@@ -74,6 +74,24 @@ function DotsIcon({ className = "" }) {
 function clsx(...arr: Array<string | false | null | undefined>) {
   return arr.filter(Boolean).join(" ");
 }
+function LightbulbIcon({ className = "" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+      <path d="M8 14c-1.2-1.2-2-2.9-2-4.8A6 6 0 0 1 12 3a6 6 0 0 1 6 6.2c0 1.9-.8 3.6-2 4.8-.9.9-1.6 2-1.8 3H9.8c-.2-1-1-2.1-1.8-3Z" />
+    </svg>
+  );
+}
 
 /* ---------- helpers ---------- */
 function openImageInNewTab(urlOrData: string) {
@@ -311,6 +329,9 @@ export default function Home() {
   const [roomType, setRoomType] = useState<string>(""); // ✅ dropdown state
   const [isGenerating, setIsGenerating] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+
+  // ✅ Photo tips modal
+  const [tipsOpen, setTipsOpen] = useState(false);
 
   // ✅ erro amigável (mostra na tela)
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -652,6 +673,19 @@ export default function Home() {
             </div>
           )}
 
+          {/* ✅ Photo tips link (fica logo abaixo da imagem) */}
+          <button
+            type="button"
+            onClick={() => setTipsOpen(true)}
+            className={clsx(
+              "mt-3 inline-flex items-center gap-2 text-xs underline-offset-4 hover:underline",
+              isDark ? "text-white/70 hover:text-white" : "text-zinc-600 hover:text-zinc-900"
+            )}
+          >
+            <LightbulbIcon className="h-4 w-4" />
+            Photo tips: how to get better results
+          </button>
+
           {/* Styles */}
           <div className="mt-5">
             <h3 className="mb-2 text-sm font-semibold">Choose a style</h3>
@@ -707,149 +741,210 @@ export default function Home() {
               <span className={isDark ? "text-white" : "text-zinc-900"}>{selectedStyle}</span>
             </p>
 
-            {/* ✅ Room type dropdown (entre estilos e o resto do fluxo) */}
+            {/* ✅ Room type dropdown */}
             <div className="mt-4">
               <div className="text-xs font-medium text-zinc-400">Room type</div>
 
-<select
-  value={roomType}
-  onChange={(e) => setRoomType(e.target.value)}
-  disabled={isGenerating}
-  className={clsx(
-    "mt-2 w-full rounded-xl border px-3 py-3 text-sm outline-none transition",
-    isDark
-      ? "border-white/10 bg-white/5 text-zinc-100 focus:border-white/20"
-      : "border-zinc-200 bg-white text-zinc-900 focus:border-zinc-300",
-    isGenerating && "opacity-70 cursor-not-allowed"
-  )}
->
-  <option value="" disabled>
-    Select a room type
-  </option>
+              <select
+                value={roomType}
+                onChange={(e) => setRoomType(e.target.value)}
+                disabled={isGenerating}
+                className={clsx(
+                  "mt-2 w-full rounded-xl border px-3 py-3 text-sm outline-none transition",
+                  isDark
+                    ? "border-white/10 bg-white/5 text-zinc-100 focus:border-white/20"
+                    : "border-zinc-200 bg-white text-zinc-900 focus:border-zinc-300",
+                  isGenerating && "opacity-70 cursor-not-allowed"
+                )}
+              >
+                <option value="" disabled>
+                  Select a room type
+                </option>
 
-  {ROOM_TYPES.map((r) => (
-    <option key={r.value} value={r.value} className={isDark ? "bg-zinc-900" : ""}>
-      {r.label}
-    </option>
-  ))}
-</select>
-</div>
-</div>
+                {ROOM_TYPES.map((r) => (
+                  <option key={r.value} value={r.value} className={isDark ? "bg-zinc-900" : ""}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-{/* Generate */}
-<button
-  className={clsx(
-    "mt-4 w-full rounded-xl py-3 font-semibold transition",
-    !file || isGenerating
-      ? isDark
-        ? "bg-white/20 text-white/60 cursor-not-allowed"
-        : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
-      : isDark
-      ? "bg-white text-zinc-950 hover:bg-white/90"
-      : "bg-zinc-900 text-white hover:bg-zinc-800"
-  )}
-  disabled={!file || isGenerating}
-  onClick={onGenerate}
->
-  {isGenerating ? "Generating..." : "Generate Design"}
-</button>
+          {/* Generate */}
+          <button
+            className={clsx(
+              "mt-4 w-full rounded-xl py-3 font-semibold transition",
+              !file || isGenerating
+                ? isDark
+                  ? "bg-white/20 text-white/60 cursor-not-allowed"
+                  : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
+                : isDark
+                ? "bg-white text-zinc-950 hover:bg-white/90"
+                : "bg-zinc-900 text-white hover:bg-zinc-800"
+            )}
+            disabled={!file || isGenerating}
+            onClick={onGenerate}
+          >
+            {isGenerating ? "Generating..." : "Generate Design"}
+          </button>
 
-{/* Actions: Download + Menu */}
-<div className="mt-3 flex gap-2">
-  <button
-    type="button"
-    className={clsx(
-      "flex-1 rounded-xl py-3 font-semibold transition",
-      !resultUrl || isGenerating
-        ? isDark
-          ? "bg-white/15 text-white/50 cursor-not-allowed"
-          : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
-        : isDark
-        ? "bg-white text-zinc-950 hover:bg-white/90"
-        : "bg-zinc-900 text-white hover:bg-zinc-800"
-    )}
-    disabled={!resultUrl || isGenerating}
-    onClick={downloadResult}
-  >
-    Download
-  </button>
+          {/* Actions: Download + Menu */}
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              className={clsx(
+                "flex-1 rounded-xl py-3 font-semibold transition",
+                !resultUrl || isGenerating
+                  ? isDark
+                    ? "bg-white/15 text-white/50 cursor-not-allowed"
+                    : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
+                  : isDark
+                  ? "bg-white text-zinc-950 hover:bg-white/90"
+                  : "bg-zinc-900 text-white hover:bg-zinc-800"
+              )}
+              disabled={!resultUrl || isGenerating}
+              onClick={downloadResult}
+            >
+              Download
+            </button>
 
-  <div className="relative" ref={menuRef}>
-    <button
-      type="button"
-      className={clsx(
-        "h-12 w-12 rounded-xl border transition flex items-center justify-center",
-        !resultUrl || isGenerating
-          ? isDark
-            ? "border-white/10 text-white/40 cursor-not-allowed"
-            : "border-zinc-200 text-zinc-400 cursor-not-allowed"
-          : isDark
-          ? "border-white/15 text-white hover:bg-white/10"
-          : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-      )}
-      disabled={!resultUrl || isGenerating}
-      onClick={() => setMenuOpen((v) => !v)}
-      aria-label="Actions"
-      title="Actions"
-    >
-      <DotsIcon className="h-5 w-5" />
-    </button>
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                className={clsx(
+                  "h-12 w-12 rounded-xl border transition flex items-center justify-center",
+                  !resultUrl || isGenerating
+                    ? isDark
+                      ? "border-white/10 text-white/40 cursor-not-allowed"
+                      : "border-zinc-200 text-zinc-400 cursor-not-allowed"
+                    : isDark
+                    ? "border-white/15 text-white hover:bg-white/10"
+                    : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
+                )}
+                disabled={!resultUrl || isGenerating}
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="Actions"
+                title="Actions"
+              >
+                <DotsIcon className="h-5 w-5" />
+              </button>
 
-    {menuOpen && resultUrl && !isGenerating && (
-      <div
-        className={clsx(
-          "absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border shadow-lg",
-          isDark
-            ? "border-white/15 bg-zinc-900 text-white"
-            : "border-zinc-200 bg-white text-zinc-900"
-        )}
-      >
-        <button
-          className={clsx(
-            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-            isDark && "hover:bg-white/10"
+              {menuOpen && resultUrl && !isGenerating && (
+                <div
+                  className={clsx(
+                    "absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border shadow-lg",
+                    isDark
+                      ? "border-white/15 bg-zinc-900 text-white"
+                      : "border-zinc-200 bg-white text-zinc-900"
+                  )}
+                >
+                  <button
+                    className={clsx(
+                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+                      isDark && "hover:bg-white/10"
+                    )}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      shareResult();
+                    }}
+                  >
+                    Share
+                  </button>
+                  <button
+                    className={clsx(
+                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+                      isDark && "hover:bg-white/10"
+                    )}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      openImageInNewTab(resultUrl);
+                    }}
+                  >
+                    Open
+                  </button>
+                  <button
+                    className={clsx(
+                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+                      isDark && "hover:bg-white/10"
+                    )}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      clearResult();
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ✅ Photo tips modal */}
+          {tipsOpen && (
+            <div className="fixed inset-0 z-50">
+              <button
+                type="button"
+                className="absolute inset-0 bg-black/50"
+                aria-label="Close tips"
+                onClick={() => setTipsOpen(false)}
+              />
+
+              <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md px-4 pb-6">
+                <div className={clsx("rounded-2xl p-4 ring-1 shadow-xl", cardBg)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold">Photo tips</h3>
+                      <p className={clsx("mt-1 text-xs", mutedText)}>
+                        A better photo usually means a better redesign.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setTipsOpen(false)}
+                      className={clsx(
+                        "h-9 w-9 rounded-full border flex items-center justify-center",
+                        isDark
+                          ? "border-white/15 text-white hover:bg-white/10"
+                          : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
+                      )}
+                      aria-label="Close"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <ul
+                    className={clsx(
+                      "mt-3 space-y-2 text-sm",
+                      isDark ? "text-white/80" : "text-zinc-700"
+                    )}
+                  >
+                    <li>• Turn on the lights and open the curtains.</li>
+                    <li>• Try to capture most of the room (floor + two walls if possible).</li>
+                    <li>• Hold the phone level at chest height (avoid tilted shots).</li>
+                    <li>• Avoid ultra wide / 0.5× lens (it distorts the room).</li>
+                    <li>• Keep doors and windows visible (don’t crop them).</li>
+                  </ul>
+
+                  <button
+                    type="button"
+                    onClick={() => setTipsOpen(false)}
+                    className={clsx(
+                      "mt-4 w-full rounded-xl py-3 font-semibold transition",
+                      isDark
+                        ? "bg-white text-zinc-950 hover:bg-white/90"
+                        : "bg-zinc-900 text-white hover:bg-zinc-800"
+                    )}
+                  >
+                    Got it
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
-          onClick={() => {
-            setMenuOpen(false);
-            shareResult();
-          }}
-        >
-          Share
-        </button>
-        <button
-          className={clsx(
-            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-            isDark && "hover:bg-white/10"
-          )}
-          onClick={() => {
-            setMenuOpen(false);
-            openImageInNewTab(resultUrl);
-          }}
-        >
-          Open
-        </button>
-        <button
-          className={clsx(
-            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-            isDark && "hover:bg-white/10"
-          )}
-          onClick={() => {
-            setMenuOpen(false);
-            clearResult();
-          }}
-        >
-          Clear
-        </button>
+        </section>
       </div>
-    )}
-  </div>
-</div>
-
-<p className={clsx("mt-3 text-xs", isDark ? "text-white/50" : "text-zinc-500")}>
-  Tip: Use a clear room photo with good lighting for best results.
-</p>
-</section>
-</div>
-</main>
-);
+    </main>
+  );
 }
