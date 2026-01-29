@@ -21,6 +21,12 @@ const STYLE_RECIPES: Record<string, string> = {
 - Furniture: airy, functional, rounded edges, hygge feel.
 - Lighting: warm natural light, simple pendant lamps.
 `,
+  Japanese: `
+- Materials: natural wood, clean plaster walls, subtle textures, optional tatami-like elements.
+- Palette: warm neutrals, soft beiges, light woods, calm low-contrast tones.
+- Furniture: low-profile, simple, minimal decor, zen-like composition.
+- Lighting: soft natural daylight, paper-lantern feel (but realistic).
+`,
   Rustic: `
 - Materials: rustic wood planks floor, textured plaster walls, reclaimed wood, wrought iron.
 - Palette: warm earthy tones (brown/cream/terracotta).
@@ -39,11 +45,45 @@ const STYLE_RECIPES: Record<string, string> = {
 - Furniture: eclectic pieces, plants, cozy layered styling.
 - Lighting: warm ambient, lanterns, natural materials.
 `,
+  "Super Luxury": `
+- Materials: premium marble/stone accents, high-end wood panels, brushed brass details, refined textiles.
+- Palette: elegant neutrals (cream/ivory/charcoal) with subtle metallic accents.
+- Furniture: upscale, refined silhouettes, designer feel, curated decor (not cluttered).
+- Lighting: layered lighting (but still realistic), refined fixtures, balanced highlights.
+`,
 };
 
 function normalizeStyle(input: string) {
   const s = (input ?? "").trim();
   return STYLE_RECIPES[s] ? s : "Modern";
+}
+
+// Room types coming from the UI
+const ROOM_TYPE_LABEL: Record<string, string> = {
+  living_room: "Living room",
+  bedroom: "Bedroom",
+  kitchen: "Kitchen",
+  bathroom: "Bathroom",
+  office: "Office",
+  balcony: "Balcony",
+  home_theater: "Home theater",
+  store: "Store",
+  house_facade: "House facade",
+  other: "Other",
+};
+
+function normalizeRoomType(input: string) {
+  const s = (input ?? "").trim();
+
+  // if UI sends the key, use it
+  if (ROOM_TYPE_LABEL[s]) return s;
+
+  // if UI ever sends a label, try to match it
+  const lower = s.toLowerCase();
+  const found = Object.entries(ROOM_TYPE_LABEL).find(([, label]) => label.toLowerCase() === lower);
+  if (found) return found[0];
+
+  return "other";
 }
 
 const MAX_IMAGE_MB = 25;
@@ -74,6 +114,11 @@ export async function POST(req: Request) {
     const style = normalizeStyle(form.get("style")?.toString() ?? "Modern");
     const image = form.get("image");
 
+    // ✅ NEW: read roomType
+    const rawRoomType = form.get("roomType")?.toString() ?? "";
+    const roomTypeKey = normalizeRoomType(rawRoomType);
+    const roomTypeLabel = ROOM_TYPE_LABEL[roomTypeKey] ?? "Other";
+
     if (!(image instanceof File)) {
       return NextResponse.json({ ok: false, error: "No image received." }, { status: 400 });
     }
@@ -95,15 +140,20 @@ export async function POST(req: Request) {
 
     const recipe = STYLE_RECIPES[style] ?? STYLE_RECIPES.Modern;
 
+    // ✅ NEW: room line in prompt
+    const roomLine = `Room type: ${roomTypeLabel}`;
+
     const prompt = `
-Preserve the original room layout, proportions, and architectural structure exactly as in the input image.
+${roomLine}
+
+Preserve the original layout, proportions, and architectural structure exactly as in the input image.
 Do NOT move, remove, resize, or relocate walls, ceiling, window positions and sizes, door position and size, or camera angle.
 The door and windows must remain clearly visible in their original locations.
 
-Refine and enhance the existing room to look clean, organized, and aesthetically pleasing,
+Refine and enhance the existing space to look clean, organized, and aesthetically pleasing,
 while remaining realistic, achievable, and faithful to the original space.
 Improve organization, material quality, color harmony, furniture alignment, and visual balance.
-Do not redesign the room or invent new architectural elements.
+Do not invent new architectural elements.
 
 The door must remain in the same position and size, but its design, color, and finish may be updated to match the selected style.
 The floor layout must remain unchanged, but the floor material, texture, and color may be upgraded to match the selected style.
@@ -111,7 +161,7 @@ The floor layout must remain unchanged, but the floor material, texture, and col
 Use natural, realistic daylight consistent with the window positions.
 Avoid dramatic or cinematic lighting.
 
-Interior design style: ${style}
+Design style: ${style}
 
 Style recipe:
 ${recipe}
@@ -191,20 +241,14 @@ ${recipe}
         continue;
       }
 
-      // erro final: devolve status mais fiel (ex.: 503 quando indisponível)
-      const msg =
-        data?.error?.message ??
-        `OpenAI request failed (status ${resp.status}).`;
-
+      // erro final
+      const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
       const statusToReturn = resp.status === 503 ? 503 : 500;
 
-      return NextResponse.json(
-        { ok: false, error: msg, details: data ?? null },
-        { status: statusToReturn }
-      );
+      return NextResponse.json({ ok: false, error: msg, details: data ?? null }, { status: statusToReturn });
     }
 
-    // fallback (não deveria chegar aqui)
+    // fallback
     const msg = lastData?.error?.message ?? `OpenAI request failed (status ${lastStatus}).`;
     const statusToReturn = lastStatus === 503 ? 503 : 500;
 
@@ -213,9 +257,6 @@ ${recipe}
       { status: statusToReturn }
     );
   } catch (e: any) {
-    return NextResponse.json(
-      { ok: false, error: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: e?.message ?? "Unknown error" }, { status: 500 });
   }
 }

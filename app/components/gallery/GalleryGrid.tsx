@@ -1,7 +1,7 @@
 "use client";
 
+import { resolveImageSrc } from "@/app/lib/resolveImageSrc";
 import type { GalleryItem } from "../../types/gallery";
-
 
 export function GalleryGrid({
   items,
@@ -27,53 +27,52 @@ export function GalleryGrid({
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-      {items.map((it) => (
-        <div
-          key={it.id}
-          className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm"
-        >
-          <button onClick={() => onOpen(it)} className="block w-full" title="Abrir">
-            <img
-              src={it.thumbUrl}
-              alt={it.prompt ?? "Imagem gerada"}
-              className="h-44 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02] md:h-52"
-              loading="lazy"
-            />
-          </button>
+      {items.map((it) => {
+        const anyIt = it as any;
 
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100" />
+        const imgPath =
+          anyIt.thumb_url ??
+          anyIt.thumbUrl ??
+          anyIt.image_url ??
+          anyIt.imageUrl ??
+          "";
 
-          <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-2 p-3">
-            <div className="min-w-0">
-              <div className="truncate text-xs font-medium text-white">
-                {it.roomType ? `${it.roomType}` : "Ambiente"}
-                {it.style ? ` • ${it.style}` : ""}
-              </div>
-              <div className="text-[11px] text-white/80">
-                {new Date(it.createdAt).toLocaleString()}
-              </div>
-            </div>
+        const isFav = anyIt.isFavorite ?? anyIt.is_favorite ?? false;
 
-            <div className="pointer-events-auto flex gap-2">
+        return (
+          <div
+            key={anyIt.id}
+            className="overflow-hidden rounded-2xl border bg-white shadow-sm"
+          >
+            <button onClick={() => onOpen(it)} className="block w-full">
+              <img
+                src={resolveImageSrc(imgPath)}
+                alt={anyIt.prompt ?? "Imagem gerada"}
+                className="h-44 w-full object-cover md:h-52"
+                loading="lazy"
+              />
+            </button>
+
+            <div className="flex items-center justify-between gap-2 p-2">
               <button
-                onClick={() => onToggleFavorite(it.id)}
-                className="rounded-xl bg-white/90 px-3 py-2 text-xs font-semibold shadow-sm hover:bg-white"
+                onClick={() => onToggleFavorite(anyIt.id)}
+                className="rounded-xl border px-3 py-2 text-xs font-semibold"
                 title="Favoritar"
               >
-                {it.isFavorite ? "★" : "☆"}
+                {isFav ? "★" : "☆"}
               </button>
 
               <button
                 onClick={() => onDownload(it)}
-                className="rounded-xl bg-white/90 px-3 py-2 text-xs font-semibold shadow-sm hover:bg-white"
+                className="rounded-xl border px-3 py-2 text-xs font-semibold"
                 title="Download"
               >
                 ⤓
               </button>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

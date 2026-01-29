@@ -1,8 +1,25 @@
 "use client";
 
+import { createClient } from "./lib/supabase/client";
 import type React from "react";
-import { addToGallery } from "./lib/galleryStorage";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+const ROOM_TYPES = [
+  { value: "living_room", label: "Living room" },
+  { value: "bedroom", label: "Bedroom" },
+  { value: "kitchen", label: "Kitchen" },
+  { value: "bathroom", label: "Bathroom" },
+  { value: "office", label: "Office" },
+  { value: "balcony", label: "Balcony" },
+  { value: "home_theater", label: "Home theater" },
+  { value: "store", label: "Store" },
+  { value: "house_facade", label: "House facade" },
+  { value: "other", label: "Other" },
+] as const;
+
+const ROOM_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  ROOM_TYPES.map((r) => [r.value, r.label])
+);
 
 /* ---------- Icons (premium) ---------- */
 function SunIcon({ className = "" }) {
@@ -226,7 +243,6 @@ type StyleId = (typeof STYLES)[number]["id"];
 type Theme = "light" | "dark";
 
 async function readApiError(res: Response): Promise<string> {
-  // tenta ler {error:"..."} do backend
   try {
     const ct = res.headers.get("content-type") || "";
     if (ct.includes("application/json")) {
@@ -234,7 +250,6 @@ async function readApiError(res: Response): Promise<string> {
       if (j?.error) return String(j.error);
     }
   } catch {}
-  // fallback: texto cru
   try {
     const t = await res.text();
     if (t) return t.slice(0, 250);
@@ -242,9 +257,58 @@ async function readApiError(res: Response): Promise<string> {
   return `Request failed (status ${res.status}).`;
 }
 
+async function blobToJpegThumb(blob: Blob, opts?: { maxDim?: number; quality?: number }) {
+  const maxDim = opts?.maxDim ?? 420;
+  const quality = opts?.quality ?? 0.8;
+
+  const img = document.createElement("img");
+  img.decoding = "async";
+
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Failed to load image for thumb"));
+      img.src = objectUrl;
+    });
+
+    const { width, height } = img;
+    const scale = Math.min(1, maxDim / Math.max(width, height));
+    const targetW = Math.max(1, Math.round(width * scale));
+    const targetH = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetW;
+    canvas.height = targetH;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("No canvas context");
+
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+
+    const thumbBlob: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("toBlob returned null"))),
+        "image/jpeg",
+        quality
+      );
+    });
+
+    return thumbBlob;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function getPublicUrlFromBucket(supabase: any, bucket: string, path: string) {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl as string;
+}
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<StyleId>("Modern");
+  const [roomType, setRoomType] = useState<string>(""); // ✅ dropdown state
   const [isGenerating, setIsGenerating] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
@@ -325,12 +389,37 @@ export default function Home() {
 
   function downloadResult() {
     if (!resultUrl) return;
-    const a = document.createElement("a");
-    a.href = resultUrl;
-    a.download = `homeai-${selectedStyle.toLowerCase().replace(/\s+/g, "-")}.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+
+    const filename = `homeai-${selectedStyle.toLowerCase().replace(/\s+/g, "-")}.jpg`;
+
+    (async () => {
+      try {
+        if (resultUrl.startsWith("data:")) {
+          const a = document.createElement("a");
+          a.href = resultUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          return;
+        }
+
+        const res = await fetch(resultUrl);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      } catch (e) {
+        window.open(resultUrl, "_blank", "noopener,noreferrer");
+      }
+    })();
   }
 
   async function shareResult() {
@@ -352,15 +441,12 @@ export default function Home() {
         await navigator.share({ title: "Home AI", text: "My redesign", url: resultUrl });
         return;
       }
-    } catch {
-      // fallthrough to open
-    }
+    } catch {}
 
     openImageInNewTab(resultUrl);
   }
 
   async function onGenerate() {
-    // 🔒 trava clique duplo
     if (isGenerating) return;
     if (!file) return;
 
@@ -373,8 +459,11 @@ export default function Home() {
 
       const optimized = await prepareImageForUpload(file, { maxDim: 1024, quality: 0.85 });
 
+      const roomTypeToSend = roomType || "other"; // ✅ sempre manda algo
+
       const formData = new FormData();
       formData.append("style", selectedStyle);
+      formData.append("roomType", roomTypeToSend); // ✅ envia para a API
       formData.append("image", optimized);
 
       const res = await fetch("/api/generate", { method: "POST", body: formData });
@@ -385,29 +474,70 @@ export default function Home() {
         return;
       }
 
-      const blob = await res.blob();
+      const finalBlob = await res.blob();
 
-      // converte blob -> dataURL (não some ao mudar de aba)
-      const dataUrl: string = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(new Error("Failed to convert image"));
-        reader.readAsDataURL(blob);
+      const supabase = createClient();
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData?.user) {
+        setErrorMsg("You must be logged in to save to your gallery.");
+        return;
+      }
+
+      const userId = userData.user.id;
+      const imageId = crypto.randomUUID();
+
+      const thumbBlob = await blobToJpegThumb(finalBlob, { maxDim: 420, quality: 0.8 });
+
+      const bucket = "homeai";
+      const imagePath = `${userId}/${imageId}.jpg`;
+      const thumbPath = `${userId}/${imageId}-thumb.jpg`;
+
+      const imageFile = new File([finalBlob], `${imageId}.jpg`, { type: "image/jpeg" });
+      const thumbFile = new File([thumbBlob], `${imageId}-thumb.jpg`, { type: "image/jpeg" });
+
+      const up1 = await supabase.storage.from(bucket).upload(imagePath, imageFile, {
+        contentType: "image/jpeg",
+        upsert: true,
       });
+      if (up1.error) {
+        console.error(up1.error);
+        setErrorMsg("Failed to upload image to storage.");
+        return;
+      }
 
-      setResultUrl(dataUrl);
+      const up2 = await supabase.storage.from(bucket).upload(thumbPath, thumbFile, {
+        contentType: "image/jpeg",
+        upsert: true,
+      });
+      if (up2.error) {
+        console.error(up2.error);
+        setErrorMsg("Failed to upload thumbnail to storage.");
+        return;
+      }
 
-      // ✅ salva na gallery
-      addToGallery({
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        roomType: "Room",
+      const imageUrl = getPublicUrlFromBucket(supabase, bucket, imagePath);
+      const thumbUrl = getPublicUrlFromBucket(supabase, bucket, thumbPath);
+
+      const roomTypeLabel = ROOM_TYPE_LABEL[roomTypeToSend] ?? roomTypeToSend;
+
+      const ins = await supabase.from("gallery_items").insert({
+        id: imageId,
+        user_id: userId,
+        room_type: roomTypeLabel, // ✅ salva no DB
         style: selectedStyle,
-        prompt: "Generated image",
-        thumbUrl: dataUrl,
-        imageUrl: dataUrl,
-        isFavorite: false,
+        prompt: `Style: ${selectedStyle} | Room: ${roomTypeLabel}`,
+        image_url: imageUrl,
+        thumb_url: thumbUrl,
+        is_favorite: false,
       });
+
+      if (ins.error) {
+        console.error(ins.error);
+        setErrorMsg("Saved image in storage, but failed to save in database.");
+        return;
+      }
+
+      setResultUrl(imageUrl);
     } catch (err) {
       console.error("Generate error:", err);
       setErrorMsg("Something went wrong. Please try again.");
@@ -476,7 +606,6 @@ export default function Home() {
                 onChange={(e) => {
                   const f = e.target.files?.[0] ?? null;
                   setFile(f);
-                  setErrorMsg(null);
                   clearResult();
                 }}
               />
@@ -484,7 +613,7 @@ export default function Home() {
           </div>
 
           {/* Preview / Slider */}
-          <div className={clsx("mt-4 overflow-hidden rounded-xl ring-1", previewBoxBg)}>
+          <div className={clsx("relative mt-4 overflow-hidden rounded-xl ring-1", previewBoxBg)}>
             {!previewUrl && !resultUrl ? (
               <div className={clsx("flex h-64 items-center justify-center text-center", subtleText)}>
                 <p className="text-sm">Select an image to see the preview here</p>
@@ -514,103 +643,14 @@ export default function Home() {
             <div
               className={clsx(
                 "mt-3 rounded-xl border px-3 py-2 text-sm",
-                isDark ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-red-200 bg-red-50 text-red-700"
+                isDark
+                  ? "border-red-500/30 bg-red-500/10 text-red-200"
+                  : "border-red-200 bg-red-50 text-red-700"
               )}
             >
               {errorMsg}
             </div>
           )}
-
-          {/* Actions: Download + Menu */}
-          <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              className={clsx(
-                "flex-1 rounded-xl py-3 font-semibold transition",
-                !resultUrl || isGenerating
-                  ? isDark
-                    ? "bg-white/15 text-white/50 cursor-not-allowed"
-                    : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
-                  : isDark
-                  ? "bg-white text-zinc-950 hover:bg-white/90"
-                  : "bg-zinc-900 text-white hover:bg-zinc-800"
-              )}
-              disabled={!resultUrl || isGenerating}
-              onClick={downloadResult}
-            >
-              Download
-            </button>
-
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                className={clsx(
-                  "h-12 w-12 rounded-xl border transition flex items-center justify-center",
-                  !resultUrl || isGenerating
-                    ? isDark
-                      ? "border-white/10 text-white/40 cursor-not-allowed"
-                      : "border-zinc-200 text-zinc-400 cursor-not-allowed"
-                    : isDark
-                    ? "border-white/15 text-white hover:bg-white/10"
-                    : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-                )}
-                disabled={!resultUrl || isGenerating}
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-label="Actions"
-                title="Actions"
-              >
-                <DotsIcon className="h-5 w-5" />
-              </button>
-
-              {menuOpen && resultUrl && !isGenerating && (
-                <div
-                  className={clsx(
-                    "absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border shadow-lg",
-                    isDark
-                      ? "border-white/15 bg-zinc-900 text-white"
-                      : "border-zinc-200 bg-white text-zinc-900"
-                  )}
-                >
-                  <button
-                    className={clsx(
-                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-                      isDark && "hover:bg-white/10"
-                    )}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      shareResult();
-                    }}
-                  >
-                    Share
-                  </button>
-                  <button
-                    className={clsx(
-                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-                      isDark && "hover:bg-white/10"
-                    )}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      openImageInNewTab(resultUrl);
-                    }}
-                  >
-                    Open
-                  </button>
-                  <button
-                    className={clsx(
-                      "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
-                      isDark && "hover:bg-white/10"
-                    )}
-                    onClick={() => {
-                      setMenuOpen(false);
-                      clearResult();
-                    }}
-                  >
-                    Clear
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Styles */}
           <div className="mt-5">
@@ -666,31 +706,150 @@ export default function Home() {
               Selected:{" "}
               <span className={isDark ? "text-white" : "text-zinc-900"}>{selectedStyle}</span>
             </p>
-          </div>
 
-          {/* Generate */}
-          <button
-            className={clsx(
-              "mt-4 w-full rounded-xl py-3 font-semibold transition",
-              !file || isGenerating
-                ? isDark
-                  ? "bg-white/20 text-white/60 cursor-not-allowed"
-                  : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
-                : isDark
-                ? "bg-white text-zinc-950 hover:bg-white/90"
-                : "bg-zinc-900 text-white hover:bg-zinc-800"
-            )}
-            disabled={!file || isGenerating}
-            onClick={onGenerate}
-          >
-            {isGenerating ? "Generating..." : "Generate Design"}
-          </button>
+            {/* ✅ Room type dropdown (entre estilos e o resto do fluxo) */}
+            <div className="mt-4">
+              <div className="text-xs font-medium text-zinc-400">Room type</div>
 
-          <p className={clsx("mt-3 text-xs", isDark ? "text-white/50" : "text-zinc-500")}>
-            Tip: Use a clear room photo with good lighting for best results.
-          </p>
-        </section>
+<select
+  value={roomType}
+  onChange={(e) => setRoomType(e.target.value)}
+  disabled={isGenerating}
+  className={clsx(
+    "mt-2 w-full rounded-xl border px-3 py-3 text-sm outline-none transition",
+    isDark
+      ? "border-white/10 bg-white/5 text-zinc-100 focus:border-white/20"
+      : "border-zinc-200 bg-white text-zinc-900 focus:border-zinc-300",
+    isGenerating && "opacity-70 cursor-not-allowed"
+  )}
+>
+  <option value="" disabled>
+    Select a room type
+  </option>
+
+  {ROOM_TYPES.map((r) => (
+    <option key={r.value} value={r.value} className={isDark ? "bg-zinc-900" : ""}>
+      {r.label}
+    </option>
+  ))}
+</select>
+</div>
+</div>
+
+{/* Generate */}
+<button
+  className={clsx(
+    "mt-4 w-full rounded-xl py-3 font-semibold transition",
+    !file || isGenerating
+      ? isDark
+        ? "bg-white/20 text-white/60 cursor-not-allowed"
+        : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
+      : isDark
+      ? "bg-white text-zinc-950 hover:bg-white/90"
+      : "bg-zinc-900 text-white hover:bg-zinc-800"
+  )}
+  disabled={!file || isGenerating}
+  onClick={onGenerate}
+>
+  {isGenerating ? "Generating..." : "Generate Design"}
+</button>
+
+{/* Actions: Download + Menu */}
+<div className="mt-3 flex gap-2">
+  <button
+    type="button"
+    className={clsx(
+      "flex-1 rounded-xl py-3 font-semibold transition",
+      !resultUrl || isGenerating
+        ? isDark
+          ? "bg-white/15 text-white/50 cursor-not-allowed"
+          : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
+        : isDark
+        ? "bg-white text-zinc-950 hover:bg-white/90"
+        : "bg-zinc-900 text-white hover:bg-zinc-800"
+    )}
+    disabled={!resultUrl || isGenerating}
+    onClick={downloadResult}
+  >
+    Download
+  </button>
+
+  <div className="relative" ref={menuRef}>
+    <button
+      type="button"
+      className={clsx(
+        "h-12 w-12 rounded-xl border transition flex items-center justify-center",
+        !resultUrl || isGenerating
+          ? isDark
+            ? "border-white/10 text-white/40 cursor-not-allowed"
+            : "border-zinc-200 text-zinc-400 cursor-not-allowed"
+          : isDark
+          ? "border-white/15 text-white hover:bg-white/10"
+          : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
+      )}
+      disabled={!resultUrl || isGenerating}
+      onClick={() => setMenuOpen((v) => !v)}
+      aria-label="Actions"
+      title="Actions"
+    >
+      <DotsIcon className="h-5 w-5" />
+    </button>
+
+    {menuOpen && resultUrl && !isGenerating && (
+      <div
+        className={clsx(
+          "absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border shadow-lg",
+          isDark
+            ? "border-white/15 bg-zinc-900 text-white"
+            : "border-zinc-200 bg-white text-zinc-900"
+        )}
+      >
+        <button
+          className={clsx(
+            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+            isDark && "hover:bg-white/10"
+          )}
+          onClick={() => {
+            setMenuOpen(false);
+            shareResult();
+          }}
+        >
+          Share
+        </button>
+        <button
+          className={clsx(
+            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+            isDark && "hover:bg-white/10"
+          )}
+          onClick={() => {
+            setMenuOpen(false);
+            openImageInNewTab(resultUrl);
+          }}
+        >
+          Open
+        </button>
+        <button
+          className={clsx(
+            "w-full px-3 py-2 text-left text-sm hover:bg-black/5",
+            isDark && "hover:bg-white/10"
+          )}
+          onClick={() => {
+            setMenuOpen(false);
+            clearResult();
+          }}
+        >
+          Clear
+        </button>
       </div>
-    </main>
-  );
+    )}
+  </div>
+</div>
+
+<p className={clsx("mt-3 text-xs", isDark ? "text-white/50" : "text-zinc-500")}>
+  Tip: Use a clear room photo with good lighting for best results.
+</p>
+</section>
+</div>
+</main>
+);
 }
