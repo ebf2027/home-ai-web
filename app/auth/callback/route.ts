@@ -1,39 +1,30 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
+import { createClient } from "../../lib/supabase/server";
 
-export async function GET(request: NextRequest) {
+export const runtime = "nodejs";
+
+export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next") ?? "/";
 
-  // resposta que vamos devolver (e nela o Supabase vai setar cookies)
-  let response = NextResponse.redirect(new URL("/", url.origin));
+  const safeNext = next.startsWith("/") ? next : "/";
+  const redirectToLogin = new URL(`/login?next=${encodeURIComponent(safeNext)}`, url.origin);
 
-  if (!code) return response;
+  if (!code) return NextResponse.redirect(redirectToLogin);
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error("exchangeCodeForSession error:", error);
+      return NextResponse.redirect(redirectToLogin);
     }
-  );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
-    // pra você ver o erro no terminal
-    console.error("OAuth callback error:", error.message);
-    return NextResponse.redirect(new URL("/login?error=oauth", url.origin));
+    return NextResponse.redirect(new URL(safeNext, url.origin));
+  } catch (e) {
+    console.error("callback route error:", e);
+    return NextResponse.redirect(redirectToLogin);
   }
-
-  return response;
 }
