@@ -92,6 +92,41 @@ function LightbulbIcon({ className = "" }) {
     </svg>
   );
 }
+function CameraIcon({ className = "" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M4 7h3l2-2h6l2 2h3v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" />
+      <circle cx="12" cy="13" r="3" />
+    </svg>
+  );
+}
+function UploadIcon({ className = "" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 3v10" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+    </svg>
+  );
+}
 
 /* ---------- helpers ---------- */
 function openImageInNewTab(urlOrData: string) {
@@ -353,7 +388,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ NEW: inputs for camera + upload
+  // ✅ camera + upload inputs
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const uploadInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -403,6 +438,8 @@ export default function Home() {
   const subtleText = isDark ? "text-white/60" : "text-zinc-500";
   const previewBoxBg = isDark ? "bg-black/40 ring-white/10" : "bg-zinc-100 ring-zinc-200";
 
+  const currentStep = isGenerating ? 3 : resultUrl ? 3 : file ? 2 : 1;
+
   function clearResult() {
     setMenuOpen(false);
     setErrorMsg(null);
@@ -412,7 +449,6 @@ export default function Home() {
     });
   }
 
-  // ✅ NEW: shared handler for both camera + upload
   function handlePickedImage(f: File | null) {
     if (!f) return;
     clearResult();
@@ -589,6 +625,64 @@ export default function Home() {
     }
   }
 
+  function StepPill({
+    n,
+    title,
+    desc,
+  }: {
+    n: number;
+    title: string;
+    desc: string;
+  }) {
+    const done = currentStep > n;
+    const active = currentStep === n;
+
+    const base = "rounded-xl border px-3 py-2 transition";
+    const doneCls = isDark
+      ? "border-emerald-500/25 bg-emerald-500/10"
+      : "border-emerald-200 bg-emerald-50";
+    const activeCls = isDark
+      ? "border-white/20 bg-white/10"
+      : "border-zinc-300 bg-white";
+    const todoCls = isDark
+      ? "border-white/10 bg-white/5"
+      : "border-zinc-200 bg-zinc-50";
+
+    const dotCls = done
+      ? "bg-emerald-400"
+      : active
+      ? isDark
+        ? "bg-white/80"
+        : "bg-zinc-900"
+      : isDark
+      ? "bg-white/25"
+      : "bg-zinc-300";
+
+    return (
+      <div className={clsx(base, done ? doneCls : active ? activeCls : todoCls)}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={clsx("h-2 w-2 rounded-full", dotCls)} />
+            <div className={clsx("text-xs font-semibold", isDark ? "text-white" : "text-zinc-900")}>
+              {n}. {title}
+            </div>
+          </div>
+          {done && (
+            <span className={clsx("text-[10px] font-semibold", isDark ? "text-emerald-200" : "text-emerald-700")}>
+              Done
+            </span>
+          )}
+          {active && !done && (
+            <span className={clsx("text-[10px] font-semibold", isDark ? "text-white/80" : "text-zinc-700")}>
+              Now
+            </span>
+          )}
+        </div>
+        <div className={clsx("mt-0.5 text-[11px] truncate", subtleText)}>{desc}</div>
+      </div>
+    );
+  }
+
   return (
     <main className={clsx("min-h-screen", pageBg)}>
       <div className="mx-auto max-w-md px-4 pb-6">
@@ -624,13 +718,13 @@ export default function Home() {
 
           <h1 className="mt-4 text-3xl font-semibold leading-tight">Redesign your space with AI</h1>
           <p className={clsx("mt-2", mutedText)}>
-            Upload a room photo and generate design variations in different styles.
+            Take a photo or upload an image, choose a style, then generate a realistic redesign.
           </p>
         </header>
 
         {/* Card */}
         <section className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-          {/* ✅ Hidden inputs (camera + upload) */}
+          {/* ✅ Hidden inputs */}
           <input
             ref={cameraInputRef}
             type="file"
@@ -647,41 +741,118 @@ export default function Home() {
             onChange={onPickFile}
           />
 
-          {/* Upload row */}
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold">Your photo</h2>
+          {/* ✅ Steps */}
+          <div className="grid grid-cols-3 gap-2">
+            <StepPill n={1} title="Photo" desc="Take or upload" />
+            <StepPill n={2} title="Style" desc="Pick a look" />
+            <StepPill n={3} title="Result" desc={isGenerating ? "Generating…" : "Download & share"} />
+          </div>
 
-            <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
-              <button
-                type="button"
-                onClick={openCamera}
-                disabled={isGenerating}
-                className={clsx(
-                  "rounded-full px-3 py-1 text-sm font-medium transition",
-                  isDark
-                    ? "bg-white text-zinc-950 hover:bg-white/90"
-                    : "bg-zinc-900 text-white hover:bg-zinc-800",
-                  isGenerating && "pointer-events-none"
-                )}
-              >
-                Take photo
-              </button>
-
-              <button
-                type="button"
-                onClick={openUpload}
-                disabled={isGenerating}
-                className={clsx(
-                  "rounded-full px-3 py-1 text-sm font-medium transition border",
-                  isDark
-                    ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
-                    : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
-                  isGenerating && "pointer-events-none"
-                )}
-              >
-                Upload
-              </button>
+          {/* Photo header */}
+          <div className="mt-4 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold">Your photo</h2>
+              <p className={clsx("mt-0.5 text-xs", subtleText)}>
+                {file ? `Selected: ${file.name}` : "JPG or PNG • Good lighting improves results"}
+              </p>
             </div>
+
+            {/* Photo tips shortcut */}
+            <button
+              type="button"
+              onClick={() => setTipsOpen(true)}
+              className={clsx(
+                "shrink-0 inline-flex items-center gap-2 text-xs underline-offset-4 hover:underline",
+                isDark ? "text-white/70 hover:text-white" : "text-zinc-600 hover:text-zinc-900"
+              )}
+            >
+              <LightbulbIcon className="h-4 w-4" />
+              Tips
+            </button>
+          </div>
+
+          {/* ✅ Premium photo pickers with animation */}
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={openCamera}
+              disabled={isGenerating}
+              className={clsx(
+                "group relative rounded-2xl border p-3 text-left transition",
+                "will-change-transform transform-gpu",
+                "active:scale-[0.98] sm:hover:-translate-y-0.5",
+                isDark
+                  ? "border-white/10 bg-white/5 hover:bg-white/10"
+                  : "border-zinc-200 bg-white hover:bg-zinc-50",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60",
+                isGenerating && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              <span
+                className={clsx(
+                  "absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                  isDark ? "bg-white/10 text-white/80" : "bg-zinc-900/5 text-zinc-700"
+                )}
+              >
+                Recommended
+              </span>
+
+              <div className="flex items-start gap-3">
+                <div
+                  className={clsx(
+                    "rounded-xl p-2 ring-1 transition",
+                    isDark
+                      ? "bg-white/10 text-white ring-white/10"
+                      : "bg-zinc-900/5 text-zinc-900 ring-zinc-200"
+                  )}
+                >
+                  <CameraIcon className="h-5 w-5" />
+                </div>
+
+                <div className="min-w-0">
+                  <div className={clsx("text-sm font-semibold", isDark ? "text-white" : "text-zinc-900")}>
+                    Take photo
+                  </div>
+                  <div className={clsx("mt-0.5 text-xs", subtleText)}>Opens camera • Fast</div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={openUpload}
+              disabled={isGenerating}
+              className={clsx(
+                "group relative rounded-2xl border p-3 text-left transition",
+                "will-change-transform transform-gpu",
+                "active:scale-[0.98] sm:hover:-translate-y-0.5",
+                isDark
+                  ? "border-white/10 bg-white/5 hover:bg-white/10"
+                  : "border-zinc-200 bg-white hover:bg-zinc-50",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60",
+                isGenerating && "opacity-60 cursor-not-allowed"
+              )}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={clsx(
+                    "rounded-xl p-2 ring-1 transition",
+                    isDark
+                      ? "bg-white/10 text-white ring-white/10"
+                      : "bg-zinc-900/5 text-zinc-900 ring-zinc-200"
+                  )}
+                >
+                  <UploadIcon className="h-5 w-5" />
+                </div>
+
+                <div className="min-w-0">
+                  <div className={clsx("text-sm font-semibold", isDark ? "text-white" : "text-zinc-900")}>
+                    Upload
+                  </div>
+                  <div className={clsx("mt-0.5 text-xs", subtleText)}>From Photos or Files</div>
+                </div>
+              </div>
+            </button>
           </div>
 
           {/* Preview / Slider */}
@@ -724,19 +895,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* ✅ Photo tips link (fica logo abaixo da imagem) */}
-          <button
-            type="button"
-            onClick={() => setTipsOpen(true)}
-            className={clsx(
-              "mt-3 inline-flex items-center gap-2 text-xs underline-offset-4 hover:underline",
-              isDark ? "text-white/70 hover:text-white" : "text-zinc-600 hover:text-zinc-900"
-            )}
-          >
-            <LightbulbIcon className="h-4 w-4" />
-            Photo tips: how to get better results
-          </button>
-
           {/* Styles */}
           <div className="mt-5">
             <h3 className="mb-2 text-sm font-semibold">Choose a style</h3>
@@ -753,6 +911,7 @@ export default function Home() {
                     disabled={isGenerating}
                     className={clsx(
                       "group relative w-full overflow-hidden rounded-xl border px-4 py-4 text-left transition bg-center bg-cover",
+                      "will-change-transform transform-gpu active:scale-[0.98] sm:hover:-translate-y-0.5",
                       isSelected
                         ? isDark
                           ? "border-white/40 ring-2 ring-white/15"
@@ -760,6 +919,7 @@ export default function Home() {
                         : isDark
                         ? "border-white/10 hover:border-white/30"
                         : "border-zinc-200 hover:border-zinc-400",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60",
                       isGenerating && "opacity-70 cursor-not-allowed"
                     )}
                     style={{ backgroundImage: `url(/styles/${imgKey}.jpg)` }}
@@ -825,6 +985,7 @@ export default function Home() {
           <button
             className={clsx(
               "mt-4 w-full rounded-xl py-3 font-semibold transition",
+              "active:scale-[0.99] transform-gpu will-change-transform",
               !file || isGenerating
                 ? isDark
                   ? "bg-white/20 text-white/60 cursor-not-allowed"
@@ -845,6 +1006,7 @@ export default function Home() {
               type="button"
               className={clsx(
                 "flex-1 rounded-xl py-3 font-semibold transition",
+                "active:scale-[0.99] transform-gpu will-change-transform",
                 !resultUrl || isGenerating
                   ? isDark
                     ? "bg-white/15 text-white/50 cursor-not-allowed"
@@ -864,6 +1026,7 @@ export default function Home() {
                 type="button"
                 className={clsx(
                   "h-12 w-12 rounded-xl border transition flex items-center justify-center",
+                  "active:scale-[0.98] transform-gpu will-change-transform",
                   !resultUrl || isGenerating
                     ? isDark
                       ? "border-white/10 text-white/40 cursor-not-allowed"
