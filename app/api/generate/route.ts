@@ -147,10 +147,21 @@ export async function POST(req: Request) {
       if (error) {
         console.error("usage rpc error:", error);
         return NextResponse.json(
-          { ok: false, error: "Usage check failed. Please try again." },
+          {
+            ok: false,
+            error: "Usage check failed. Please try again.",
+            details: {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint,
+            },
+          },
           { status: 500 }
         );
       }
+
+
 
       const row = Array.isArray(data) ? data[0] : data;
 
