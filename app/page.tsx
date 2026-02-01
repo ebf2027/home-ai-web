@@ -303,11 +303,11 @@ async function readApiError(res: Response): Promise<string> {
       const j = await res.json();
       if (j?.error) return String(j.error);
     }
-  } catch {}
+  } catch { }
   try {
     const t = await res.text();
     if (t) return t.slice(0, 250);
-  } catch {}
+  } catch { }
   return `Request failed (status ${res.status}).`;
 }
 
@@ -412,14 +412,14 @@ export default function Home() {
       }
       const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
       setTheme(prefersDark ? "dark" : "light");
-    } catch {}
+    } catch { }
   }, []);
 
   // Save theme
   useEffect(() => {
     try {
       localStorage.setItem("homeai_theme", theme);
-    } catch {}
+    } catch { }
   }, [theme]);
 
   const previewUrl = useMemo(() => {
@@ -520,7 +520,7 @@ export default function Home() {
         await navigator.share({ title: "Home AI", text: "My redesign", url: resultUrl });
         return;
       }
-    } catch {}
+    } catch { }
 
     openImageInNewTab(resultUrl);
   }
@@ -548,10 +548,33 @@ export default function Home() {
       const res = await fetch("/api/generate", { method: "POST", body: formData });
 
       if (!res.ok) {
-        const msg = await readApiError(res);
+        let msg = await readApiError(res);
+
+        // melhora mensagem quando é limite do free
+        if (msg?.toLowerCase().includes("daily free limit")) {
+          msg = msg + " Tap Upgrade to unlock more generations.";
+        }
+
         setErrorMsg(msg || "Generation failed. Please try again.");
         return;
       }
+      {
+        errorMsg?.toLowerCase().includes("daily free limit") && (
+          <button
+            type="button"
+            onClick={() => (window.location.href = "/upgrade")}
+            className={clsx(
+              "mt-2 w-full rounded-xl py-2 text-sm font-semibold transition",
+              isDark
+                ? "bg-white text-zinc-950 hover:bg-white/90"
+                : "bg-zinc-900 text-white hover:bg-zinc-800"
+            )}
+          >
+            Upgrade
+          </button>
+        )
+      }
+
 
       const finalBlob = await res.blob();
 
@@ -687,39 +710,39 @@ export default function Home() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Your photo</h2>
 
-           <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
-  <button
-    type="button"
-    onClick={openCamera}
-    disabled={isGenerating}
-    className={clsx(
-      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
-      isDark
-        ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
-        : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
-      isGenerating && "pointer-events-none"
-    )}
-  >
-    <CameraIcon className="h-4 w-4" />
-    Take photo
-  </button>
+            <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
+              <button
+                type="button"
+                onClick={openCamera}
+                disabled={isGenerating}
+                className={clsx(
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
+                  isDark
+                    ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
+                    : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
+                  isGenerating && "pointer-events-none"
+                )}
+              >
+                <CameraIcon className="h-4 w-4" />
+                Take photo
+              </button>
 
-  <button
-    type="button"
-    onClick={openUpload}
-    disabled={isGenerating}
-    className={clsx(
-      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
-      isDark
-        ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
-        : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
-      isGenerating && "pointer-events-none"
-    )}
-  >
-    <UploadIcon className="h-4 w-4" />
-    Upload
-  </button>
-</div>
+              <button
+                type="button"
+                onClick={openUpload}
+                disabled={isGenerating}
+                className={clsx(
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
+                  isDark
+                    ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
+                    : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
+                  isGenerating && "pointer-events-none"
+                )}
+              >
+                <UploadIcon className="h-4 w-4" />
+                Upload
+              </button>
+            </div>
 
           </div>
 
@@ -797,8 +820,8 @@ export default function Home() {
                           ? "border-white/40 ring-2 ring-white/15"
                           : "border-zinc-400 ring-2 ring-zinc-300"
                         : isDark
-                        ? "border-white/10 hover:border-white/30"
-                        : "border-zinc-200 hover:border-zinc-400",
+                          ? "border-white/10 hover:border-white/30"
+                          : "border-zinc-200 hover:border-zinc-400",
                       isGenerating && "opacity-70 cursor-not-allowed"
                     )}
                     style={{ backgroundImage: `url(/styles/${imgKey}.jpg)` }}
@@ -869,8 +892,8 @@ export default function Home() {
                   ? "bg-white/20 text-white/60 cursor-not-allowed"
                   : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
                 : isDark
-                ? "bg-white text-zinc-950 hover:bg-white/90"
-                : "bg-zinc-900 text-white hover:bg-zinc-800"
+                  ? "bg-white text-zinc-950 hover:bg-white/90"
+                  : "bg-zinc-900 text-white hover:bg-zinc-800"
             )}
             disabled={!file || isGenerating}
             onClick={onGenerate}
@@ -889,8 +912,8 @@ export default function Home() {
                     ? "bg-white/15 text-white/50 cursor-not-allowed"
                     : "bg-zinc-200 text-zinc-500 cursor-not-allowed"
                   : isDark
-                  ? "bg-white text-zinc-950 hover:bg-white/90"
-                  : "bg-zinc-900 text-white hover:bg-zinc-800"
+                    ? "bg-white text-zinc-950 hover:bg-white/90"
+                    : "bg-zinc-900 text-white hover:bg-zinc-800"
               )}
               disabled={!resultUrl || isGenerating}
               onClick={downloadResult}
@@ -908,8 +931,8 @@ export default function Home() {
                       ? "border-white/10 text-white/40 cursor-not-allowed"
                       : "border-zinc-200 text-zinc-400 cursor-not-allowed"
                     : isDark
-                    ? "border-white/15 text-white hover:bg-white/10"
-                    : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
+                      ? "border-white/15 text-white hover:bg-white/10"
+                      : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
                 )}
                 disabled={!resultUrl || isGenerating}
                 onClick={() => setMenuOpen((v) => !v)}

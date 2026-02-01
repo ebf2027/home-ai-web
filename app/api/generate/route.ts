@@ -85,10 +85,8 @@ const ROOM_TYPE_LABEL: Record<string, string> = {
 function normalizeRoomType(input: string) {
   const s = (input ?? "").trim();
 
-  // if UI sends the key, use it
   if (ROOM_TYPE_LABEL[s]) return s;
 
-  // if UI ever sends a label, try to match it
   const lower = s.toLowerCase();
   const found = Object.entries(ROOM_TYPE_LABEL).find(([, label]) => label.toLowerCase() === lower);
   if (found) return found[0];
@@ -101,9 +99,8 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
 const OPENAI_TIMEOUT_MS = 60_000;
 
-// tenta novamente quando for erro temporário
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
-const MAX_RETRIES = 2; // total: 1 tentativa + 2 retries = 3 tentativas
+const MAX_RETRIES = 2;
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -119,9 +116,22 @@ async function safeReadJson(resp: Response) {
 
 export async function POST(req: Request) {
   try {
-    // ✅ 1) Auth + free limit gate BEFORE OpenAI (cost protection)
-    const supabase: any = createSupabaseServerClient();
+    // ✅ 1) Create server client (unwrap if your helper returns { supabase: client })
+    const raw: any = createSupabaseServerClient();
+    const supabase: any = raw?.auth ? raw : raw?.supabase ?? raw?.client ?? raw;
 
+    if (!supabase?.auth?.getSession) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Supabase server client misconfigured: missing auth methods. Fix app/lib/supabase/server.ts to return the Supabase client directly.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // ✅ 2) Auth (session)
     const {
       data: { session },
       error: userErr,
@@ -136,8 +146,8 @@ export async function POST(req: Request) {
     const userId: string = user.id;
     const isBypass = PRO_BYPASS_USER_IDS.includes(userId);
 
-    // Uses UTC day for consistency
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    // ✅ 3) Free daily limit (RPC)
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
 
     if (!isBypass) {
       const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
@@ -169,13 +179,12 @@ export async function POST(req: Request) {
       }
     }
 
-    // ✅ 2) Continue with generation
+    // ✅ 4) Continue with your existing generate flow
     const form = await req.formData();
 
     const style = normalizeStyle(form.get("style")?.toString() ?? "Modern");
     const image = form.get("image");
 
-    // ✅ read roomType
     const rawRoomType = form.get("roomType")?.toString() ?? "";
     const roomTypeKey = normalizeRoomType(rawRoomType);
     const roomTypeLabel = ROOM_TYPE_LABEL[roomTypeKey] ?? "Other";
@@ -200,8 +209,6 @@ export async function POST(req: Request) {
     }
 
     const recipe = STYLE_RECIPES[style] ?? STYLE_RECIPES.Modern;
-
-    // room line in prompt
     const roomLine = `Room type: ${roomTypeLabel}`;
 
     const prompt = `
@@ -254,9 +261,8 @@ ${recipe}
       } catch (e: any) {
         clearTimeout(t);
 
-        // timeout ou erro de rede: tenta de novo
         if (attempt < MAX_RETRIES) {
-          await sleep(500 * (attempt + 1)); // 500ms, 1000ms, ...
+          await sleep(500 * (attempt + 1));
           continue;
         }
 
@@ -279,7 +285,6 @@ ${recipe}
       lastStatus = resp.status;
       lastData = data;
 
-      // sucesso
       if (resp.ok) {
         const b64 = data?.data?.[0]?.b64_json;
         if (!b64) {
@@ -296,13 +301,11 @@ ${recipe}
         });
       }
 
-      // se for erro temporário, tenta de novo
       if (RETRYABLE_STATUS.has(resp.status) && attempt < MAX_RETRIES) {
         await sleep(500 * (attempt + 1));
         continue;
       }
 
-      // erro final
       const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
       const statusToReturn = resp.status === 503 ? 503 : 500;
 
@@ -312,14 +315,10 @@ ${recipe}
       );
     }
 
-    // fallback
     const msg = lastData?.error?.message ?? `OpenAI request failed (status ${lastStatus}).`;
     const statusToReturn = lastStatus === 503 ? 503 : 500;
 
-    return NextResponse.json(
-      { ok: false, error: msg, details: lastData ?? null },
-      { status: statusToReturn }
-    );
+    return NextResponse.json({ ok: false, error: msg, details: lastData ?? null }, { status: statusToReturn });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? "Unknown error" }, { status: 500 });
   }
