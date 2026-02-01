@@ -92,6 +92,42 @@ function LightbulbIcon({ className = "" }) {
     </svg>
   );
 }
+function CameraIcon({ className = "" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M4 7h3l2-2h6l2 2h3v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" />
+      <circle cx="12" cy="13" r="3" />
+    </svg>
+  );
+}
+
+function UploadIcon({ className = "" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 3v10" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+    </svg>
+  );
+}
 
 /* ---------- helpers ---------- */
 function openImageInNewTab(urlOrData: string) {
@@ -651,37 +687,40 @@ export default function Home() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Your photo</h2>
 
-            <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
-              <button
-                type="button"
-                onClick={openCamera}
-                disabled={isGenerating}
-                className={clsx(
-                  "rounded-full px-3 py-1 text-sm font-medium transition",
-                  isDark
-                    ? "bg-white text-zinc-950 hover:bg-white/90"
-                    : "bg-zinc-900 text-white hover:bg-zinc-800",
-                  isGenerating && "pointer-events-none"
-                )}
-              >
-                Take photo
-              </button>
+           <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
+  <button
+    type="button"
+    onClick={openCamera}
+    disabled={isGenerating}
+    className={clsx(
+      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
+      isDark
+        ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
+        : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
+      isGenerating && "pointer-events-none"
+    )}
+  >
+    <CameraIcon className="h-4 w-4" />
+    Take photo
+  </button>
 
-              <button
-                type="button"
-                onClick={openUpload}
-                disabled={isGenerating}
-                className={clsx(
-                  "rounded-full px-3 py-1 text-sm font-medium transition border",
-                  isDark
-                    ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
-                    : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
-                  isGenerating && "pointer-events-none"
-                )}
-              >
-                Upload
-              </button>
-            </div>
+  <button
+    type="button"
+    onClick={openUpload}
+    disabled={isGenerating}
+    className={clsx(
+      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium transition",
+      isDark
+        ? "border-white/15 bg-white/10 text-white hover:bg-white/20"
+        : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
+      isGenerating && "pointer-events-none"
+    )}
+  >
+    <UploadIcon className="h-4 w-4" />
+    Upload
+  </button>
+</div>
+
           </div>
 
           {/* Preview / Slider */}
