@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Buffer } from "buffer";
 import { createClient as createSupabaseServerClient } from "../../lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,6 +13,19 @@ const PRO_BYPASS_USER_IDS = (process.env.PRO_BYPASS_USER_IDS ?? "")
   .map((s) => s.trim())
   .filter(Boolean);
 
+// ✅ pick a timezone for "daily" counting (better UX for Brazil)
+const USAGE_TZ = process.env.USAGE_TZ ?? "America/Sao_Paulo";
+function getDayISO(tz = USAGE_TZ) {
+  // en-CA => YYYY-MM-DD
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+/* ---------- Styles ---------- */
 const STYLE_RECIPES: Record<string, string> = {
   Modern: `
 - Materials: smooth matte walls, microcement or wide-plank oak floor, black metal accents.
@@ -68,6 +82,7 @@ function normalizeStyle(input: string) {
   return STYLE_RECIPES[s] ? s : "Modern";
 }
 
+/* ---------- Room Types ---------- */
 // Room types coming from the UI
 const ROOM_TYPE_LABEL: Record<string, string> = {
   living_room: "Living room",
@@ -90,12 +105,15 @@ function normalizeRoomType(input: string) {
 
   // if UI ever sends a label, try to match it
   const lower = s.toLowerCase();
-  const found = Object.entries(ROOM_TYPE_LABEL).find(([, label]) => label.toLowerCase() === lower);
+  const found = Object.entries(ROOM_TYPE_LABEL).find(
+    ([, label]) => label.toLowerCase() === lower
+  );
   if (found) return found[0];
 
   return "other";
 }
 
+/* ---------- Limits / OpenAI ---------- */
 const MAX_IMAGE_MB = 25;
 const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
@@ -117,6 +135,12 @@ async function safeReadJson(resp: Response) {
   }
 }
 
+type UsageRow = {
+  allowed?: boolean;
+  count?: number;
+  daily_limit?: number;
+};
+
 export async function POST(req: Request) {
   try {
     // ✅ 1) Auth + free limit gate BEFORE OpenAI (cost protection)
@@ -136,7 +160,8 @@ export async function POST(req: Request) {
     const userId: string = user.id;
     const isBypass = PRO_BYPASS_USER_IDS.includes(userId);
 
-    const today = new Date().toISOString().slice(0, 10); // UTC day YYYY-MM-DD
+    // ✅ daily day string (timezone-aware)
+    const today = getDayISO(); // "YYYY-MM-DD"
 
     if (!isBypass) {
       const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
@@ -161,18 +186,20 @@ export async function POST(req: Request) {
         );
       }
 
+      const row: UsageRow | null = Array.isArray(data) ? (data[0] as UsageRow) : (data as UsageRow);
 
+      const allowed = Boolean(row?.allowed);
+      const used = Number(row?.count ?? 0);
+      const dailyLimit = Number(row?.daily_limit ?? FREE_DAILY_LIMIT);
 
-      const row = Array.isArray(data) ? data[0] : data;
-
-      if (!row?.allowed) {
+      if (!allowed) {
         return NextResponse.json(
           {
             ok: false,
-            error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Please upgrade to Pro.`,
+            error: `Daily free limit reached (${dailyLimit}/day). Please upgrade to Pro.`,
             code: "FREE_LIMIT",
-            used: row?.count ?? FREE_DAILY_LIMIT,
-            limit: FREE_DAILY_LIMIT,
+            used,
+            limit: dailyLimit,
           },
           { status: 429 }
         );
@@ -256,8 +283,6 @@ ${recipe}
           signal: controller.signal,
         });
       } catch (e: any) {
-        clearTimeout(t);
-
         if (attempt < MAX_RETRIES) {
           await sleep(500 * (attempt + 1));
           continue;
@@ -306,13 +331,19 @@ ${recipe}
       const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
       const statusToReturn = resp.status === 503 ? 503 : 500;
 
-      return NextResponse.json({ ok: false, error: msg, details: data ?? null }, { status: statusToReturn });
+      return NextResponse.json(
+        { ok: false, error: msg, details: data ?? null },
+        { status: statusToReturn }
+      );
     }
 
     const msg = lastData?.error?.message ?? `OpenAI request failed (status ${lastStatus}).`;
     const statusToReturn = lastStatus === 503 ? 503 : 500;
 
-    return NextResponse.json({ ok: false, error: msg, details: lastData ?? null }, { status: statusToReturn });
+    return NextResponse.json(
+      { ok: false, error: msg, details: lastData ?? null },
+      { status: statusToReturn }
+    );
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message ?? "Unknown error" }, { status: 500 });
   }
