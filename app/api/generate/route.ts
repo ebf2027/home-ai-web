@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
+import { createClient as createSupabaseServerClient } from "../../lib/supabase/server";
 
 export const runtime = "nodejs";
+
+// ✅ FREE limit (env configurable)
+const FREE_DAILY_LIMIT = Number(process.env.FREE_DAILY_LIMIT ?? "3");
+
+// ✅ optional bypass for your own user id(s), comma-separated UUIDs
+const PRO_BYPASS_USER_IDS = (process.env.PRO_BYPASS_USER_IDS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const STYLE_RECIPES: Record<string, string> = {
   Modern: `
@@ -109,12 +119,63 @@ async function safeReadJson(resp: Response) {
 
 export async function POST(req: Request) {
   try {
+    // ✅ 1) Auth + free limit gate BEFORE OpenAI (cost protection)
+    const supabase: any = createSupabaseServerClient();
+
+    const {
+      data: { session },
+      error: userErr,
+    } = await supabase.auth.getSession();
+
+    const user = session?.user;
+
+    if (userErr || !user) {
+      return NextResponse.json({ ok: false, error: "You must be logged in." }, { status: 401 });
+    }
+
+    const userId: string = user.id;
+    const isBypass = PRO_BYPASS_USER_IDS.includes(userId);
+
+    // Uses UTC day for consistency
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    if (!isBypass) {
+      const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
+        p_day: today,
+        p_limit: FREE_DAILY_LIMIT,
+      });
+
+      if (error) {
+        console.error("usage rpc error:", error);
+        return NextResponse.json(
+          { ok: false, error: "Usage check failed. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+
+      if (!row?.allowed) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Please upgrade to Pro.`,
+            code: "FREE_LIMIT",
+            used: row?.count ?? FREE_DAILY_LIMIT,
+            limit: FREE_DAILY_LIMIT,
+          },
+          { status: 429 }
+        );
+      }
+    }
+
+    // ✅ 2) Continue with generation
     const form = await req.formData();
 
     const style = normalizeStyle(form.get("style")?.toString() ?? "Modern");
     const image = form.get("image");
 
-    // ✅ NEW: read roomType
+    // ✅ read roomType
     const rawRoomType = form.get("roomType")?.toString() ?? "";
     const roomTypeKey = normalizeRoomType(rawRoomType);
     const roomTypeLabel = ROOM_TYPE_LABEL[roomTypeKey] ?? "Other";
@@ -140,7 +201,7 @@ export async function POST(req: Request) {
 
     const recipe = STYLE_RECIPES[style] ?? STYLE_RECIPES.Modern;
 
-    // ✅ NEW: room line in prompt
+    // room line in prompt
     const roomLine = `Room type: ${roomTypeLabel}`;
 
     const prompt = `
@@ -245,7 +306,10 @@ ${recipe}
       const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
       const statusToReturn = resp.status === 503 ? 503 : 500;
 
-      return NextResponse.json({ ok: false, error: msg, details: data ?? null }, { status: statusToReturn });
+      return NextResponse.json(
+        { ok: false, error: msg, details: data ?? null },
+        { status: statusToReturn }
+      );
     }
 
     // fallback
