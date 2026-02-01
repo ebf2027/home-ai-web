@@ -353,6 +353,10 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ NEW: inputs for camera + upload
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (!menuRef.current) return;
@@ -407,6 +411,24 @@ export default function Home() {
       return null;
     });
   }
+
+  // ✅ NEW: shared handler for both camera + upload
+  function handlePickedImage(f: File | null) {
+    if (!f) return;
+    clearResult();
+    setFile(f);
+  }
+
+  const onPickFile: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const f = e.target.files?.[0] ?? null;
+    handlePickedImage(f);
+
+    // ✅ important for iOS: allow picking the same file again
+    e.currentTarget.value = "";
+  };
+
+  const openCamera = () => cameraInputRef.current?.click();
+  const openUpload = () => uploadInputRef.current?.click();
 
   function downloadResult() {
     if (!resultUrl) return;
@@ -608,29 +630,58 @@ export default function Home() {
 
         {/* Card */}
         <section className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
+          {/* ✅ Hidden inputs (camera + upload) */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={onPickFile}
+          />
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onPickFile}
+          />
+
           {/* Upload row */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Your photo</h2>
 
-            <label
-              className={clsx(
-                "cursor-pointer rounded-full px-3 py-1 text-sm transition",
-                isDark ? "bg-white/10 hover:bg-white/20" : "bg-zinc-900/5 hover:bg-zinc-900/10",
-                isGenerating && "opacity-60 pointer-events-none"
-              )}
-            >
-              Choose image
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0] ?? null;
-                  setFile(f);
-                  clearResult();
-                }}
-              />
-            </label>
+            <div className={clsx("flex items-center gap-2", isGenerating && "opacity-60")}>
+              <button
+                type="button"
+                onClick={openCamera}
+                disabled={isGenerating}
+                className={clsx(
+                  "rounded-full px-3 py-1 text-sm font-medium transition",
+                  isDark
+                    ? "bg-white text-zinc-950 hover:bg-white/90"
+                    : "bg-zinc-900 text-white hover:bg-zinc-800",
+                  isGenerating && "pointer-events-none"
+                )}
+              >
+                Take photo
+              </button>
+
+              <button
+                type="button"
+                onClick={openUpload}
+                disabled={isGenerating}
+                className={clsx(
+                  "rounded-full px-3 py-1 text-sm font-medium transition border",
+                  isDark
+                    ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
+                    : "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100",
+                  isGenerating && "pointer-events-none"
+                )}
+              >
+                Upload
+              </button>
+            </div>
           </div>
 
           {/* Preview / Slider */}
@@ -881,7 +932,7 @@ export default function Home() {
 
           {/* ✅ Photo tips modal */}
           {tipsOpen && (
-            <div className="fixed inset-0 z-50">
+            <div className="fixed inset-0 z-[999]">
               <button
                 type="button"
                 className="absolute inset-0 bg-black/50"
@@ -889,7 +940,10 @@ export default function Home() {
                 onClick={() => setTipsOpen(false)}
               />
 
-              <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md px-4 pb-6">
+              <div
+                className="absolute inset-x-0 mx-auto max-w-md px-4 pb-6"
+                style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
+              >
                 <div className={clsx("rounded-2xl p-4 ring-1 shadow-xl", cardBg)}>
                   <div className="flex items-start justify-between gap-3">
                     <div>

@@ -1,239 +1,172 @@
 # PROJECT STATE — HOME-AI-WEB
 
-## 1. Visão geral
-- **Nome do app:** Home AI
-- **Tipo:** Web App (MVP)
-- **Objetivo:** Permitir que o usuário envie uma foto de um ambiente e gere variações de design de interiores usando IA.
-- **Status atual:** MVP funcional com autenticação (Home + Gallery + Profile + Upgrade), persistência por usuário no **Supabase (Postgres + Storage)**, com **deleção correta** (DB + arquivos no Storage) e rota de **limpeza de órfãos**.
+## 1) Visão geral
+- Nome do app: **Home AI**
+- Tipo: Web App (MVP)
+- Objetivo: Usuário envia uma foto de um cômodo e gera variações realistas de design de interiores com IA.
+- Status atual: **MVP funcional em produção com login + gallery persistente no Supabase + room type.**
 
 ---
 
-## 2. Stack / Tecnologias
-- **Framework:** Next.js (App Router)
-- **Linguagem:** TypeScript
-- **UI / Estilo:** Tailwind CSS
-- **Estado:** React hooks (useState, useEffect, useMemo)
-- **Backend:** API Routes (Next)
-- **IA de imagem:** OpenAI (Images API)
-- **Autenticação:** Supabase Auth (Email/Senha + Google OAuth)
-- **Persistência (Gallery):**
-  - **Supabase Postgres** (tabela `public.gallery_items`) + RLS por usuário
-  - **Supabase Storage** (bucket `homeai`) para armazenar arquivos de imagem
-- **Persistência local:**
-  - `sessionStorage`: “último resultado” na Home
-  - `localStorage`: tema (dark/light)
-- **Deploy:** Vercel + GitHub
+## 2) Produção / Links
+- Repositório (GitHub): **ebf2027/home-ai-web**
+- Produção (Vercel): **home-ai-web-2** (único projeto mantido)
+- URL de produção: **https://home-ai-web-2.vercel.app**
 
 ---
 
-## 3. Estrutura real de pastas (atual)
-HOME-AI-WEB/
-├─ app/
-│ ├─ api/
-│ │ ├─ generate/
-│ │ │ └─ route.ts
-│ │ └─ storage/
-│ │ └─ cleanup/
-│ │ └─ route.ts
-│ ├─ auth/
-│ │ └─ callback/
-│ │ └─ route.ts
-│ ├─ login/
-│ │ └─ page.tsx
-│ ├─ components/
-│ │ ├─ BottomTabs.tsx
-│ │ └─ gallery/
-│ │ ├─ GalleryGrid.tsx
-│ │ └─ GalleryModal.tsx
-│ ├─ gallery/
-│ │ └─ page.tsx
-│ ├─ lib/
-│ │ ├─ supabase/
-│ │ │ ├─ client.ts
-│ │ │ └─ server.ts
-│ │ ├─ galleryDb.ts
-│ │ ├─ resolveImageSrc.ts
-│ │ └─ storageImages.ts
-│ ├─ profile/
-│ │ └─ page.tsx
-│ ├─ types/
-│ │ └─ gallery.ts
-│ ├─ upgrade/
-│ │ └─ page.tsx
-│ ├─ favicon.ico
-│ ├─ globals.css
-│ ├─ layout.tsx
-│ └─ page.tsx
-├─ docs/
-│ └─ PROJECT_STATE.md
-├─ public/
-├─ .env.local
-├─ package.json
-├─ tsconfig.json
-├─ next.config.ts
-└─ proxy.ts (proteção de rotas; substitui middleware.ts)
-
-markdown
-Copiar código
+## 3) Stack / Tecnologias
+- Framework: **Next.js (App Router)**
+- Linguagem: **TypeScript**
+- UI: **Tailwind CSS**
+- Auth/DB/Storage: **Supabase**
+  - Auth: Email+Senha e Google OAuth
+  - DB: tabela `gallery_items`
+  - Storage: bucket `homeai`
+- IA de imagem: **OpenAI Images Edits** via API Route
+- Deploy: **Vercel**
 
 ---
 
-## 4. Páginas principais
-
-### app/page.tsx (Home)
-- Upload da imagem do ambiente
-- Seleção de estilo (Modern, Minimalist, Scandinavian, etc.)
-- Geração da imagem via `POST /api/generate`
-- Exibição de preview / before-after slider
-- Menu de ações com 3 opções: **Share / Open / Clear**
-- Último resultado salvo em `sessionStorage` (`homeai_last_result`)
-- Ao gerar:
-  - salva a geração no Supabase (registro no Postgres + arquivos no Storage)
-- Download:
-  - “força download” via `fetch -> blob -> URL.createObjectURL`
-
-### app/gallery/page.tsx (Gallery)
-- Lista imagens do usuário carregando do Supabase (tabela `gallery_items`)
-- Filtro de favoritos
-- Favoritar/desfavoritar (`update is_favorite`)
-- **Delete completo:** remove arquivos do **Storage** (imagem + thumb) e depois remove o registro no **DB**
-- Botão Refresh
-
-### app/login/page.tsx
-- Formulário de login Email/Senha
-- Botão “Continue with Google”
-- Após login, redireciona para rota solicitada via `next=...`
-
-### app/profile/page.tsx
-- Página de perfil (placeholder no MVP)
-
-### app/upgrade/page.tsx
-- Página de upgrade / monetização (placeholder no MVP)
-
----
-
-## 5. Autenticação e proteção de rotas
-
-### Google OAuth
-- Configurado no Google Cloud (OAuth Client ID + Secret)
-- Redirect/callback do Supabase:
-  - `https://<project>.supabase.co/auth/v1/callback`
-
-### Callback route
-- `app/auth/callback/route.ts`
-- Faz `exchangeCodeForSession(code)` e seta cookies corretamente
-
-### Proteção de rotas
-- `proxy.ts` (substitui middleware.ts)
-- Redireciona usuário não logado para `/login?next=...`
-- **Opção escolhida:** B (login já ao abrir o app)
-- Home `/` também é protegida
-
----
-
-## 6. Supabase — Banco de dados + Storage
-
-### 6.1 Tabela: `public.gallery_items`
-Campos:
-- `id` uuid primary key
-- `user_id` uuid (FK `auth.users`)
-- `created_at` timestamptz default now()
-- `room_type` text
-- `style` text
-- `prompt` text
-- `image_url` text  **(path do Storage, não base64)**
-- `thumb_url` text nullable **(path do Storage)**
-- `is_favorite` boolean default false
-
-### 6.2 RLS (Postgres)
-- RLS habilitado na tabela
-- Policies por usuário para select/insert/update/delete usando `auth.uid() = user_id`
-
-### 6.3 Storage
-- **Bucket:** `homeai`
-- **Estrutura de arquivos:** tudo dentro da pasta do usuário:
-  - `{userId}/{uuid}.jpg`
-  - `{userId}/{uuid}-thumb.jpg`
-  - (uploads manuais também seguem `{userId}/arquivo.ext`)
-
-### 6.4 Policies (Storage)
-- Policies configuradas para **authenticated** em:
-  - SELECT / INSERT / UPDATE / DELETE
-- Regra usada (padrão do projeto):
-  - permitir acesso apenas a objetos cujo “primeiro folder” do path é o próprio `auth.uid()`
-
-### 6.5 Consistência Storage x DB
-- **Delete no app** remove:
-  1) arquivos no Storage (imagem + thumb)
-  2) linha no Postgres (`gallery_items`)
-
-- **Rota utilitária de limpeza de órfãos (dev/admin):**
-  - `GET /api/storage/cleanup`
-  - compara lista do Storage (pasta do user) com registros do DB e remove arquivos órfãos
-  - útil quando existirem sobras antigas por testes/migrações
-
----
-
-## 7. Variáveis de ambiente (.env.local)
-(sem valores aqui)
+## 4) Variáveis de ambiente
+### Local (`.env.local`)
 - `OPENAI_API_KEY=...`
-- `NEXT_PUBLIC_SUPABASE_URL=...`
+- `NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY=...`
-- `SUPABASE_SERVICE_ROLE_KEY=...`
 
-> Observação: `SUPABASE_SERVICE_ROLE_KEY` é **somente servidor** (API routes), nunca usar no client.
+### Vercel (Production Environment Variables)
+- Mesmas variáveis acima configuradas no projeto **home-ai-web-2**.
 
----
-
-## 8. Persistência de dados
-- Gallery: Supabase Postgres (metadados) + Supabase Storage (arquivos), por usuário
-- Última imagem da Home: `sessionStorage` (`homeai_last_result`)
-- Tema: `localStorage` (`homeai_theme`)
+> Importante: `NEXT_PUBLIC_SUPABASE_URL` precisa ser uma URL válida HTTP/HTTPS (ex.: `https://...supabase.co`).
 
 ---
 
-## 9. Fluxo do usuário (atual)
-1) Usuário abre o app → vai para `/login`  
-2) Faz login (Google ou Email/Senha)  
-3) Entra na Home  
-4) Faz upload e escolhe estilo  
-5) Gera imagem com IA  
-6) App salva automaticamente no Supabase (DB + Storage)  
-7) Usuário abre Gallery e vê histórico do próprio usuário  
-8) Pode favoritar, deletar, baixar
+## 5) Rotas / Páginas principais (App Router)
+- `/` → Home (upload + seleção de estilo + room type + gerar + salvar)
+- `/gallery` → Gallery (lista do usuário via Supabase)
+- `/login` → Login (Google + Email/Senha)
+- `/profile` → Profile
+- `/upgrade` → Upgrade (placeholder/fluxo futuro)
+- `/auth/callback` → Callback do OAuth (troca code → session e redireciona para `next`)
+- `/api/generate` → Geração com OpenAI (edits)
+- `/api/storage/cleanup` → (existe no projeto) endpoint de manutenção/limpeza (se aplicável)
 
 ---
 
-## 10. Decisões já tomadas (não mudar sem discutir)
-- Idioma do app: Inglês
-- Foco em MVP
-- UX simples, clean e mobile-first
-- Gallery como histórico automático das gerações
-- Login obrigatório ao abrir o app (Opção B)
-- Storage organizado por pasta `{auth.uid()}/...`
+## 6) Fluxo de autenticação (Supabase)
+- O usuário acessa `/login?next=/...`
+- Pode autenticar via:
+  - **Google OAuth** (`signInWithOAuth`)
+  - **Email + senha** (`signInWithPassword`)
+  - **Signup** (`signUp`) com confirmação por email (quando habilitado no Supabase)
+- Após login, o app redireciona para o `next` (default `/`).
+- Callback do OAuth: `/auth/callback?code=...&next=...`
+
+Arquivos relevantes:
+- `app/login/page.tsx` (wrapper com Suspense quando necessário)
+- `app/login/LoginClient.tsx` (UI/handlers reais)
+- `app/auth/callback/route.ts` (troca code por session e redirect)
+- `app/lib/supabase/client.ts` (supabase client-side)
+- `app/lib/supabase/server.ts` (supabase server-side / cookies)
 
 ---
 
-## 11. Links importantes
-- GitHub repo: `ebf2027/home-ai-web`
-- Vercel project: `home-ai-web-2`
-- Domain: `home-ai-web-2.vercel.app`
-- Supabase project: `gphunbcamhetcuqqetvl`
+## 7) Fluxo de geração e salvamento (Home → OpenAI → Supabase)
+### Home (`app/page.tsx`)
+1. Usuário escolhe imagem (`Choose image`).
+2. Usuário escolhe **Style**.
+3. Usuário escolhe **Room type** (dropdown em inglês).
+4. Clica **Generate Design**.
+5. App:
+   - Otimiza a imagem para upload (`prepareImageForUpload`)
+   - Faz `POST /api/generate` (FormData: `style`, `roomType`, `image`)
+   - Recebe imagem final (blob jpeg)
+   - Gera thumbnail (jpeg)
+   - Faz upload para Supabase Storage:
+     - `homeai/{userId}/{imageId}.jpg`
+     - `homeai/{userId}/{imageId}-thumb.jpg`
+   - Cria registro no Supabase DB em `gallery_items` com:
+     - `id`, `user_id`, `room_type`, `style`, `prompt`, `image_url`, `thumb_url`, `is_favorite`
+
+### API de geração (`app/api/generate/route.ts`)
+- Recebe FormData: `image`, `style` (+ agora `roomType`)
+- Monta prompt com regras fortes:
+  - preservar layout, portas/janelas, câmera etc.
+- Chama OpenAI `POST https://api.openai.com/v1/images/edits`
+- Retorna `image/jpeg` no response
+
+Observação:
+- Model atual: `gpt-image-1-mini`
+- `size: "auto"`, `quality: "medium"`, `output_format: "jpeg"`
+- Tem retry para status temporários (429/5xx) e timeout.
 
 ---
 
-## 12. Diário de atualização
-### 26–28/01/2026 — Storage + delete completo + cleanup
-- Bucket `homeai` no Supabase Storage em uso (arquivo + thumbnail).
-- `gallery_items.image_url` e `thumb_url` passaram a ser **paths** do Storage (não base64).
-- Policies do Storage ajustadas para `authenticated` (select/insert/update/delete) com regra por pasta `{auth.uid()}`.
-- Gallery delete passou a remover **Storage + DB**.
-- Criada rota `/api/storage/cleanup` para remover arquivos órfãos (dev/admin).
-- Troubleshooting: quando Next “prende” validações antigas, limpar `.next` (incluindo `.next/dev`) resolve.
+## 8) Gallery (persistente)
+- Página: `app/gallery/page.tsx` + grid `app/components/gallery/GalleryGrid.tsx`
+- Busca itens do usuário via Supabase (DB + URLs do Storage)
+- Mostra cards com:
+  - Thumb/Imagem
+  - Room type
+  - Style
+  - Favoritar (star)
+  - Download
+  - Delete
+
+> As imagens antigas (antes do Room Type) não precisam ser alteradas. Daqui pra frente todas as novas já salvam `room_type`.
 
 ---
 
-## 13. Próximo passo (próxima sessão)
-- Deploy dessas mudanças na Vercel + conferir env vars no painel da Vercel
-- Decidir se o bucket fica PUBLIC ou se migra para signed URLs (privado) com expiração
-- Opcional: automatizar limpeza (cron) ou manter apenas rota admin protegida
+## 9) UI adicionada hoje
+### Room Type (Home)
+- Dropdown entre estilos e botão de geração.
+- Opções em inglês (ex.: Living room, Bedroom, Kitchen, …).
+- `roomType` vai para o prompt e é salvo no DB como label.
+
+### “Photo tips” (Home)
+- Ajuda para o usuário tirar uma foto melhor.
+- Abre uma modal com lista de dicas (em inglês).
+- Ajustada para não ficar escondida atrás do bottom tabs (modal scrollável / padding bottom / z-index).
+
+---
+
+## 10) Deploy / Workflow
+### Local
+- `npm install`
+- `npm run dev`
+- testar login, geração, salvar no storage e aparecer na gallery.
+
+### Produção (Vercel)
+- Push no GitHub dispara deploy automático:
+  - `git add .`
+  - `git commit -m "..."`
+  - `git push`
+
+---
+
+## 11) Problemas resolvidos hoje (histórico rápido)
+- Build falhando por `useSearchParams` / Suspense no `/login` → corrigido com wrapper e/ou client component adequado.
+- Erros de “Invalid supabaseUrl / missing env vars” em deploy → corrigido ajustando env vars na Vercel e valores do Supabase.
+- Confusão de múltiplos projetos na Vercel → mantido apenas **home-ai-web-2** (funcionando).
+
+---
+
+## 12) Próximos passos (para finalizar em ~10 dias)
+1. **Limites / Monetização**
+   - Definir plano Free vs Pro (ex.: limite diário, estilos premium, resolução).
+   - Implementar paywall no `/upgrade`.
+2. **Pagamento**
+   - Integrar Stripe (assinatura / lifetime).
+3. **Hardening**
+   - Melhorar mensagens de erro (OpenAI/Supabase).
+   - Rate limit / proteção no `/api/generate`.
+4. **UX**
+   - Melhor “empty state” e microcopys.
+   - Mostrar consumo de créditos (se houver).
+5. **Legal/Produto**
+   - Terms / Privacy / contato
+   - Analytics básico (Vercel Analytics ou alternativa)
+6. **Marketing**
+   - Landing simples, demo images, CTA claro.
+
+---
