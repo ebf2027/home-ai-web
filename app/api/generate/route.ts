@@ -85,8 +85,10 @@ const ROOM_TYPE_LABEL: Record<string, string> = {
 function normalizeRoomType(input: string) {
   const s = (input ?? "").trim();
 
+  // if UI sends the key, use it
   if (ROOM_TYPE_LABEL[s]) return s;
 
+  // if UI ever sends a label, try to match it
   const lower = s.toLowerCase();
   const found = Object.entries(ROOM_TYPE_LABEL).find(([, label]) => label.toLowerCase() === lower);
   if (found) return found[0];
@@ -99,6 +101,7 @@ const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
 const OPENAI_TIMEOUT_MS = 60_000;
 
+// retry for temporary errors
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 const MAX_RETRIES = 2;
 
@@ -116,22 +119,9 @@ async function safeReadJson(resp: Response) {
 
 export async function POST(req: Request) {
   try {
-    // ✅ 1) Create server client (unwrap if your helper returns { supabase: client })
-    const raw: any = createSupabaseServerClient();
-    const supabase: any = raw?.auth ? raw : raw?.supabase ?? raw?.client ?? raw;
+    // ✅ 1) Auth + free limit gate BEFORE OpenAI (cost protection)
+    const supabase = await createSupabaseServerClient(); // ✅ IMPORTANT: await (your server.ts is async)
 
-    if (!supabase?.auth?.getSession) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            "Supabase server client misconfigured: missing auth methods. Fix app/lib/supabase/server.ts to return the Supabase client directly.",
-        },
-        { status: 500 }
-      );
-    }
-
-    // ✅ 2) Auth (session)
     const {
       data: { session },
       error: userErr,
@@ -146,8 +136,7 @@ export async function POST(req: Request) {
     const userId: string = user.id;
     const isBypass = PRO_BYPASS_USER_IDS.includes(userId);
 
-    // ✅ 3) Free daily limit (RPC)
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+    const today = new Date().toISOString().slice(0, 10); // UTC day YYYY-MM-DD
 
     if (!isBypass) {
       const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
@@ -179,7 +168,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // ✅ 4) Continue with your existing generate flow
+    // ✅ 2) Continue with generation
     const form = await req.formData();
 
     const style = normalizeStyle(form.get("style")?.toString() ?? "Modern");
@@ -202,10 +191,7 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { ok: false, error: "Missing OPENAI_API_KEY in .env.local" },
-        { status: 500 }
-      );
+      return NextResponse.json({ ok: false, error: "Missing OPENAI_API_KEY." }, { status: 500 });
     }
 
     const recipe = STYLE_RECIPES[style] ?? STYLE_RECIPES.Modern;
@@ -309,10 +295,7 @@ ${recipe}
       const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
       const statusToReturn = resp.status === 503 ? 503 : 500;
 
-      return NextResponse.json(
-        { ok: false, error: msg, details: data ?? null },
-        { status: statusToReturn }
-      );
+      return NextResponse.json({ ok: false, error: msg, details: data ?? null }, { status: statusToReturn });
     }
 
     const msg = lastData?.error?.message ?? `OpenAI request failed (status ${lastStatus}).`;
