@@ -296,19 +296,28 @@ const STYLES = [
 type StyleId = (typeof STYLES)[number]["id"];
 type Theme = "light" | "dark";
 
-async function readApiError(res: Response): Promise<string> {
+async function readApiError(
+  res: Response
+): Promise<{ message: string; code?: string; used?: number; limit?: number }> {
   try {
     const ct = res.headers.get("content-type") || "";
     if (ct.includes("application/json")) {
       const j = await res.json();
-      if (j?.error) return String(j.error);
+      return {
+        message: j?.error ? String(j.error) : `Request failed (status ${res.status}).`,
+        code: j?.code ? String(j.code) : undefined,
+        used: typeof j?.used === "number" ? j.used : undefined,
+        limit: typeof j?.limit === "number" ? j.limit : undefined,
+      };
     }
-  } catch { }
+  } catch {}
+
   try {
     const t = await res.text();
-    if (t) return t.slice(0, 250);
-  } catch { }
-  return `Request failed (status ${res.status}).`;
+    if (t) return { message: t.slice(0, 250) };
+  } catch {}
+
+  return { message: `Request failed (status ${res.status}).` };
 }
 
 async function blobToJpegThumb(blob: Blob, opts?: { maxDim?: number; quality?: number }) {
@@ -372,6 +381,9 @@ export default function Home() {
   // ✅ erro amigável (mostra na tela)
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // ✅ NEW: flag para mostrar CTA de upgrade ao atingir limite free
+  const [freeLimitHit, setFreeLimitHit] = useState(false);
+
   // 🔒 manter a última imagem ao trocar de aba (Home ↔ Gallery)
   useEffect(() => {
     const saved = sessionStorage.getItem("homeai_last_result");
@@ -412,14 +424,14 @@ export default function Home() {
       }
       const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
       setTheme(prefersDark ? "dark" : "light");
-    } catch { }
+    } catch {}
   }, []);
 
   // Save theme
   useEffect(() => {
     try {
       localStorage.setItem("homeai_theme", theme);
-    } catch { }
+    } catch {}
   }, [theme]);
 
   const previewUrl = useMemo(() => {
@@ -442,6 +454,7 @@ export default function Home() {
   function clearResult() {
     setMenuOpen(false);
     setErrorMsg(null);
+    setFreeLimitHit(false);
     setResultUrl((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
@@ -520,7 +533,7 @@ export default function Home() {
         await navigator.share({ title: "Home AI", text: "My redesign", url: resultUrl });
         return;
       }
-    } catch { }
+    } catch {}
 
     openImageInNewTab(resultUrl);
   }
@@ -531,6 +544,7 @@ export default function Home() {
 
     setMenuOpen(false);
     setErrorMsg(null);
+    setFreeLimitHit(false);
 
     try {
       setIsGenerating(true);
@@ -548,33 +562,24 @@ export default function Home() {
       const res = await fetch("/api/generate", { method: "POST", body: formData });
 
       if (!res.ok) {
-        let msg = await readApiError(res);
+        const err = await readApiError(res);
 
-        // melhora mensagem quando é limite do free
-        if (msg?.toLowerCase().includes("daily free limit")) {
+        const isLimit =
+          err.code === "FREE_LIMIT" || err.message.toLowerCase().includes("daily free limit");
+
+        setFreeLimitHit(isLimit);
+
+        let msg = err.message || "Generation failed. Please try again.";
+        if (isLimit) {
+          const used = typeof err.used === "number" ? err.used : undefined;
+          const limit = typeof err.limit === "number" ? err.limit : undefined;
+          if (used != null && limit != null) msg = `${msg} (${used}/${limit})`;
           msg = msg + " Tap Upgrade to unlock more generations.";
         }
 
-        setErrorMsg(msg || "Generation failed. Please try again.");
+        setErrorMsg(msg);
         return;
       }
-      {
-        errorMsg?.toLowerCase().includes("daily free limit") && (
-          <button
-            type="button"
-            onClick={() => (window.location.href = "/upgrade")}
-            className={clsx(
-              "mt-2 w-full rounded-xl py-2 text-sm font-semibold transition",
-              isDark
-                ? "bg-white text-zinc-950 hover:bg-white/90"
-                : "bg-zinc-900 text-white hover:bg-zinc-800"
-            )}
-          >
-            Upgrade
-          </button>
-        )
-      }
-
 
       const finalBlob = await res.blob();
 
@@ -743,7 +748,6 @@ export default function Home() {
                 Upload
               </button>
             </div>
-
           </div>
 
           {/* Preview / Slider */}
@@ -784,6 +788,22 @@ export default function Home() {
             >
               {errorMsg}
             </div>
+          )}
+
+          {/* ✅ Upgrade CTA (apenas quando bater limite free) */}
+          {freeLimitHit && (
+            <button
+              type="button"
+              onClick={() => (window.location.href = "/upgrade")}
+              className={clsx(
+                "mt-2 w-full rounded-xl py-3 font-semibold transition",
+                isDark
+                  ? "bg-white text-zinc-950 hover:bg-white/90"
+                  : "bg-zinc-900 text-white hover:bg-zinc-800"
+              )}
+            >
+              Upgrade
+            </button>
           )}
 
           {/* ✅ Photo tips link (fica logo abaixo da imagem) */}
