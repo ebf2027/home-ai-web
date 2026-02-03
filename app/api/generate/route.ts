@@ -7,12 +7,6 @@ export const runtime = "nodejs";
 // ✅ FREE limit (env configurable)
 const FREE_DAILY_LIMIT = Number(process.env.FREE_DAILY_LIMIT ?? "3");
 
-// ✅ optional bypass for your own user id(s), comma-separated UUIDs
-const PRO_BYPASS_USER_IDS = (process.env.PRO_BYPASS_USER_IDS ?? "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
 // ✅ pick a timezone for "daily" counting (better UX for Brazil)
 const USAGE_TZ = process.env.USAGE_TZ ?? "America/Sao_Paulo";
 function getDayISO(tz = USAGE_TZ) {
@@ -83,7 +77,6 @@ function normalizeStyle(input: string) {
 }
 
 /* ---------- Room Types ---------- */
-// Room types coming from the UI
 const ROOM_TYPE_LABEL: Record<string, string> = {
   living_room: "Living room",
   bedroom: "Bedroom",
@@ -100,10 +93,8 @@ const ROOM_TYPE_LABEL: Record<string, string> = {
 function normalizeRoomType(input: string) {
   const s = (input ?? "").trim();
 
-  // if UI sends the key, use it
   if (ROOM_TYPE_LABEL[s]) return s;
 
-  // if UI ever sends a label, try to match it
   const lower = s.toLowerCase();
   const found = Object.entries(ROOM_TYPE_LABEL).find(
     ([, label]) => label.toLowerCase() === lower
@@ -141,10 +132,37 @@ type UsageRow = {
   daily_limit?: number;
 };
 
+// ✅ NEW: check Pro status from DB
+async function getIsProUser(supabase: any, userId: string): Promise<boolean> {
+  // Try read
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("is_pro")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("profiles select error:", error);
+    return false;
+  }
+
+  if (!data) {
+    // If profile row wasn't created for some reason, attempt to create it (is_pro=false)
+    const ins = await supabase.from("profiles").insert({ id: userId, is_pro: false });
+    if (ins.error) {
+      // not fatal
+      console.warn("profiles insert fallback error:", ins.error);
+    }
+    return false;
+  }
+
+  return Boolean(data.is_pro);
+}
+
 export async function POST(req: Request) {
   try {
-    // ✅ 1) Auth + free limit gate BEFORE OpenAI (cost protection)
-    const supabase = await createSupabaseServerClient(); // ✅ IMPORTANT: await (your server.ts is async)
+    // ✅ 1) Auth + Pro check + free limit gate BEFORE OpenAI (cost protection)
+    const supabase = await createSupabaseServerClient(); // ✅ IMPORTANT: await (server.ts is async)
 
     const {
       data: { session },
@@ -158,12 +176,14 @@ export async function POST(req: Request) {
     }
 
     const userId: string = user.id;
-    const isBypass = PRO_BYPASS_USER_IDS.includes(userId);
+
+    // ✅ Pro from DB (no env bypass anymore)
+    const isPro = await getIsProUser(supabase, userId);
 
     // ✅ daily day string (timezone-aware)
     const today = getDayISO(); // "YYYY-MM-DD"
 
-    if (!isBypass) {
+    if (!isPro) {
       const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
         p_day: today,
         p_limit: FREE_DAILY_LIMIT,
@@ -265,7 +285,7 @@ ${recipe}
     out.append("size", "auto");
     out.append("output_format", "jpeg");
     out.append("quality", "medium");
-    out.set("image", image, image.name || "room.jpg");
+    out.set("image", image, (image as File).name || "room.jpg");
 
     let lastStatus = 500;
     let lastData: any = null;
