@@ -15,7 +15,7 @@ function getBaseUrl(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const stripe = getStripe(); // ✅ aqui
+    const stripe = getStripe();
 
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getSession();
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
 
     const baseUrl = getBaseUrl(req);
 
+    // Busca perfil
     const { data: profile, error } = await supabaseAdmin
       .from("profiles")
       .select("stripe_customer_id")
@@ -35,12 +36,21 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
 
-    const customerId = profile?.stripe_customer_id;
+    let customerId = profile?.stripe_customer_id ?? null;
+
+    // ✅ Se não tiver customer ainda, cria e salva (upsert)
     if (!customerId) {
-      return NextResponse.json({ ok: false, error: "No Stripe customer found yet." }, { status: 400 });
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { user_id: user.id },
+      });
+      customerId = customer.id;
+
+      await supabaseAdmin
+        .from("profiles")
+        .upsert({ id: user.id, stripe_customer_id: customerId }, { onConflict: "id" });
     }
 
-    // ✅ Nome correto no SDK: billingPortal (não billingPortal.sessions)
     const portal = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${baseUrl}/upgrade`,
