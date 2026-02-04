@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 type Theme = "light" | "dark";
 
@@ -68,7 +69,7 @@ function CheckIcon({ className = "" }) {
   );
 }
 
-function Badge({ children, isDark }: { children: React.ReactNode; isDark: boolean }) {
+function Badge({ children, isDark }: { children: ReactNode; isDark: boolean }) {
   return (
     <span
       className={clsx(
@@ -81,9 +82,42 @@ function Badge({ children, isDark }: { children: React.ReactNode; isDark: boolea
   );
 }
 
+async function postForRedirectUrl(endpoint: string) {
+  const res = await fetch(endpoint, { method: "POST" });
+
+  // tenta ler JSON { url }
+  const data = await res.json().catch(() => null);
+
+  if (res.status === 401 || res.status === 403) {
+    const msg =
+      data?.error ||
+      data?.message ||
+      "You need to be signed in to continue.";
+    throw new Error(msg);
+  }
+
+  if (!res.ok) {
+    const msg =
+      data?.error ||
+      data?.message ||
+      `Request failed (${res.status})`;
+    throw new Error(msg);
+  }
+
+  const url: string | undefined = data?.url;
+  if (!url) {
+    throw new Error("Stripe URL not returned by the API.");
+  }
+
+  return url;
+}
+
 export default function UpgradePage() {
   const [theme, setTheme] = useState<Theme>("light");
   const isDark = theme === "dark";
+
+  const [busy, setBusy] = useState<null | "checkout" | "portal">(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -92,7 +126,8 @@ export default function UpgradePage() {
         setTheme(saved);
         return;
       }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+      const prefersDark =
+        window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
       setTheme(prefersDark ? "dark" : "light");
     } catch {}
   }, []);
@@ -108,9 +143,29 @@ export default function UpgradePage() {
   const mutedText = isDark ? "text-white/70" : "text-zinc-600";
   const subtleText = isDark ? "text-white/60" : "text-zinc-500";
 
-  // 🔧 Por enquanto: CTA “Coming soon”.
-  // Depois a gente liga isso no Stripe (checkout + webhook).
-  const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  async function handleCheckout() {
+    try {
+      setError(null);
+      setBusy("checkout");
+      const url = await postForRedirectUrl("/api/stripe/checkout");
+      window.location.href = url;
+    } catch (e: any) {
+      setError(e?.message || "Could not start checkout.");
+      setBusy(null);
+    }
+  }
+
+  async function handlePortal() {
+    try {
+      setError(null);
+      setBusy("portal");
+      const url = await postForRedirectUrl("/api/stripe/portal");
+      window.location.href = url;
+    } catch (e: any) {
+      setError(e?.message || "Could not open billing portal.");
+      setBusy(null);
+    }
+  }
 
   return (
     <main className={clsx("min-h-screen", pageBg)}>
@@ -135,11 +190,17 @@ export default function UpgradePage() {
                   : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
               )}
             >
-              {isDark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+              {isDark ? (
+                <SunIcon className="h-5 w-5" />
+              ) : (
+                <MoonIcon className="h-5 w-5" />
+              )}
             </button>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight">Unlock Pro</h1>
+          <h1 className="mt-4 text-3xl font-semibold leading-tight">
+            Unlock Pro
+          </h1>
           <p className={clsx("mt-2", mutedText)}>
             Get more generations per day, faster results, and premium quality.
           </p>
@@ -171,6 +232,20 @@ export default function UpgradePage() {
           </div>
         </header>
 
+        {/* Error banner */}
+        {error && (
+          <div
+            className={clsx(
+              "mb-3 rounded-2xl p-3 text-sm ring-1",
+              isDark
+                ? "bg-red-500/10 text-red-200 ring-red-500/20"
+                : "bg-red-50 text-red-700 ring-red-200"
+            )}
+          >
+            {error}
+          </div>
+        )}
+
         {/* Cards */}
         <section className="space-y-3">
           {/* Free */}
@@ -178,7 +253,9 @@ export default function UpgradePage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">Free</div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>Great to try the product</div>
+                <div className={clsx("mt-1 text-sm", mutedText)}>
+                  Great to try the product
+                </div>
               </div>
               <div className={clsx("text-right", mutedText)}>
                 <div className="text-lg font-semibold">R$ 0</div>
@@ -186,7 +263,12 @@ export default function UpgradePage() {
               </div>
             </div>
 
-            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
+            <ul
+              className={clsx(
+                "mt-3 space-y-2 text-sm",
+                isDark ? "text-white/80" : "text-zinc-700"
+              )}
+            >
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
                 Daily generation limit (cost protection)
@@ -203,7 +285,12 @@ export default function UpgradePage() {
           </div>
 
           {/* Pro */}
-          <div className={clsx("rounded-2xl p-4 ring-1", isDark ? "bg-white/7 ring-white/15" : "bg-white ring-zinc-300")}>
+          <div
+            className={clsx(
+              "rounded-2xl p-4 ring-1",
+              isDark ? "bg-white/7 ring-white/15" : "bg-white ring-zinc-300"
+            )}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">Pro</div>
@@ -217,7 +304,12 @@ export default function UpgradePage() {
               </div>
             </div>
 
-            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
+            <ul
+              className={clsx(
+                "mt-3 space-y-2 text-sm",
+                isDark ? "text-white/80" : "text-zinc-700"
+              )}
+            >
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
                 Higher daily limit (or unlimited)
@@ -238,97 +330,58 @@ export default function UpgradePage() {
 
             <button
               type="button"
-              onClick={() => setComingSoonOpen(true)}
+              onClick={handleCheckout}
+              disabled={busy !== null}
               className={clsx(
                 "mt-4 w-full rounded-xl py-3 font-semibold transition",
+                busy !== null && "opacity-70 cursor-not-allowed",
                 isDark
                   ? "bg-white text-zinc-950 hover:bg-white/90"
                   : "bg-zinc-900 text-white hover:bg-zinc-800"
               )}
             >
-              Upgrade to Pro
+              {busy === "checkout" ? "Redirecting..." : "Upgrade to Pro"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePortal}
+              disabled={busy !== null}
+              className={clsx(
+                "mt-2 w-full rounded-xl py-3 font-semibold transition ring-1",
+                busy !== null && "opacity-70 cursor-not-allowed",
+                isDark
+                  ? "bg-transparent text-white ring-white/15 hover:bg-white/10"
+                  : "bg-white text-zinc-900 ring-zinc-200 hover:bg-zinc-50"
+              )}
+            >
+              {busy === "portal" ? "Opening..." : "Manage subscription"}
             </button>
 
             <p className={clsx("mt-2 text-xs", subtleText)}>
-              Payments will be enabled soon (Stripe). This button is already in place.
+              Secure payments by Stripe. You can manage or cancel anytime.
             </p>
           </div>
 
           {/* FAQ / Notes */}
           <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-            <div className="text-sm font-semibold">What happens after I upgrade?</div>
+            <div className="text-sm font-semibold">
+              What happens after I upgrade?
+            </div>
             <p className={clsx("mt-2 text-sm", mutedText)}>
-              Pro will remove the daily free limit and unlock higher quality settings. We’ll also add a
-              subscription management button here.
+              After payment, your Pro status is activated by the Stripe webhook
+              and your daily limit increases automatically. Use{" "}
+              <span className="font-medium">Manage subscription</span> above to
+              update payment method, cancel, or view invoices.
             </p>
 
             <div className={clsx("mt-4 text-xs", subtleText)}>
-              Tip: Next step is connecting this page to Stripe checkout + webhook to mark your account as Pro.
+              Tip: if you get “You need to be signed in”, log in first and try
+              again.
             </div>
           </div>
         </section>
       </div>
-
-      {/* Coming soon modal */}
-      {comingSoonOpen && (
-        <div className="fixed inset-0 z-[999]">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/50"
-            aria-label="Close"
-            onClick={() => setComingSoonOpen(false)}
-          />
-
-          <div className="absolute inset-x-0 top-24 mx-auto max-w-md px-4">
-            <div className={clsx("rounded-2xl p-4 ring-1 shadow-xl", cardBg)}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold">Upgrade coming soon</h3>
-                  <p className={clsx("mt-1 text-xs", mutedText)}>
-                    The UI is ready. Next we’ll connect Stripe checkout + webhook.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setComingSoonOpen(false)}
-                  className={clsx(
-                    "h-9 w-9 rounded-full border flex items-center justify-center",
-                    isDark
-                      ? "border-white/15 text-white hover:bg-white/10"
-                      : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-                  )}
-                  aria-label="Close"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className={clsx("mt-3 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
-                Next steps to enable payments:
-                <ul className="mt-2 space-y-1 text-sm">
-                  <li>• Add Stripe keys + Price ID</li>
-                  <li>• Create checkout endpoint</li>
-                  <li>• Webhook to set user as Pro in Supabase</li>
-                  <li>• Replace bypass env with “is_pro” from DB</li>
-                </ul>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setComingSoonOpen(false)}
-                className={clsx(
-                  "mt-4 w-full rounded-xl py-3 font-semibold transition",
-                  isDark
-                    ? "bg-white text-zinc-950 hover:bg-white/90"
-                    : "bg-zinc-900 text-white hover:bg-zinc-800"
-                )}
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
