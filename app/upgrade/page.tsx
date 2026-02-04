@@ -258,7 +258,7 @@ export default function UpgradePage() {
                 </div>
               </div>
               <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">R$ 0</div>
+                <div className="text-lg font-semibold">$ 0</div>
                 <div className="text-xs">forever</div>
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function UpgradePage() {
                 </div>
               </div>
               <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">R$ 29,90</div>
+                <div className="text-lg font-semibold">$9.99</div>
                 <div className="text-xs">/ month</div>
               </div>
             </div>
