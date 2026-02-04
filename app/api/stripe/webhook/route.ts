@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 import { supabaseAdmin } from "@/app/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -9,6 +9,8 @@ function isActiveSub(status: string | null | undefined) {
 }
 
 export async function POST(req: Request) {
+  const stripe = getStripe(); // ✅ aqui
+
   const sig = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -16,14 +18,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Missing webhook signature/secret" }, { status: 400 });
   }
 
-  // App Router: use req.text() para obter o corpo raw do webhook. :contentReference[oaicite:4]{index=4}
+  // App Router: use req.text() para obter o corpo raw do webhook.
   const body = await req.text();
 
   let event: any;
   try {
     event = stripe.webhooks.constructEvent(body, sig, secret);
   } catch (err: any) {
-    return NextResponse.json({ ok: false, error: `Webhook signature verification failed: ${err.message}` }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: `Webhook signature verification failed: ${err.message}` },
+      { status: 400 }
+    );
   }
 
   try {
@@ -31,10 +36,7 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object as any;
 
-        const userId =
-          session?.metadata?.user_id ||
-          session?.client_reference_id ||
-          null;
+        const userId = session?.metadata?.user_id || session?.client_reference_id || null;
 
         const customerId = typeof session.customer === "string" ? session.customer : null;
         const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
@@ -72,9 +74,8 @@ export async function POST(req: Request) {
         // Prefer metadata do subscription
         const userId = sub?.metadata?.user_id || null;
 
-        const shouldBePro = event.type === "customer.subscription.deleted"
-          ? false
-          : isActiveSub(status);
+        const shouldBePro =
+          event.type === "customer.subscription.deleted" ? false : isActiveSub(status);
 
         if (userId) {
           await supabaseAdmin

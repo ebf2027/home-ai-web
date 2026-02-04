@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 import { supabaseAdmin } from "@/app/lib/supabase/admin";
 import { createClient as createSupabaseServerClient } from "@/app/lib/supabase/server";
 
@@ -15,6 +15,8 @@ function getBaseUrl(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripe(); // ✅ aqui
+
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
@@ -38,6 +40,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "No Stripe customer found yet." }, { status: 400 });
     }
 
+    // ✅ Nome correto no SDK: billingPortal (não billingPortal.sessions)
     const portal = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${baseUrl}/upgrade`,

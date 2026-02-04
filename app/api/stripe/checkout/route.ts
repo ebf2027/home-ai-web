@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 import { supabaseAdmin } from "@/app/lib/supabase/admin";
 import { createClient as createSupabaseServerClient } from "@/app/lib/supabase/server";
 
@@ -16,6 +16,8 @@ function getBaseUrl(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripe(); // ✅ aqui é o lugar certo
+
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
