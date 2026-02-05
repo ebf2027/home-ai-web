@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 type Theme = "light" | "dark";
+type Plan = "pro" | "pro_plus";
+type Busy = null | "checkout_pro" | "checkout_pro_plus" | "portal";
 
 function clsx(...arr: Array<string | false | null | undefined>) {
   return arr.filter(Boolean).join(" ");
@@ -82,32 +84,27 @@ function Badge({ children, isDark }: { children: ReactNode; isDark: boolean }) {
   );
 }
 
-async function postForRedirectUrl(endpoint: string) {
-  const res = await fetch(endpoint, { method: "POST" });
+async function postForRedirectUrl(endpoint: string, body?: any) {
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  // tenta ler JSON { url }
   const data = await res.json().catch(() => null);
 
   if (res.status === 401 || res.status === 403) {
-    const msg =
-      data?.error ||
-      data?.message ||
-      "You need to be signed in to continue.";
+    const msg = data?.error || data?.message || "You need to be signed in to continue.";
     throw new Error(msg);
   }
 
   if (!res.ok) {
-    const msg =
-      data?.error ||
-      data?.message ||
-      `Request failed (${res.status})`;
+    const msg = data?.error || data?.message || `Request failed (${res.status})`;
     throw new Error(msg);
   }
 
   const url: string | undefined = data?.url;
-  if (!url) {
-    throw new Error("Stripe URL not returned by the API.");
-  }
+  if (!url) throw new Error("Stripe URL not returned by the API.");
 
   return url;
 }
@@ -116,7 +113,7 @@ export default function UpgradePage() {
   const [theme, setTheme] = useState<Theme>("light");
   const isDark = theme === "dark";
 
-  const [busy, setBusy] = useState<null | "checkout" | "portal">(null);
+  const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -126,8 +123,7 @@ export default function UpgradePage() {
         setTheme(saved);
         return;
       }
-      const prefersDark =
-        window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
       setTheme(prefersDark ? "dark" : "light");
     } catch {}
   }, []);
@@ -143,11 +139,13 @@ export default function UpgradePage() {
   const mutedText = isDark ? "text-white/70" : "text-zinc-600";
   const subtleText = isDark ? "text-white/60" : "text-zinc-500";
 
-  async function handleCheckout() {
+  const isBusy = busy !== null;
+
+  async function handleCheckout(plan: Plan) {
     try {
       setError(null);
-      setBusy("checkout");
-      const url = await postForRedirectUrl("/api/stripe/checkout");
+      setBusy(plan === "pro" ? "checkout_pro" : "checkout_pro_plus");
+      const url = await postForRedirectUrl("/api/stripe/checkout", { plan });
       window.location.href = url;
     } catch (e: any) {
       setError(e?.message || "Could not start checkout.");
@@ -189,20 +187,15 @@ export default function UpgradePage() {
                   ? "border-white/15 text-white hover:bg-white/10"
                   : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
               )}
+              disabled={isBusy}
             >
-              {isDark ? (
-                <SunIcon className="h-5 w-5" />
-              ) : (
-                <MoonIcon className="h-5 w-5" />
-              )}
+              {isDark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
             </button>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight">
-            Unlock Pro
-          </h1>
+          <h1 className="mt-4 text-3xl font-semibold leading-tight">Choose your plan</h1>
           <p className={clsx("mt-2", mutedText)}>
-            Get more generations per day, faster results, and premium quality.
+            Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
           </p>
 
           <div className="mt-4 flex items-center gap-3">
@@ -210,9 +203,7 @@ export default function UpgradePage() {
               href="/"
               className={clsx(
                 "rounded-full border px-4 py-2 text-sm font-medium transition",
-                isDark
-                  ? "border-white/15 hover:bg-white/10"
-                  : "border-zinc-200 hover:bg-zinc-100"
+                isDark ? "border-white/15 hover:bg-white/10" : "border-zinc-200 hover:bg-zinc-100"
               )}
             >
               ← Back to Home
@@ -222,9 +213,7 @@ export default function UpgradePage() {
               href="/gallery"
               className={clsx(
                 "rounded-full border px-4 py-2 text-sm font-medium transition",
-                isDark
-                  ? "border-white/15 hover:bg-white/10"
-                  : "border-zinc-200 hover:bg-zinc-100"
+                isDark ? "border-white/15 hover:bg-white/10" : "border-zinc-200 hover:bg-zinc-100"
               )}
             >
               View Gallery
@@ -237,9 +226,7 @@ export default function UpgradePage() {
           <div
             className={clsx(
               "mb-3 rounded-2xl p-3 text-sm ring-1",
-              isDark
-                ? "bg-red-500/10 text-red-200 ring-red-500/20"
-                : "bg-red-50 text-red-700 ring-red-200"
+              isDark ? "bg-red-500/10 text-red-200 ring-red-500/20" : "bg-red-50 text-red-700 ring-red-200"
             )}
           >
             {error}
@@ -253,25 +240,26 @@ export default function UpgradePage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">Free</div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>
-                  Great to try the product
-                </div>
+                <div className={clsx("mt-1 text-sm", mutedText)}>Perfect to try it out</div>
               </div>
               <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">$ 0</div>
+                <div className="text-lg font-semibold">$0</div>
                 <div className="text-xs">forever</div>
               </div>
             </div>
 
-            <ul
-              className={clsx(
-                "mt-3 space-y-2 text-sm",
-                isDark ? "text-white/80" : "text-zinc-700"
-              )}
-            >
+            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Daily generation limit (cost protection)
+                3 total credits included
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                +1 credit when you complete your profile
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                +1 credit for each friend you refer (when they qualify)
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
@@ -282,21 +270,18 @@ export default function UpgradePage() {
                 Download designs
               </li>
             </ul>
+
+            <p className={clsx("mt-2 text-xs", subtleText)}>
+              Free credits are limited and do not renew. 1 credit = 1 render.
+            </p>
           </div>
 
           {/* Pro */}
-          <div
-            className={clsx(
-              "rounded-2xl p-4 ring-1",
-              isDark ? "bg-white/7 ring-white/15" : "bg-white ring-zinc-300"
-            )}
-          >
+          <div className={clsx("rounded-2xl p-4 ring-1", isDark ? "bg-white/7 ring-white/15" : "bg-white ring-zinc-300")}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-base font-semibold">Pro</div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>
-                  Best for creators, real estate, and daily use
-                </div>
+                <div className={clsx("mt-1 text-sm", mutedText)}>Best for creators, real estate, and daily use</div>
               </div>
               <div className={clsx("text-right", mutedText)}>
                 <div className="text-lg font-semibold">$9.99</div>
@@ -304,15 +289,10 @@ export default function UpgradePage() {
               </div>
             </div>
 
-            <ul
-              className={clsx(
-                "mt-3 space-y-2 text-sm",
-                isDark ? "text-white/80" : "text-zinc-700"
-              )}
-            >
+            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Higher daily limit (or unlimited)
+                100 credits per month
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
@@ -330,26 +310,105 @@ export default function UpgradePage() {
 
             <button
               type="button"
-              onClick={handleCheckout}
-              disabled={busy !== null}
+              onClick={() => handleCheckout("pro")}
+              disabled={isBusy}
               className={clsx(
                 "mt-4 w-full rounded-xl py-3 font-semibold transition",
-                busy !== null && "opacity-70 cursor-not-allowed",
-                isDark
-                  ? "bg-white text-zinc-950 hover:bg-white/90"
-                  : "bg-zinc-900 text-white hover:bg-zinc-800"
+                isBusy && "opacity-70 cursor-not-allowed",
+                isDark ? "bg-white text-zinc-950 hover:bg-white/90" : "bg-zinc-900 text-white hover:bg-zinc-800"
               )}
             >
-              {busy === "checkout" ? "Redirecting..." : "Upgrade to Pro"}
+              {busy === "checkout_pro" ? "Redirecting..." : "Upgrade to Pro"}
             </button>
+
+            <p className={clsx("mt-2 text-xs", subtleText)}>
+              Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
+            </p>
+          </div>
+
+          {/* Pro+ */}
+          <div
+            className={clsx(
+              "rounded-2xl p-4 ring-1",
+              isDark ? "bg-white/9 ring-white/20" : "bg-white ring-zinc-300"
+            )}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="text-base font-semibold">Pro+</div>
+                  <span
+                    className={clsx(
+                      "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                      isDark ? "bg-amber-400/15 text-amber-200" : "bg-amber-100 text-amber-800"
+                    )}
+                  >
+                    Best value
+                  </span>
+                </div>
+                <div className={clsx("mt-1 text-sm", mutedText)}>
+                  Built for heavy usage, teams, and high-volume clients
+                </div>
+              </div>
+              <div className={clsx("text-right", mutedText)}>
+                <div className="text-lg font-semibold">$19.99</div>
+                <div className="text-xs">/ month</div>
+              </div>
+            </div>
+
+            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                300 credits per month
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                Priority generation (faster)
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                Higher quality output (future toggle)
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckIcon className="mt-0.5 h-4 w-4" />
+                Premium styles (future)
+              </li>
+            </ul>
+
+            <button
+              type="button"
+              onClick={() => handleCheckout("pro_plus")}
+              disabled={isBusy}
+              className={clsx(
+                "mt-4 w-full rounded-xl py-3 font-semibold transition",
+                isBusy && "opacity-70 cursor-not-allowed",
+                isDark
+                  ? "bg-amber-200 text-zinc-950 hover:bg-amber-200/90"
+                  : "bg-amber-500 text-white hover:bg-amber-600"
+              )}
+            >
+              {busy === "checkout_pro_plus" ? "Redirecting..." : "Upgrade to Pro+"}
+            </button>
+
+            <p className={clsx("mt-2 text-xs", subtleText)}>
+              Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
+            </p>
+          </div>
+
+          {/* Manage subscription */}
+          <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
+            <div className="text-sm font-semibold">Already subscribed?</div>
+            <p className={clsx("mt-1 text-sm", mutedText)}>
+              Manage your subscription, update your payment method, cancel, or view invoices.
+            </p>
 
             <button
               type="button"
               onClick={handlePortal}
-              disabled={busy !== null}
+              disabled={isBusy}
               className={clsx(
-                "mt-2 w-full rounded-xl py-3 font-semibold transition ring-1",
-                busy !== null && "opacity-70 cursor-not-allowed",
+                "mt-3 w-full rounded-xl py-3 font-semibold transition ring-1",
+                isBusy && "opacity-70 cursor-not-allowed",
                 isDark
                   ? "bg-transparent text-white ring-white/15 hover:bg-white/10"
                   : "bg-white text-zinc-900 ring-zinc-200 hover:bg-zinc-50"
@@ -365,19 +424,14 @@ export default function UpgradePage() {
 
           {/* FAQ / Notes */}
           <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-            <div className="text-sm font-semibold">
-              What happens after I upgrade?
-            </div>
+            <div className="text-sm font-semibold">What happens after I upgrade?</div>
             <p className={clsx("mt-2 text-sm", mutedText)}>
-              After payment, your Pro status is activated by the Stripe webhook
-              and your daily limit increases automatically. Use{" "}
-              <span className="font-medium">Manage subscription</span> above to
-              update payment method, cancel, or view invoices.
+              After payment, your plan is activated by the Stripe webhook and your monthly credits become available
+              automatically. Credits reset each billing cycle and do not roll over.
             </p>
 
             <div className={clsx("mt-4 text-xs", subtleText)}>
-              Tip: if you get “You need to be signed in”, log in first and try
-              again.
+              Tip: if you get “You need to be signed in”, log in first and try again.
             </div>
           </div>
         </section>

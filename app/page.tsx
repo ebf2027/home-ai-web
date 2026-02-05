@@ -141,7 +141,8 @@ function openImageInNewTab(urlOrData: string) {
 
     const byteChars = atob(b64);
     const byteNumbers = new Array(byteChars.length);
-    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    for (let i = 0; i < byteChars.length; i++)
+      byteNumbers[i] = byteChars.charCodeAt(i);
 
     const blob = new Blob([new Uint8Array(byteNumbers)], { type: mime });
     const url = URL.createObjectURL(blob);
@@ -166,7 +167,8 @@ async function prepareImageForUpload(
   try {
     await new Promise<void>((resolve, reject) => {
       img.onload = () => resolve();
-      img.onerror = () => reject(new Error("Failed to load image for resizing"));
+      img.onerror = () =>
+        reject(new Error("Failed to load image for resizing"));
       img.src = objectUrl;
     });
 
@@ -194,7 +196,9 @@ async function prepareImageForUpload(
       );
     });
 
-    const newName = file.name.replace(/\.[^.]+$/, "") + `-opt-${targetW}x${targetH}.jpg`;
+    const newName =
+      file.name.replace(/\.[^.]+$/, "") +
+      `-opt-${targetW}x${targetH}.jpg`;
     return new File([blob], newName, { type: "image/jpeg" });
   } finally {
     URL.revokeObjectURL(objectUrl);
@@ -252,9 +256,17 @@ function BeforeAfterSlider({
         draggable={false}
       />
 
-      <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
+      <div
+        className="absolute inset-0"
+        style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={afterSrc} alt="After" className="h-full w-full object-cover" draggable={false} />
+        <img
+          src={afterSrc}
+          alt="After"
+          className="h-full w-full object-cover"
+          draggable={false}
+        />
       </div>
 
       <div className="absolute left-3 top-3 z-10 rounded-full bg-black/55 px-3 py-1 text-xs text-white">
@@ -264,7 +276,10 @@ function BeforeAfterSlider({
         After
       </div>
 
-      <div className="absolute top-0 z-20 h-full" style={{ left: `calc(${pos}% - 1px)` }}>
+      <div
+        className="absolute top-0 z-20 h-full"
+        style={{ left: `calc(${pos}% - 1px)` }}
+      >
         <div className="h-full w-[2px] bg-white/90 shadow" />
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
           <div className="flex items-center gap-1 text-zinc-900">
@@ -283,14 +298,46 @@ function BeforeAfterSlider({
 
 /* ---------- Styles ---------- */
 const STYLES = [
-  { id: "Modern", title: "Modern", desc: "Clean lines, bold contrasts, contemporary feel." },
-  { id: "Minimalist", title: "Minimalist", desc: "Less clutter, calm palette, functional layout." },
-  { id: "Scandinavian", title: "Scandinavian", desc: "Light woods, cozy textures, bright and airy." },
-  { id: "Japanese", title: "Japanese", desc: "Minimal harmony, natural wood, zen atmosphere." },
-  { id: "Rustic", title: "Rustic", desc: "Natural materials, warm tones, handcrafted vibe." },
-  { id: "Industrial", title: "Industrial", desc: "Metal, concrete, exposed elements, urban look." },
-  { id: "Boho", title: "Boho", desc: "Layered textiles, plants, artistic and eclectic." },
-  { id: "Super Luxury", title: "Super Luxury", desc: "Premium materials, refined lighting, high-end design." },
+  {
+    id: "Modern",
+    title: "Modern",
+    desc: "Clean lines, bold contrasts, contemporary feel.",
+  },
+  {
+    id: "Minimalist",
+    title: "Minimalist",
+    desc: "Less clutter, calm palette, functional layout.",
+  },
+  {
+    id: "Scandinavian",
+    title: "Scandinavian",
+    desc: "Light woods, cozy textures, bright and airy.",
+  },
+  {
+    id: "Japanese",
+    title: "Japanese",
+    desc: "Minimal harmony, natural wood, zen atmosphere.",
+  },
+  {
+    id: "Rustic",
+    title: "Rustic",
+    desc: "Natural materials, warm tones, handcrafted vibe.",
+  },
+  {
+    id: "Industrial",
+    title: "Industrial",
+    desc: "Metal, concrete, exposed elements, urban look.",
+  },
+  {
+    id: "Boho",
+    title: "Boho",
+    desc: "Layered textiles, plants, artistic and eclectic.",
+  },
+  {
+    id: "Super Luxury",
+    title: "Super Luxury",
+    desc: "Premium materials, refined lighting, high-end design.",
+  },
 ] as const;
 
 type StyleId = (typeof STYLES)[number]["id"];
@@ -304,7 +351,9 @@ async function readApiError(
     if (ct.includes("application/json")) {
       const j = await res.json();
       return {
-        message: j?.error ? String(j.error) : `Request failed (status ${res.status}).`,
+        message: j?.error
+          ? String(j.error)
+          : `Request failed (status ${res.status}).`,
         code: j?.code ? String(j.code) : undefined,
         used: typeof j?.used === "number" ? j.used : undefined,
         limit: typeof j?.limit === "number" ? j.limit : undefined,
@@ -320,7 +369,10 @@ async function readApiError(
   return { message: `Request failed (status ${res.status}).` };
 }
 
-async function blobToJpegThumb(blob: Blob, opts?: { maxDim?: number; quality?: number }) {
+async function blobToJpegThumb(
+  blob: Blob,
+  opts?: { maxDim?: number; quality?: number }
+) {
   const maxDim = opts?.maxDim ?? 420;
   const quality = opts?.quality ?? 0.8;
 
@@ -381,8 +433,8 @@ export default function Home() {
   // ✅ erro amigável (mostra na tela)
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // ✅ NEW: flag para mostrar CTA de upgrade ao atingir limite free
-  const [freeLimitHit, setFreeLimitHit] = useState(false);
+  // ✅ NEW: show CTA when credits are exhausted / upgrade needed
+  const [upgradeCta, setUpgradeCta] = useState(false);
 
   // 🔒 manter a última imagem ao trocar de aba (Home ↔ Gallery)
   useEffect(() => {
@@ -422,7 +474,8 @@ export default function Home() {
         setTheme(saved);
         return;
       }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+      const prefersDark =
+        window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
       setTheme(prefersDark ? "dark" : "light");
     } catch {}
   }, []);
@@ -449,12 +502,14 @@ export default function Home() {
   const cardBg = isDark ? "bg-white/5 ring-white/10" : "bg-white ring-zinc-200";
   const mutedText = isDark ? "text-white/70" : "text-zinc-600";
   const subtleText = isDark ? "text-white/60" : "text-zinc-500";
-  const previewBoxBg = isDark ? "bg-black/40 ring-white/10" : "bg-zinc-100 ring-zinc-200";
+  const previewBoxBg = isDark
+    ? "bg-black/40 ring-white/10"
+    : "bg-zinc-100 ring-zinc-200";
 
   function clearResult() {
     setMenuOpen(false);
     setErrorMsg(null);
-    setFreeLimitHit(false);
+    setUpgradeCta(false);
     setResultUrl((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
@@ -482,7 +537,9 @@ export default function Home() {
   function downloadResult() {
     if (!resultUrl) return;
 
-    const filename = `homeai-${selectedStyle.toLowerCase().replace(/\s+/g, "-")}.jpg`;
+    const filename = `homeai-${selectedStyle
+      .toLowerCase()
+      .replace(/\s+/g, "-")}.jpg`;
 
     (async () => {
       try {
@@ -526,11 +583,19 @@ export default function Home() {
 
         // @ts-ignore
         if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ files: [file], title: "Home AI", text: "My redesign" });
+          await navigator.share({
+            files: [file],
+            title: "Home AI",
+            text: "My redesign",
+          });
           return;
         }
 
-        await navigator.share({ title: "Home AI", text: "My redesign", url: resultUrl });
+        await navigator.share({
+          title: "Home AI",
+          text: "My redesign",
+          url: resultUrl,
+        });
         return;
       }
     } catch {}
@@ -544,13 +609,16 @@ export default function Home() {
 
     setMenuOpen(false);
     setErrorMsg(null);
-    setFreeLimitHit(false);
+    setUpgradeCta(false);
 
     try {
       setIsGenerating(true);
       clearResult();
 
-      const optimized = await prepareImageForUpload(file, { maxDim: 1024, quality: 0.85 });
+      const optimized = await prepareImageForUpload(file, {
+        maxDim: 1024,
+        quality: 0.85,
+      });
 
       const roomTypeToSend = roomType || "other"; // ✅ sempre manda algo
 
@@ -563,18 +631,26 @@ export default function Home() {
 
       if (!res.ok) {
         const err = await readApiError(res);
+        const lower = (err.message || "").toLowerCase();
 
-        const isLimit =
-          err.code === "FREE_LIMIT" || err.message.toLowerCase().includes("daily free limit");
+        // ✅ Now we gate by credits (and still handle old messages gracefully)
+        const needsUpgrade =
+          res.status === 429 ||
+          err.code === "NO_CREDITS" ||
+          err.code === "FREE_LIMIT" ||
+          lower.includes("no credits") ||
+          lower.includes("out of credits") ||
+          lower.includes("daily free limit") ||
+          lower.includes("upgrade");
 
-        setFreeLimitHit(isLimit);
+        setUpgradeCta(needsUpgrade);
 
         let msg = err.message || "Generation failed. Please try again.";
-        if (isLimit) {
-          const used = typeof err.used === "number" ? err.used : undefined;
-          const limit = typeof err.limit === "number" ? err.limit : undefined;
-          if (used != null && limit != null) msg = `${msg} (${used}/${limit})`;
-          msg = msg + " Tap Upgrade to unlock more generations.";
+
+        if (needsUpgrade) {
+          if (!lower.includes("upgrade")) {
+            msg = msg + " Upgrade to get more credits.";
+          }
         }
 
         setErrorMsg(msg);
@@ -593,14 +669,21 @@ export default function Home() {
       const userId = userData.user.id;
       const imageId = crypto.randomUUID();
 
-      const thumbBlob = await blobToJpegThumb(finalBlob, { maxDim: 420, quality: 0.8 });
+      const thumbBlob = await blobToJpegThumb(finalBlob, {
+        maxDim: 420,
+        quality: 0.8,
+      });
 
       const bucket = "homeai";
       const imagePath = `${userId}/${imageId}.jpg`;
       const thumbPath = `${userId}/${imageId}-thumb.jpg`;
 
-      const imageFile = new File([finalBlob], `${imageId}.jpg`, { type: "image/jpeg" });
-      const thumbFile = new File([thumbBlob], `${imageId}-thumb.jpg`, { type: "image/jpeg" });
+      const imageFile = new File([finalBlob], `${imageId}.jpg`, {
+        type: "image/jpeg",
+      });
+      const thumbFile = new File([thumbBlob], `${imageId}-thumb.jpg`, {
+        type: "image/jpeg",
+      });
 
       const up1 = await supabase.storage.from(bucket).upload(imagePath, imageFile, {
         contentType: "image/jpeg",
@@ -686,7 +769,9 @@ export default function Home() {
             </button>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight">Redesign your space with AI</h1>
+          <h1 className="mt-4 text-3xl font-semibold leading-tight">
+            Redesign your space with AI
+          </h1>
           <p className={clsx("mt-2", mutedText)}>
             Upload a room photo and generate design variations in different styles.
           </p>
@@ -790,8 +875,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* ✅ Upgrade CTA (apenas quando bater limite free) */}
-          {freeLimitHit && (
+          {/* ✅ Upgrade CTA (when credits are exhausted / upgrade needed) */}
+          {upgradeCta && (
             <button
               type="button"
               onClick={() => (window.location.href = "/upgrade")}

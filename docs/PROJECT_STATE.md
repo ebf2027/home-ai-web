@@ -7,7 +7,7 @@ Tipo: Web App (MVP)
 
 Objetivo: Usuário envia uma foto de um cômodo e gera variações realistas de design de interiores com IA.
 
-Status atual: MVP funcional em produção com login + gallery persistente no Supabase + room type + limite diário Free (cost protection).
+Status atual: MVP funcional em produção com login + gallery persistente (Supabase) + room type + limite diário Free (cost protection) + páginas legais (support/privacy/terms) + integração Stripe (Checkout + Billing Portal + Webhook) pronta.
 
 2) Produção / Links
 
@@ -29,15 +29,15 @@ Auth/DB/Storage: Supabase
 
 Auth: Email+Senha e Google OAuth
 
-DB: tabela gallery_items
+DB: gallery_items (+ usage_daily) (+ profiles com flags de PRO)
 
 Storage: bucket homeai
 
-Nova feature: controle de uso diário (tabela usage_daily + RPC)
-
 IA de imagem: OpenAI Images Edits via API Route
 
-Deploy: Vercel
+Payments: Stripe (Subscriptions)
+
+Deploy: Vercel (deploy automático via GitHub)
 
 4) Variáveis de ambiente
 Local (.env.local)
@@ -54,46 +54,63 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
 Supabase (server-side — recomendado também setar localmente):
 
-SUPABASE_URL=https://xxxx.supabase.co (opcional, mas priorizado em app/lib/supabase/server.ts)
+SUPABASE_URL=https://xxxx.supabase.co (opcional, priorizado em app/lib/supabase/server.ts)
 
-SUPABASE_ANON_KEY=... (opcional, mas priorizado em app/lib/supabase/server.ts)
+SUPABASE_ANON_KEY=... (opcional, priorizado em app/lib/supabase/server.ts)
 
-Limites Free / Monetização (novas):
+SUPABASE_SERVICE_ROLE_KEY=... (necessário para supabaseAdmin no server, se você usar localmente)
+
+Limites Free / Monetização:
 
 FREE_DAILY_LIMIT=3 (default = 3 se não existir)
 
-PRO_BYPASS_USER_IDS= (opcional, lista de UUIDs separados por vírgula para “bypass” do limite)
+PRO_BYPASS_USER_IDS= (opcional, lista de UUIDs separados por vírgula para bypass do limite)
 
-USAGE_TZ=America/Sao_Paulo (opcional; default = America/Sao_Paulo para contar “dia” no fuso correto)
+USAGE_TZ=America/Sao_Paulo (opcional; default America/Sao_Paulo)
+
+Stripe (novas):
+
+STRIPE_SECRET_KEY=sk_live_... (ou sk_test_... se estiver testando)
+
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+STRIPE_PRICE_ID_PRO=price_...
+
+APP_URL=https://home-ai-web-2.vercel.app (recomendado para URLs de retorno consistentes)
 
 Vercel (Production Environment Variables)
 
 Mesmas variáveis acima configuradas no projeto home-ai-web-2.
 
-Importante: NEXT_PUBLIC_SUPABASE_URL precisa ser uma URL válida HTTP/HTTPS (ex.: https://...supabase.co).
+Importante: após mudar env vars, faça Redeploy (e se necessário desmarque “Use existing Build Cache”).
 
 5) Rotas / Páginas principais (App Router)
 
 / → Home (upload + seleção de estilo + room type + gerar + salvar)
-
 /gallery → Gallery (lista do usuário via Supabase)
-
 /login → Login (Google + Email/Senha)
-
 /profile → Profile
+/upgrade → Upgrade (botão de assinar e botão de gerenciar assinatura via Stripe)
+/support → Página de contato (email de suporte)
+/privacy → Página de política de privacidade
+/terms → Página de termos de serviço
+/auth/callback → Callback do OAuth
 
-/upgrade → Upgrade (placeholder/fluxo futuro)
+APIs:
 
-/auth/callback → Callback do OAuth (troca code → session e redireciona para next)
+/api/generate → Geração com OpenAI + gate de limite diário Free
 
-/api/generate → Geração com OpenAI (edits) + gate de limite diário Free
+/api/stripe/checkout → Cria Checkout Session (subscription)
 
-/api/storage/cleanup → (existe no projeto) endpoint de manutenção/limpeza (se aplicável)
+/api/stripe/portal → Cria sessão do Billing Portal (manage subscription)
+
+/api/stripe/webhook → Webhook Stripe para ativar/desativar PRO no Supabase
+
+/api/storage/cleanup → (se existir no projeto) endpoint de manutenção/limpeza
 
 6) Fluxo de autenticação (Supabase)
 
 O usuário acessa /login?next=/...
-
 Pode autenticar via:
 
 Google OAuth (signInWithOAuth)
@@ -121,13 +138,13 @@ app/lib/supabase/server.ts (async; precisa await createClient())
 7) Fluxo de geração e salvamento (Home → OpenAI → Supabase)
 Home (app/page.tsx)
 
-Usuário escolhe imagem (Choose image).
+Usuário escolhe imagem (Choose image)
 
-Usuário escolhe Style.
+Usuário escolhe Style
 
-Usuário escolhe Room type (dropdown em inglês).
+Usuário escolhe Room type (dropdown em inglês)
 
-Clica Generate Design.
+Clica Generate Design
 
 App:
 
@@ -135,9 +152,7 @@ Otimiza a imagem para upload (prepareImageForUpload)
 
 Faz POST /api/generate (FormData: style, roomType, image)
 
-Recebe imagem final (blob jpeg)
-
-Gera thumbnail (jpeg)
+Recebe imagem final (blob jpeg) e gera thumbnail
 
 Faz upload para Supabase Storage:
 
@@ -145,7 +160,7 @@ homeai/{userId}/{imageId}.jpg
 
 homeai/{userId}/{imageId}-thumb.jpg
 
-Cria registro no Supabase DB em gallery_items com:
+Cria registro no DB gallery_items com:
 
 id, user_id, room_type, style, prompt, image_url, thumb_url, is_favorite
 
@@ -153,29 +168,27 @@ API de geração (app/api/generate/route.ts)
 
 Ordem importante (cost protection):
 
-Auth + checagem de limite diário (antes de chamar OpenAI)
+Auth + checagem de limite diário Free (antes de chamar OpenAI)
 
-Se permitido, continua com geração (OpenAI edits)
+Se permitido, chama OpenAI edits e retorna image/jpeg
 
 Detalhes:
 
 Recebe FormData: image, style, roomType
 
-Normaliza style + roomType e monta prompt forte:
+Normaliza style + roomType e monta prompt forte (preservar layout, portas/janelas etc.)
 
-preservar layout, portas/janelas, câmera etc.
+OpenAI: POST /v1/images/edits
 
-Chama OpenAI: POST https://api.openai.com/v1/images/edits
-
-Retorna image/jpeg no response
+Retorna image/jpeg
 
 Config OpenAI:
 
-Model atual: gpt-image-1-mini
+model: gpt-image-1-mini
 
 size: "auto", quality: "medium", output_format: "jpeg"
 
-Retry para status temporários (429/5xx) e timeout
+Retry em 429/5xx e timeout
 
 8) Gallery (persistente)
 
@@ -197,90 +210,149 @@ Download
 
 Delete
 
-As imagens antigas (antes do Room Type) não precisam ser alteradas. Daqui pra frente todas as novas já salvam room_type.
+Imagens antigas (antes do Room Type) continuam OK; daqui pra frente as novas já salvam room_type.
 
 9) UI adicionada (recente)
-Room Type (Home)
 
-Dropdown entre estilos e botão de geração.
+Room Type (Home): dropdown entre estilos e botão de gerar, opções em inglês.
 
-Opções em inglês (ex.: Living room, Bedroom, Kitchen, …).
+Photo tips (Home): modal com dicas (corrigida para não ficar atrás do bottom tabs).
 
-roomType vai para o prompt e é salvo no DB como label.
+Take photo + Upload (Home): dois botões; no mobile abre câmera via capture="environment".
 
-“Photo tips” (Home)
+10) Limite diário do Free (cost protection)
 
-Ajuda para o usuário tirar uma foto melhor.
+Objetivo:
 
-Abre uma modal com lista de dicas (em inglês).
+Bloquear chamadas OpenAI quando o usuário Free atingir o limite diário.
 
-Ajustada para não ficar escondida atrás do bottom tabs (modal scrollável / padding bottom / z-index).
+Config:
 
-Take photo + Upload (Home): implementado com dois botões; no mobile abre câmera diretamente via capture="environment".
+FREE_DAILY_LIMIT (default 3)
 
-10) Limite diário do Free (implementado hoje)
-Objetivo
+PRO_BYPASS_USER_IDS (opcional)
 
-Proteger custos: bloquear chamadas OpenAI quando o usuário Free atingir o limite diário.
+USAGE_TZ (default America/Sao_Paulo)
 
-Limite configurável por env: FREE_DAILY_LIMIT (default 3).
+Supabase:
 
-Bypass opcional por env: PRO_BYPASS_USER_IDS (UUIDs separados por vírgula).
+Tabela public.usage_daily (PK: user_id, day, coluna count int)
 
-Dia contado no fuso USAGE_TZ (default America/Sao_Paulo).
+RLS + policies para usuário ler/inserir/atualizar o próprio registro
 
-Banco (Supabase)
+RPC: public.check_and_bump_usage_daily(p_day date, p_limit int) retorna allowed, count, daily_limit
 
-Criado:
+Backend (/api/generate):
 
-Tabela: public.usage_daily
+await createSupabaseServerClient()
 
-PK: (user_id, day)
+supabase.auth.getSession()
 
-Coluna count (int)
+se não bypass: supabase.rpc("check_and_bump_usage_daily", { p_day, p_limit })
 
-RLS habilitado + policies para o usuário ler/inserir/atualizar o próprio registro.
+se bloqueado: 429 Daily free limit reached...
 
-RPC criada e corrigida:
+11) Stripe (assinatura Pro) — Implementado
+Produto / Preço (Stripe)
 
-Função: public.check_and_bump_usage_daily(p_day date, p_limit int)
+Produto: Home Ai Pro
 
-Retorno: allowed boolean, count int, daily_limit int
+Recorrência: mensal
 
-Comportamento:
+Preço: US$ 9,99 (definido no Stripe)
 
-garante linha do dia (insert on conflict)
+O app usa o STRIPE_PRICE_ID_PRO para criar a assinatura.
 
-faz lock (for update)
+Fluxo no app
 
-se count < limit: incrementa e retorna allowed=true
+Página /upgrade:
 
-se atingiu: retorna allowed=false
+Upgrade to Pro → chama /api/stripe/checkout e redireciona para Stripe Checkout
 
-Backend (route.ts)
+Manage subscription → chama /api/stripe/portal e abre Stripe Billing Portal
 
-Em POST /api/generate:
+Observação: se o usuário ainda não tem stripe_customer_id, o portal pode retornar “No Stripe customer found yet.” (esperado antes da primeira compra)
 
-cria Supabase server client via await createSupabaseServerClient() (server.ts é async)
+Rotas Stripe (App Router)
 
-pega sessão: supabase.auth.getSession()
+app/api/stripe/checkout/route.ts
 
-se não logado: 401
+Cria/pega customer
 
-se não bypass: chama supabase.rpc("check_and_bump_usage_daily", { p_day, p_limit })
+Cria Checkout Session mode: "subscription"
 
-se não allowed: 429 com mensagem “Daily free limit reached…”
+Passa metadata.user_id e client_reference_id para reconciliar
 
-se allowed: segue para OpenAI normalmente
+Usa success_url/cancel_url com base em APP_URL ou host atual
 
-11) Deploy / Workflow
+app/api/stripe/portal/route.ts
+
+Cria Billing Portal Session para o customer existente
+
+return_url: ${baseUrl}/upgrade
+
+app/api/stripe/webhook/route.ts
+
+Valida assinatura via STRIPE_WEBHOOK_SECRET
+
+Eventos tratados:
+
+checkout.session.completed
+
+customer.subscription.updated
+
+customer.subscription.deleted
+
+Atualiza profiles:
+
+is_pro: true/false
+
+stripe_customer_id
+
+stripe_subscription_id
+
+Lib Stripe
+
+app/lib/stripe.ts
+
+Exporta getStripe() (singleton) usando STRIPE_SECRET_KEY
+
+Evita importar stripe como export inexistente (corrigido)
+
+Supabase Admin
+
+app/lib/supabase/admin.ts
+
+Client server-side com service role para atualizar profiles via webhook e checkout.
+
+Banco (profiles)
+
+profiles precisa ter (ou foi adicionado):
+
+is_pro boolean
+
+stripe_customer_id text
+
+stripe_subscription_id text
+
+12) Páginas legais (implementadas)
+
+/support → contato de suporte (email definido)
+
+/privacy → política de privacidade
+
+/terms → termos de serviço
+
+Observação: foi necessário corrigir builds quando algum page.tsx não exportava componente (erro “is not a module”). Agora todas as páginas exportam corretamente.
+
+13) Deploy / Workflow
 Local
 
 npm install
 
 npm run dev
 
-testar:
+Testar:
 
 login
 
@@ -290,66 +362,72 @@ salvar no storage
 
 aparecer na gallery
 
-limite diário Free funcionando
+limite diário funcionando
+
+/upgrade (checkout/portal em modo test ou live)
 
 Produção (Vercel)
 
 Push no GitHub dispara deploy automático:
 
 git add .
-
 git commit -m "..."
-
 git push
 
-Para mudanças em env vars no Vercel: após ajustar, fazer Redeploy (e se necessário desmarcar “Use existing Build Cache”).
 
-12) Problemas resolvidos (histórico rápido)
+Para mudanças em env vars no Vercel:
 
-Erro em produção: Cannot read properties of undefined (reading 'getSession')
+salvar variáveis
 
-Causa: app/lib/supabase/server.ts exporta createClient() async, então precisava await createSupabaseServerClient().
+Redeploy
 
-Erro RPC/SQL: "column reference 'count' is ambiguous"
+se necessário, desmarcar “Use existing Build Cache”
 
-Causa: conflito/ambiguidade na função SQL antiga.
+14) Problemas resolvidos (histórico rápido)
 
-Solução: recriar a função check_and_bump_usage_daily com retorno e lógica corrigidos.
+Supabase server client async exigia await createSupabaseServerClient()
 
-Diferença local vs Vercel:
+RPC antiga com erro "count is ambiguous" → função recriada
 
-Ajustes de env vars e redeploy garantiram consistência.
+Build Vercel: page.tsx is not a module → corrigido export nas páginas
 
-13) Próximos passos (para finalizar em ~10 dias)
+Stripe:
 
-Limites / Monetização
+import errado (import { stripe } ...) → padronizado para getStripe()
 
-Definir plano Free vs Pro (ex.: limite diário, estilos premium, resolução).
+webhook/checkout/portal ajustados
 
-Implementar paywall no /upgrade.
+endpoint live criado no Stripe Workbench
 
-Pagamento
+15) Próximos passos (próximos ~10 dias)
+Monetização / Planos
 
-Integrar Stripe (assinatura / lifetime).
+Definir limite/mês do Pro com base no custo real por geração
+
+Ajustar copy do plano (evitar “Unlimited” se houver limite)
+
+Stripe / Produção
+
+Confirmar que está usando LIVE keys + LIVE webhook
+
+Testar compra real (ou teste) e verificar:
+
+delivery do webhook
+
+profiles.is_pro atualizado
+
+portal funcionando após a primeira compra
 
 Hardening
 
-Melhorar mensagens de erro (OpenAI/Supabase).
+Melhorar mensagens de erro (OpenAI/Supabase/Stripe)
 
-Rate limit / proteção no /api/generate.
+Rate limit adicional no /api/generate
 
-UX
-
-Melhor “empty state” e microcopys.
-
-Mostrar consumo de créditos (uso diário).
-
-Legal/Produto
-
-Terms / Privacy / contato
-
-Analytics básico (Vercel Analytics ou alternativa)
+Mostrar consumo diário (uso)
 
 Marketing
 
-Landing simples, demo images, CTA claro
+Landing simples + demo + CTA
+
+Analytics básico (Vercel Analytics ou alternativa)

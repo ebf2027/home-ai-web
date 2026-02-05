@@ -5,8 +5,9 @@ import { createClient as createSupabaseServerClient } from "@/app/lib/supabase/s
 
 export const runtime = "nodejs";
 
+type Plan = "pro" | "pro_plus";
+
 function getBaseUrl(req: Request) {
-  // Prefer env APP_URL (produção), fallback para host atual
   const envUrl = process.env.APP_URL;
   if (envUrl) return envUrl.replace(/\/$/, "");
   const host = req.headers.get("host");
@@ -14,9 +15,19 @@ function getBaseUrl(req: Request) {
   return `${proto}://${host}`;
 }
 
+async function safeReadJson(req: Request): Promise<any | null> {
+  try {
+    const ct = req.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return null;
+    return await req.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const stripe = getStripe(); // ✅ aqui é o lugar certo
+    const stripe = getStripe();
 
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getSession();
@@ -26,9 +37,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
     }
 
-    const priceId = process.env.STRIPE_PRICE_ID_PRO;
+    // ✅ Optional: choose plan via JSON body (default: pro)
+    const body = await safeReadJson(req);
+    const plan: Plan = body?.plan === "pro_plus" ? "pro_plus" : "pro";
+
+    const priceId =
+      plan === "pro_plus"
+        ? process.env.STRIPE_PRICE_ID_PRO_PLUS
+        : process.env.STRIPE_PRICE_ID_PRO;
+
     if (!priceId) {
-      return NextResponse.json({ ok: false, error: "Missing STRIPE_PRICE_ID_PRO" }, { status: 500 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            plan === "pro_plus"
+              ? "Missing STRIPE_PRICE_ID_PRO_PLUS"
+              : "Missing STRIPE_PRICE_ID_PRO",
+        },
+        { status: 500 }
+      );
     }
 
     const baseUrl = getBaseUrl(req);
@@ -63,18 +91,15 @@ export async function POST(req: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
 
-      // ajuda a reconciliar
       client_reference_id: user.id,
 
-      // garante que a subscription também carrega o user_id
       subscription_data: {
-        metadata: { user_id: user.id },
+        metadata: { user_id: user.id, plan },
       },
 
-      // para o webhook achar o usuário com certeza
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, plan },
 
-      success_url: `${baseUrl}/upgrade?success=1`,
+      success_url: `${baseUrl}/upgrade?success=1&plan=${plan}`,
       cancel_url: `${baseUrl}/upgrade?canceled=1`,
     });
 
