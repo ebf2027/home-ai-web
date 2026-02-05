@@ -244,7 +244,6 @@ export default function UpgradePage() {
               </div>
               <div className={clsx("text-right", mutedText)}>
                 <div className="text-lg font-semibold">$0</div>
-                <div className="text-xs">forever</div>
               </div>
             </div>
 
@@ -300,11 +299,11 @@ export default function UpgradePage() {
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Higher quality output (future toggle)
+                Higher quality output
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Premium styles (future)
+                Premium styles
               </li>
             </ul>
 
@@ -327,12 +326,7 @@ export default function UpgradePage() {
           </div>
 
           {/* Pro+ */}
-          <div
-            className={clsx(
-              "rounded-2xl p-4 ring-1",
-              isDark ? "bg-white/9 ring-white/20" : "bg-white ring-zinc-300"
-            )}
-          >
+          <div className={clsx("rounded-2xl p-4 ring-1", isDark ? "bg-white/9 ring-white/20" : "bg-white ring-zinc-300")}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -367,11 +361,11 @@ export default function UpgradePage() {
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Higher quality output (future toggle)
+                Higher quality output
               </li>
               <li className="flex items-start gap-2">
                 <CheckIcon className="mt-0.5 h-4 w-4" />
-                Premium styles (future)
+                Premium styles
               </li>
             </ul>
 
