@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTheme } from "../components/ThemeProvider";
 import clsx from "clsx";
+import type React from "react"; // Adicionado para tipagem correta
 
 // --- Tipos ---
 type Plan = "pro" | "pro_plus";
@@ -16,8 +17,9 @@ function SunIcon({ className = "" }) {
 function MoonIcon({ className = "" }) {
   return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>;
 }
-function CheckIcon({ className = "" }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 6 9 17l-5-5" /></svg>;
+// CORREÇÃO AQUI: Adicionado suporte para 'style'
+function CheckIcon({ className = "", style }: { className?: string, style?: React.CSSProperties }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M20 6 9 17l-5-5" /></svg>;
 }
 
 // --- Função Auxiliar do Stripe ---
