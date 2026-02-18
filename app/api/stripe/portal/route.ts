@@ -18,8 +18,8 @@ export async function POST(req: Request) {
     const stripe = getStripe();
 
     const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.auth.getSession();
-    const user = data.session?.user;
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });

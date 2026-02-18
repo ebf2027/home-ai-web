@@ -1,433 +1,120 @@
-PROJECT STATE — HOME-AI-WEB
-1) Visão geral
-
+PROJECT STATE — HOME-AI-WEB (Atualizado em 14/02/2026)
+1) Visão Geral
 Nome do app: Home AI
 
-Tipo: Web App (MVP)
+Status atual: MVP de Luxo com Identidade Visual Premium. Sistema de Tema Global Persistente (Light/Dark) implementado. Login e Fluxo de Assinatura totalmente customizados com acabamento em Gold Accent.
 
-Objetivo: Usuário envia uma foto de um cômodo e gera variações realistas de design de interiores com IA.
+2) Stack / Tecnologias (Atualizado)
+UI: Tailwind CSS + Design de Luxo Customizado.
 
-Status atual: MVP funcional em produção com login + gallery persistente (Supabase) + room type + limite diário Free (cost protection) + páginas legais (support/privacy/terms) + integração Stripe (Checkout + Billing Portal + Webhook) pronta.
+Arquitetura: Context API para gerenciamento de tema global (ThemeProvider).
 
-2) Produção / Links
+Navegação: ConditionalBottomBar (Porteiro de navegação para esconder abas em telas críticas como Login).
 
-Repositório (GitHub): ebf2027/home-ai-web
+3) Identidade Visual & UI Premium (A "Capa de Revista")
+Paleta de Cores: Fundo Dark Profundo (#0A0A0A) e acentos em Dourado Premium (#D4AF37).
 
-Produção (Vercel): home-ai-web-2 (único projeto mantido)
+Home (Smoking de Gala):
 
-URL de produção: https://home-ai-web-2.vercel.app
+Badge superior animado: Home AI • Premium.
 
-3) Stack / Tecnologias
+Botão de Geração com gradiente dourado e efeito de brilho.
 
-Framework: Next.js (App Router)
+Galeria de Estilos com "cortinas abertas" (sem máscara escura, imagens vibrantes 100% do tempo).
 
-Linguagem: TypeScript
+Exibição textual do modelo selecionado e botão de Download luxuoso.
 
-UI: Tailwind CSS
+Login (Porta de Entrada):
 
-Auth/DB/Storage: Supabase
+Interface minimalista centralizada.
 
-Auth: Email+Senha e Google OAuth
+Correção de contraste no botão Google (Hover fix).
 
-DB: gallery_items (+ usage_daily) (+ profiles com flags de PRO)
+Barra de navegação inferior ocultada para foco total na conversão.
 
-Storage: bucket homeai
+Upgrade (Vitrine):
 
-IA de imagem: OpenAI Images Edits via API Route
+Cards de planos Pro e Pro+ com hierarquia visual.
 
-Payments: Stripe (Subscriptions)
+Destaque "Best Value" no plano Pro+ com gradiente dourado.
 
-Deploy: Vercel (deploy automático via GitHub)
+4) Arquitetura de Tema (O Coração do App)
+ThemeProvider: Localizado em app/components/ThemeProvider.tsx. Controla o estado isDark em todo o app.
 
-4) Variáveis de ambiente
-Local (.env.local)
+Persistência: Preferência do usuário salva no localStorage e sincronizada entre todas as abas (Home, Gallery, Profile, Upgrade).
 
-Obrigatórias:
+Layout Wrapper: O arquivo app/layout.tsx agora "abraça" todo o site com o Provider, garantindo que nenhum componente tente ler o tema sem autorização.
 
-OPENAI_API_KEY=...
+5) Problemas Resolvidos (Recentemente)
+Erro de Contexto: Resolvido o erro "useTheme must be used within a ThemeProvider" através da reestruturação do RootLayout.
 
-Supabase (públicas):
+Erros de Exportação: Corrigido o erro "The default export is not a React Component" garantindo exportações limpas no page.tsx.
 
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+Lógica de Captura: Re-implementada a função onPickFile que havia sido perdida durante o redesign da Home.
 
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+Flicker de Tema: Ajustada a lógica de montagem para evitar "clarões brancos" ao carregar o app em modo dark.
 
-Supabase (server-side — recomendado também setar localmente):
+6) Próximos Passos (Prioridade)
+Ajustes Finos na Home: Corrigir os pequenos detalhes notados após o redesign (o que você mencionou antes de descansar).
 
-SUPABASE_URL=https://xxxx.supabase.co (opcional, priorizado em app/lib/supabase/server.ts)
+Refinamento da Gallery: Aplicar o mesmo "banho de loja" na galeria para que os cards de imagens salvas sigam o padrão luxo.
 
-SUPABASE_ANON_KEY=... (opcional, priorizado em app/lib/supabase/server.ts)
+SEO & Analytics: Adicionar metadados premium para compartilhamento em redes sociais.
 
-SUPABASE_SERVICE_ROLE_KEY=... (necessário para supabaseAdmin no server, se você usar localmente)
+PROJECT STATE — HOME-AI-WEB (Versão atualizada em 16/02/2026)
+Aqui está o documento atualizado com as vitórias de hoje (incluindo o Photo Tips):
 
-Limites Free / Monetização:
+1) Visão Geral
+Nome: Home AI
 
-FREE_DAILY_LIMIT=3 (default = 3 se não existir)
+Status: MVP de Luxo. Identidade visual consolidada com acabamento em Gold Accent (#D4AF37) e Dark Mode profundo.
 
-PRO_BYPASS_USER_IDS= (opcional, lista de UUIDs separados por vírgula para bypass do limite)
+2) Funcionalidades Recentes (Hoje)
+Photo Tips Premium: Sistema de dicas interativo com 4 pilares (Lighting, Perspective, Clutter, Focus), usando modais com fundo em glassmorphism e botões dourados.
 
-USAGE_TZ=America/Sao_Paulo (opcional; default America/Sao_Paulo)
+Correção de Sessão: Identificado que erros 401 na Galeria são resolvidos com o refresh da sessão (Login/Logout).
 
-Stripe (novas):
+3) Próximos Passos (Para amanhã)
+Layout Responsivo Híbrido:
 
-STRIPE_SECRET_KEY=sk_live_... (ou sk_test_... se estiver testando)
+Desktop (Web): Expandir a interface para ocupar melhor a tela. Implementar uma Sidebar (Barra lateral) fixa ou retrátil para navegação.
 
-STRIPE_WEBHOOK_SECRET=whsec_...
+Mobile: Manter a estética atual com a Bottom Bar (Barra inferior), garantindo que nada quebre na experiência de celular.
 
-STRIPE_PRICE_ID_PRO=price_...
+PROJECT STATE — HOMERENOVAI (Atualizado em 17/02/2026)
+1) Visão Geral
+Nome do App: HomeRenovAi (Atualizado para originalidade e branding).
 
-APP_URL=https://home-ai-web-2.vercel.app (recomendado para URLs de retorno consistentes)
+Status Atual: MVP de Luxo Híbrido. Implementado o design de Painéis Duplos para Desktop, inspirado no projeto Figma do usuário, mantendo a experiência mobile intacta.
 
-Vercel (Production Environment Variables)
+2) Identidade Visual & UI Premium
+Paleta de Cores: Fundo Dark Profundo (#0A0A0A), Acentos em Gold Accent (#D4AF37) e detalhes em Azul Royal nos brilhos do logo.
 
-Mesmas variáveis acima configuradas no projeto home-ai-web-2.
+Layout Desktop (Web): Estrutura de dois grandes painéis pretos arredondados que organizam o fluxo de trabalho (Workspace à esquerda, Estilos e Ações à direita).
 
-Importante: após mudar env vars, faça Redeploy (e se necessário desmarque “Use existing Build Cache”).
+Modo Light: Corrigido para ser abrangente, alterando as cores internas dos painéis para tons claros/brancos de forma harmônica.
 
-5) Rotas / Páginas principais (App Router)
+Navegação Premium: Botões internos com ícones (Home, Gallery, Upgrade, Profile) integrados ao painel principal.
 
-/ → Home (upload + seleção de estilo + room type + gerar + salvar)
-/gallery → Gallery (lista do usuário via Supabase)
-/login → Login (Google + Email/Senha)
-/profile → Profile
-/upgrade → Upgrade (botão de assinar e botão de gerenciar assinatura via Stripe)
-/support → Página de contato (email de suporte)
-/privacy → Página de política de privacidade
-/terms → Página de termos de serviço
-/auth/callback → Callback do OAuth
+3) Funcionalidades Consolidadas
+Photo Tips Premium: Sistema de dicas interativo restaurado com ícones coloridos e modal em glassmorphism.
 
-APIs:
+Workspace Inteligente: Sistema de comparação Before/After integrado com etiquetas visuais de luxo.
 
-/api/generate → Geração com OpenAI + gate de limite diário Free
+Galeria de Estilos: Seletor de 8 estilos arquitetônicos com efeito de aumento (hover scale) e bordas douradas ativas.
 
-/api/stripe/checkout → Cria Checkout Session (subscription)
+Botões de Ação: Botões "Generate" e "Download" agora são persistentes e visíveis mesmo quando inativos, respeitando a estética do design.
 
-/api/stripe/portal → Cria sessão do Billing Portal (manage subscription)
+4) Problemas Resolvidos (Hoje)
+Light Mode Bug: Resolvido o problema onde o modo claro não afetava o interior dos containers principais.
 
-/api/stripe/webhook → Webhook Stripe para ativar/desativar PRO no Supabase
+Referência de Ícones: Corrigido o erro de código que impedia a abertura do Photo Tips.
 
-/api/storage/cleanup → (se existir no projeto) endpoint de manutenção/limpeza
+Responsividade: Implementado o comportamento híbrido que alterna entre uma coluna (celular) e dois painéis (computador).
 
-6) Fluxo de autenticação (Supabase)
+5) Próximos Passos (Prioridade Máxima)
+Debug da Gallery: Investigar e corrigir a falha na inserção de imagens geradas no banco de dados (SupaBase) para garantir que apareçam na Galeria.
 
-O usuário acessa /login?next=/...
-Pode autenticar via:
+Refinamento da Gallery: Aplicar o novo padrão visual de luxo na visualização das imagens salvas.
 
-Google OAuth (signInWithOAuth)
-
-Email + senha (signInWithPassword)
-
-Signup (signUp) com confirmação por email (quando habilitado no Supabase)
-
-Após login, o app redireciona para o next (default /).
-
-Callback do OAuth: /auth/callback?code=...&next=...
-
-Arquivos relevantes:
-
-app/login/page.tsx
-
-app/login/LoginClient.tsx
-
-app/auth/callback/route.ts
-
-app/lib/supabase/client.ts
-
-app/lib/supabase/server.ts (async; precisa await createClient())
-
-7) Fluxo de geração e salvamento (Home → OpenAI → Supabase)
-Home (app/page.tsx)
-
-Usuário escolhe imagem (Choose image)
-
-Usuário escolhe Style
-
-Usuário escolhe Room type (dropdown em inglês)
-
-Clica Generate Design
-
-App:
-
-Otimiza a imagem para upload (prepareImageForUpload)
-
-Faz POST /api/generate (FormData: style, roomType, image)
-
-Recebe imagem final (blob jpeg) e gera thumbnail
-
-Faz upload para Supabase Storage:
-
-homeai/{userId}/{imageId}.jpg
-
-homeai/{userId}/{imageId}-thumb.jpg
-
-Cria registro no DB gallery_items com:
-
-id, user_id, room_type, style, prompt, image_url, thumb_url, is_favorite
-
-API de geração (app/api/generate/route.ts)
-
-Ordem importante (cost protection):
-
-Auth + checagem de limite diário Free (antes de chamar OpenAI)
-
-Se permitido, chama OpenAI edits e retorna image/jpeg
-
-Detalhes:
-
-Recebe FormData: image, style, roomType
-
-Normaliza style + roomType e monta prompt forte (preservar layout, portas/janelas etc.)
-
-OpenAI: POST /v1/images/edits
-
-Retorna image/jpeg
-
-Config OpenAI:
-
-model: gpt-image-1-mini
-
-size: "auto", quality: "medium", output_format: "jpeg"
-
-Retry em 429/5xx e timeout
-
-8) Gallery (persistente)
-
-Página: app/gallery/page.tsx + grid app/components/gallery/GalleryGrid.tsx
-
-Busca itens do usuário via Supabase (DB + URLs do Storage)
-
-Mostra cards com:
-
-Thumb/Imagem
-
-Room type
-
-Style
-
-Favoritar (star)
-
-Download
-
-Delete
-
-Imagens antigas (antes do Room Type) continuam OK; daqui pra frente as novas já salvam room_type.
-
-9) UI adicionada (recente)
-
-Room Type (Home): dropdown entre estilos e botão de gerar, opções em inglês.
-
-Photo tips (Home): modal com dicas (corrigida para não ficar atrás do bottom tabs).
-
-Take photo + Upload (Home): dois botões; no mobile abre câmera via capture="environment".
-
-10) Limite diário do Free (cost protection)
-
-Objetivo:
-
-Bloquear chamadas OpenAI quando o usuário Free atingir o limite diário.
-
-Config:
-
-FREE_DAILY_LIMIT (default 3)
-
-PRO_BYPASS_USER_IDS (opcional)
-
-USAGE_TZ (default America/Sao_Paulo)
-
-Supabase:
-
-Tabela public.usage_daily (PK: user_id, day, coluna count int)
-
-RLS + policies para usuário ler/inserir/atualizar o próprio registro
-
-RPC: public.check_and_bump_usage_daily(p_day date, p_limit int) retorna allowed, count, daily_limit
-
-Backend (/api/generate):
-
-await createSupabaseServerClient()
-
-supabase.auth.getSession()
-
-se não bypass: supabase.rpc("check_and_bump_usage_daily", { p_day, p_limit })
-
-se bloqueado: 429 Daily free limit reached...
-
-11) Stripe (assinatura Pro) — Implementado
-Produto / Preço (Stripe)
-
-Produto: Home Ai Pro
-
-Recorrência: mensal
-
-Preço: US$ 9,99 (definido no Stripe)
-
-O app usa o STRIPE_PRICE_ID_PRO para criar a assinatura.
-
-Fluxo no app
-
-Página /upgrade:
-
-Upgrade to Pro → chama /api/stripe/checkout e redireciona para Stripe Checkout
-
-Manage subscription → chama /api/stripe/portal e abre Stripe Billing Portal
-
-Observação: se o usuário ainda não tem stripe_customer_id, o portal pode retornar “No Stripe customer found yet.” (esperado antes da primeira compra)
-
-Rotas Stripe (App Router)
-
-app/api/stripe/checkout/route.ts
-
-Cria/pega customer
-
-Cria Checkout Session mode: "subscription"
-
-Passa metadata.user_id e client_reference_id para reconciliar
-
-Usa success_url/cancel_url com base em APP_URL ou host atual
-
-app/api/stripe/portal/route.ts
-
-Cria Billing Portal Session para o customer existente
-
-return_url: ${baseUrl}/upgrade
-
-app/api/stripe/webhook/route.ts
-
-Valida assinatura via STRIPE_WEBHOOK_SECRET
-
-Eventos tratados:
-
-checkout.session.completed
-
-customer.subscription.updated
-
-customer.subscription.deleted
-
-Atualiza profiles:
-
-is_pro: true/false
-
-stripe_customer_id
-
-stripe_subscription_id
-
-Lib Stripe
-
-app/lib/stripe.ts
-
-Exporta getStripe() (singleton) usando STRIPE_SECRET_KEY
-
-Evita importar stripe como export inexistente (corrigido)
-
-Supabase Admin
-
-app/lib/supabase/admin.ts
-
-Client server-side com service role para atualizar profiles via webhook e checkout.
-
-Banco (profiles)
-
-profiles precisa ter (ou foi adicionado):
-
-is_pro boolean
-
-stripe_customer_id text
-
-stripe_subscription_id text
-
-12) Páginas legais (implementadas)
-
-/support → contato de suporte (email definido)
-
-/privacy → política de privacidade
-
-/terms → termos de serviço
-
-Observação: foi necessário corrigir builds quando algum page.tsx não exportava componente (erro “is not a module”). Agora todas as páginas exportam corretamente.
-
-13) Deploy / Workflow
-Local
-
-npm install
-
-npm run dev
-
-Testar:
-
-login
-
-geração
-
-salvar no storage
-
-aparecer na gallery
-
-limite diário funcionando
-
-/upgrade (checkout/portal em modo test ou live)
-
-Produção (Vercel)
-
-Push no GitHub dispara deploy automático:
-
-git add .
-git commit -m "..."
-git push
-
-
-Para mudanças em env vars no Vercel:
-
-salvar variáveis
-
-Redeploy
-
-se necessário, desmarcar “Use existing Build Cache”
-
-14) Problemas resolvidos (histórico rápido)
-
-Supabase server client async exigia await createSupabaseServerClient()
-
-RPC antiga com erro "count is ambiguous" → função recriada
-
-Build Vercel: page.tsx is not a module → corrigido export nas páginas
-
-Stripe:
-
-import errado (import { stripe } ...) → padronizado para getStripe()
-
-webhook/checkout/portal ajustados
-
-endpoint live criado no Stripe Workbench
-
-15) Próximos passos (próximos ~10 dias)
-Monetização / Planos
-
-Definir limite/mês do Pro com base no custo real por geração
-
-Ajustar copy do plano (evitar “Unlimited” se houver limite)
-
-Stripe / Produção
-
-Confirmar que está usando LIVE keys + LIVE webhook
-
-Testar compra real (ou teste) e verificar:
-
-delivery do webhook
-
-profiles.is_pro atualizado
-
-portal funcionando após a primeira compra
-
-Hardening
-
-Melhorar mensagens de erro (OpenAI/Supabase/Stripe)
-
-Rate limit adicional no /api/generate
-
-Mostrar consumo diário (uso)
-
-Marketing
-
-Landing simples + demo + CTA
-
-Analytics básico (Vercel Analytics ou alternativa)
+Ajuste da Bottom Bar: Decidir sobre a ocultação da barra inferior em telas grandes para evitar redundância com o novo menu.

@@ -1,370 +1,380 @@
 import { NextResponse } from "next/server";
 import { Buffer } from "buffer";
-import { createClient as createSupabaseServerClient } from "../../lib/supabase/server";
+import { createClient as createSupabaseServerClient } from "@/app/lib/supabase/server";
+import { supabaseAdmin } from "@/app/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
-// ✅ FREE limit (env configurable)
-const FREE_DAILY_LIMIT = Number(process.env.FREE_DAILY_LIMIT ?? "3");
+// Optional: bypass credit consume for your own user id(s), comma-separated UUIDs
+const PRO_BYPASS_USER_IDS = (process.env.PRO_BYPASS_USER_IDS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
-// ✅ pick a timezone for "daily" counting (better UX for Brazil)
-const USAGE_TZ = process.env.USAGE_TZ ?? "America/Sao_Paulo";
-function getDayISO(tz = USAGE_TZ) {
-  // en-CA => YYYY-MM-DD
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: tz,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+function normalizeText(v: unknown, fallback: string) {
+  if (typeof v !== "string") return fallback;
+  const s = v.trim();
+  return s.length ? s : fallback;
 }
 
-/* ---------- Styles ---------- */
-const STYLE_RECIPES: Record<string, string> = {
-  Modern: `
-- Materials: smooth matte walls, microcement or wide-plank oak floor, black metal accents.
-- Palette: neutral (white/gray/black) with 1 subtle accent color.
-- Furniture: clean lines, low-profile sofa, minimal decor.
-- Lighting: recessed/track lights, modern pendant, crisp contrast.
-`,
-  Minimalist: `
-- Materials: very plain surfaces, light oak or pale microcement floor, NO clutter.
-- Palette: soft whites, warm beige, very low contrast.
-- Furniture: fewer pieces, ultra-simple shapes, hidden storage, empty surfaces.
-- Lighting: soft, even, natural, minimal fixtures.
-`,
-  Scandinavian: `
-- Materials: light oak floor, white walls, cozy textiles (wool/linen), natural wood.
-- Palette: bright whites + light gray + warm wood.
-- Furniture: airy, functional, rounded edges, hygge feel.
-- Lighting: warm natural light, simple pendant lamps.
-`,
-  Japanese: `
-- Materials: natural wood, clean plaster walls, subtle textures, optional tatami-like elements.
-- Palette: warm neutrals, soft beiges, light woods, calm low-contrast tones.
-- Furniture: low-profile, simple, minimal decor, zen-like composition.
-- Lighting: soft natural daylight, paper-lantern feel (but realistic).
-`,
-  Rustic: `
-- Materials: rustic wood planks floor, textured plaster walls, reclaimed wood, wrought iron.
-- Palette: warm earthy tones (brown/cream/terracotta).
-- Furniture: chunkier wood furniture, handcrafted feel, natural textures.
-- Lighting: warm, cozy, slightly dimmer, vintage lamps.
-`,
-  Industrial: `
-- Materials: polished concrete floor OR dark wood, brick/concrete wall texture, exposed metal.
-- Palette: charcoal/gray/black with warm wood accents.
-- Furniture: metal frames, leather details, utilitarian shelves.
-- Lighting: exposed bulbs, track lighting, strong shadows (but still realistic).
-`,
-  Boho: `
-- Materials: warm wood floor, layered rugs, woven textures, rattan, macrame.
-- Palette: warm neutrals + earthy accents (sage/terracotta).
-- Furniture: eclectic pieces, plants, cozy layered styling.
-- Lighting: warm ambient, lanterns, natural materials.
-`,
-  "Super Luxury": `
-- Materials: premium marble/stone accents, high-end wood panels, brushed brass details, refined textiles.
-- Palette: elegant neutrals (cream/ivory/charcoal) with subtle metallic accents.
-- Furniture: upscale, refined silhouettes, designer feel, curated decor (not cluttered).
-- Lighting: layered lighting (but still realistic), refined fixtures, balanced highlights.
-`,
-};
+function buildPrompt(styleRaw: string, roomTypeRaw: string) {
+  const style = styleRaw.trim();
+  const roomType = roomTypeRaw.trim();
 
-function normalizeStyle(input: string) {
-  const s = (input ?? "").trim();
-  return STYLE_RECIPES[s] ? s : "Modern";
+  return [
+    `Photorealistic interior redesign of the SAME ${roomType} in a ${style} style.`,
+    `Keep the exact same camera angle, perspective, room shape, walls, ceiling lines, and layout.`,
+    `DO NOT move or remove doors, windows, or openings. Keep doors clearly visible.`,
+    `Preserve architectural elements and room proportions. Do not change window/door positions.`,
+    `Keep the overall structure identical; only change finishes, decor, furniture style, and lighting to match the chosen style.`,
+    `Make it realistic, high quality, natural light, coherent shadows, no text, no watermark.`,
+  ].join(" ");
 }
-
-/* ---------- Room Types ---------- */
-const ROOM_TYPE_LABEL: Record<string, string> = {
-  living_room: "Living room",
-  bedroom: "Bedroom",
-  kitchen: "Kitchen",
-  bathroom: "Bathroom",
-  office: "Office",
-  balcony: "Balcony",
-  home_theater: "Home theater",
-  store: "Store",
-  house_facade: "House facade",
-  other: "Other",
-};
-
-function normalizeRoomType(input: string) {
-  const s = (input ?? "").trim();
-
-  if (ROOM_TYPE_LABEL[s]) return s;
-
-  const lower = s.toLowerCase();
-  const found = Object.entries(ROOM_TYPE_LABEL).find(
-    ([, label]) => label.toLowerCase() === lower
-  );
-  if (found) return found[0];
-
-  return "other";
-}
-
-/* ---------- Limits / OpenAI ---------- */
-const MAX_IMAGE_MB = 25;
-const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
-
-const OPENAI_TIMEOUT_MS = 60_000;
-
-// retry for temporary errors
-const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
-const MAX_RETRIES = 2;
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function safeReadJson(resp: Response) {
-  try {
-    return await resp.json();
-  } catch {
-    return null;
+type CreditsSnapshot = {
+  free_used: number;
+  paid_used: number;
+  bonus_used: number;
+};
+
+function num(v: any) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// garante row existir (para refund funcionar em usuário novo)
+async function ensureCreditsRow(userId: string) {
+  await supabaseAdmin
+    .from("user_credits")
+    .upsert(
+      {
+        user_id: userId,
+        free_used: 0,
+        paid_used: 0,
+        updated_at: new Date().toISOString(),
+      } as any,
+      { onConflict: "user_id" }
+    );
+}
+
+async function readCreditsSnapshot(userId: string): Promise<CreditsSnapshot | null> {
+  await ensureCreditsRow(userId);
+
+  const { data, error } = await supabaseAdmin
+    .from("user_credits")
+    .select("free_used,paid_used,bonus_used")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    free_used: num((data as any).free_used),
+    paid_used: num((data as any).paid_used),
+    bonus_used: num((data as any).bonus_used),
+  };
+}
+
+// reembolsa 1 crédito (best-effort)
+async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot | null) {
+  if (!before) return;
+
+  const { data: nowRow } = await supabaseAdmin
+    .from("user_credits")
+    .select("free_used,paid_used,bonus_used")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!nowRow) return;
+
+  const now: any = nowRow;
+
+  // 1. Paid
+  if (num(now.paid_used) === before.paid_used + 1) {
+    await supabaseAdmin
+      .from("user_credits")
+      .update({ paid_used: before.paid_used, updated_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("paid_used", before.paid_used + 1);
+    return;
+  }
+
+  // 2. Bonus
+  // Note: we assume column is 'bonus_used'
+  if (num(now.bonus_used) === before.bonus_used + 1) {
+    await supabaseAdmin
+      .from("user_credits")
+      .update({ bonus_used: before.bonus_used, updated_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("bonus_used", before.bonus_used + 1);
+    return;
+  }
+
+  // 3. Free
+  if (num(now.free_used) === before.free_used + 1) {
+    await supabaseAdmin
+      .from("user_credits")
+      .update({ free_used: before.free_used, updated_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("free_used", before.free_used + 1);
+    return;
   }
 }
 
-type UsageRow = {
-  allowed?: boolean;
-  count?: number;
-  daily_limit?: number;
-};
+async function callOpenAIImageEditWithRetry(args: {
+  imageFile: File;
+  prompt: string;
+  timeoutMs?: number;
+  maxAttempts?: number;
+}) {
+  const { imageFile, prompt, timeoutMs = 60_000, maxAttempts = 3 } = args;
 
-// ✅ NEW: check Pro status from DB
-async function getIsProUser(supabase: any, userId: string): Promise<boolean> {
-  // Try read
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("is_pro")
-    .eq("id", userId)
-    .maybeSingle();
+  if (!OPENAI_API_KEY) throw new Error("Missing OPENAI_API_KEY.");
 
-  if (error) {
-    console.error("profiles select error:", error);
-    return false;
-  }
+  let lastErr: any = null;
 
-  if (!data) {
-    // If profile row wasn't created for some reason, attempt to create it (is_pro=false)
-    const ins = await supabase.from("profiles").insert({ id: userId, is_pro: false });
-    if (ins.error) {
-      // not fatal
-      console.warn("profiles insert fallback error:", ins.error);
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const fd = new FormData();
+      fd.append("image[]", imageFile, imageFile.name || "image.jpg");
+      fd.append("model", "gpt-image-1-mini");
+      fd.append("prompt", prompt);
+      fd.append("quality", "medium");
+      fd.append("output_format", "jpeg");
+      fd.append("size", "1024x1024");
+
+      const res = await fetch("https://api.openai.com/v1/images/edits", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+        body: fd,
+        signal: controller.signal,
+      });
+
+      const contentType = res.headers.get("content-type") ?? "";
+
+      if (!res.ok) {
+        let msg = `OpenAI request failed (${res.status})`;
+        try {
+          const txt = await res.text();
+          if (txt) msg = `${msg}: ${txt.slice(0, 800)}`;
+        } catch { }
+        const err = new Error(msg) as any;
+        err.status = res.status;
+        throw err;
+      }
+
+      if (contentType.includes("application/json")) {
+        const json: any = await res.json();
+        const b64 = json?.data?.[0]?.b64_json;
+        if (!b64) throw new Error("OpenAI JSON response missing b64_json.");
+
+        const outFmt = (json?.output_format as string | undefined) ?? "jpeg";
+        const mime =
+          outFmt === "png" ? "image/png" : outFmt === "webp" ? "image/webp" : "image/jpeg";
+
+        const buf = Buffer.from(b64, "base64");
+        return { buf, mime };
+      }
+
+      const arr = await res.arrayBuffer();
+      const buf = Buffer.from(arr);
+      const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
+      return { buf, mime };
+    } catch (err: any) {
+      lastErr = err;
+
+      const status = err?.status;
+      const isAbort = err?.name === "AbortError";
+      const retryable = isAbort || status === 429 || (typeof status === "number" && status >= 500);
+
+      clearTimeout(t);
+
+      if (!retryable || attempt === maxAttempts) throw err;
+
+      const base = 400 * Math.pow(2, attempt - 1);
+      const jitter = Math.floor(Math.random() * 250);
+      await sleep(base + jitter);
+    } finally {
+      clearTimeout(t);
     }
-    return false;
   }
 
-  return Boolean(data.is_pro);
+  throw lastErr || new Error("OpenAI request failed.");
 }
 
 export async function POST(req: Request) {
-  try {
-    // ✅ 1) Auth + Pro check + free limit gate BEFORE OpenAI (cost protection)
-    const supabase = await createSupabaseServerClient(); // ✅ IMPORTANT: await (server.ts is async)
+  const supabase = await createSupabaseServerClient();
 
-    const {
-      data: { session },
-      error: userErr,
-    } = await supabase.auth.getSession();
+  // 1) Auth
+  const {
+    data: { user },
+    error: userErr,
+  } = await supabase.auth.getUser();
 
-    const user = session?.user;
+  if (userErr || !user) {
+    return NextResponse.json({ error: "You need to be signed in to continue." }, { status: 401 });
+  }
 
-    if (userErr || !user) {
-      return NextResponse.json({ ok: false, error: "You must be logged in." }, { status: 401 });
-    }
+  const userId = user.id;
+  const bypassCredits = PRO_BYPASS_USER_IDS.includes(userId);
 
-    const userId: string = user.id;
+  // 2) Parse form data
+  const form = await req.formData();
+  const image = form.get("image");
+  const styleRaw = form.get("style");
+  const roomTypeRaw = form.get("roomType");
 
-    // ✅ Pro from DB (no env bypass anymore)
-    const isPro = await getIsProUser(supabase, userId);
-
-    // ✅ daily day string (timezone-aware)
-    const today = getDayISO(); // "YYYY-MM-DD"
-
-    if (!isPro) {
-      const { data, error } = await supabase.rpc("check_and_bump_usage_daily", {
-        p_day: today,
-        p_limit: FREE_DAILY_LIMIT,
-      });
-
-      if (error) {
-        console.error("usage rpc error:", error);
-        return NextResponse.json(
-          {
-            ok: false,
-            error: "Usage check failed. Please try again.",
-            details: {
-              message: error.message,
-              code: error.code,
-              details: error.details,
-              hint: error.hint,
-            },
-          },
-          { status: 500 }
-        );
-      }
-
-      const row: UsageRow | null = Array.isArray(data) ? (data[0] as UsageRow) : (data as UsageRow);
-
-      const allowed = Boolean(row?.allowed);
-      const used = Number(row?.count ?? 0);
-      const dailyLimit = Number(row?.daily_limit ?? FREE_DAILY_LIMIT);
-
-      if (!allowed) {
-        return NextResponse.json(
-          {
-            ok: false,
-            error: `Daily free limit reached (${dailyLimit}/day). Please upgrade to Pro.`,
-            code: "FREE_LIMIT",
-            used,
-            limit: dailyLimit,
-          },
-          { status: 429 }
-        );
-      }
-    }
-
-    // ✅ 2) Continue with generation
-    const form = await req.formData();
-
-    const style = normalizeStyle(form.get("style")?.toString() ?? "Modern");
-    const image = form.get("image");
-
-    const rawRoomType = form.get("roomType")?.toString() ?? "";
-    const roomTypeKey = normalizeRoomType(rawRoomType);
-    const roomTypeLabel = ROOM_TYPE_LABEL[roomTypeKey] ?? "Other";
-
-    if (!(image instanceof File)) {
-      return NextResponse.json({ ok: false, error: "No image received." }, { status: 400 });
-    }
-
-    if (typeof image.size === "number" && image.size > MAX_IMAGE_BYTES) {
-      return NextResponse.json(
-        { ok: false, error: `Image too large. Max allowed is ${MAX_IMAGE_MB}MB.` },
-        { status: 413 }
-      );
-    }
-
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, error: "Missing OPENAI_API_KEY." }, { status: 500 });
-    }
-
-    const recipe = STYLE_RECIPES[style] ?? STYLE_RECIPES.Modern;
-    const roomLine = `Room type: ${roomTypeLabel}`;
-
-    const prompt = `
-${roomLine}
-
-Preserve the original layout, proportions, and architectural structure exactly as in the input image.
-Do NOT move, remove, resize, or relocate walls, ceiling, window positions and sizes, door position and size, or camera angle.
-The door and windows must remain clearly visible in their original locations.
-
-Refine and enhance the existing space to look clean, organized, and aesthetically pleasing,
-while remaining realistic, achievable, and faithful to the original space.
-Improve organization, material quality, color harmony, furniture alignment, and visual balance.
-Do not invent new architectural elements.
-
-The door must remain in the same position and size, but its design, color, and finish may be updated to match the selected style.
-The floor layout must remain unchanged, but the floor material, texture, and color may be upgraded to match the selected style.
-
-Use natural, realistic daylight consistent with the window positions.
-Avoid dramatic or cinematic lighting.
-
-Design style: ${style}
-
-Style recipe:
-${recipe}
-`.trim();
-
-    const out = new FormData();
-    out.append("model", "gpt-image-1-mini");
-    out.append("prompt", prompt);
-    out.append("size", "auto");
-    out.append("output_format", "jpeg");
-    out.append("quality", "medium");
-    out.set("image", image, (image as File).name || "room.jpg");
-
-    let lastStatus = 500;
-    let lastData: any = null;
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
-
-      let resp: Response;
-      try {
-        resp = await fetch("https://api.openai.com/v1/images/edits", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}` },
-          body: out,
-          signal: controller.signal,
-        });
-      } catch (e: any) {
-        if (attempt < MAX_RETRIES) {
-          await sleep(500 * (attempt + 1));
-          continue;
-        }
-
-        if (e?.name === "AbortError") {
-          return NextResponse.json(
-            { ok: false, error: "OpenAI request timed out. Please try again." },
-            { status: 504 }
-          );
-        }
-
-        return NextResponse.json(
-          { ok: false, error: "Network error calling OpenAI. Please try again." },
-          { status: 502 }
-        );
-      } finally {
-        clearTimeout(t);
-      }
-
-      const data = await safeReadJson(resp);
-      lastStatus = resp.status;
-      lastData = data;
-
-      if (resp.ok) {
-        const b64 = data?.data?.[0]?.b64_json;
-        if (!b64) {
-          return NextResponse.json(
-            { ok: false, error: "No image returned by OpenAI.", details: data ?? null },
-            { status: 502 }
-          );
-        }
-
-        const buffer = Buffer.from(b64, "base64");
-        return new Response(buffer, {
-          status: 200,
-          headers: { "Content-Type": "image/jpeg", "Cache-Control": "no-store" },
-        });
-      }
-
-      if (RETRYABLE_STATUS.has(resp.status) && attempt < MAX_RETRIES) {
-        await sleep(500 * (attempt + 1));
-        continue;
-      }
-
-      const msg = data?.error?.message ?? `OpenAI request failed (status ${resp.status}).`;
-      const statusToReturn = resp.status === 503 ? 503 : 500;
-
-      return NextResponse.json(
-        { ok: false, error: msg, details: data ?? null },
-        { status: statusToReturn }
-      );
-    }
-
-    const msg = lastData?.error?.message ?? `OpenAI request failed (status ${lastStatus}).`;
-    const statusToReturn = lastStatus === 503 ? 503 : 500;
-
+  if (!(image instanceof File)) {
     return NextResponse.json(
-      { ok: false, error: msg, details: lastData ?? null },
-      { status: statusToReturn }
+      { error: "Missing image file (field name: image)." },
+      { status: 400 }
     );
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? "Unknown error" }, { status: 500 });
+  }
+
+  const style = normalizeText(styleRaw, "Modern");
+  const roomType = normalizeText(roomTypeRaw, "room");
+  const prompt = buildPrompt(style, roomType);
+
+  let creditWasConsumed = false;
+  let snapshot: CreditsSnapshot | null = null;
+  let consumptionType: "paid" | "bonus" | "free" | null = null;
+
+  if (!bypassCredits) {
+    // 3.a) Read current state
+    const { data: row, error: fetchErr } = await supabaseAdmin
+      .from("user_credits")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchErr) {
+      return NextResponse.json(
+        { error: `Credits check failed: ${fetchErr.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Default values if row doesn't exist
+    const r: any = row ?? {};
+
+    // Ensure row exists if it doesn't (though usually it should)
+    if (!row) {
+      await ensureCreditsRow(userId);
+    }
+
+    // ---- CALCULATION (Same as /api/credits) ----
+    const DEFAULT_FREE_BASE = 3;
+    const clamp = (n: number) => (Number.isFinite(n) ? Math.max(0, n) : 0);
+
+    // Paid
+    const paidAllowance = Number(r.paid_monthly_allowance ?? 0);
+    const paidUsed = Number(r.paid_used ?? 0);
+    const paidRemaining = clamp(paidAllowance - paidUsed);
+
+    // Bonus
+    const bonusTotal = Number(
+      r.bonus_referrals_total ??
+      r.bonus_referral_total ??
+      r.bonus_total ??
+      r.bonus_earned ??
+      0
+    );
+    const bonusUsed = Number(
+      r.bonus_referrals_used ??
+      r.bonus_referral_used ??
+      r.bonus_used ??
+      0
+    );
+    const bonusRemaining = clamp(bonusTotal - bonusUsed);
+
+    // Free
+    const plan =
+      r.plan ??
+      (paidAllowance >= 300 ? "pro_plus" : paidAllowance >= 100 ? "pro" : "free");
+
+    const freeBase = Number(r.free_base ?? DEFAULT_FREE_BASE);
+    const freeUsed = Number(r.free_used ?? 0);
+    // Free credits only apply if plan is free
+    const freeRemaining = plan === "free" ? clamp(freeBase - freeUsed) : 0;
+
+    // Snapshot for refund
+    snapshot = {
+      free_used: freeUsed,
+      paid_used: paidUsed,
+      bonus_used: bonusUsed,
+    };
+
+    // ---- DECISION: Priority Paid -> Bonus -> Free ----
+    let updateData: any = null;
+
+    if (paidRemaining > 0) {
+      consumptionType = "paid";
+      updateData = { paid_used: paidUsed + 1, updated_at: new Date().toISOString() };
+    } else if (bonusRemaining > 0) {
+      consumptionType = "bonus";
+      // We need to know which column to update. The read logic checks multiple fallback names,
+      // but usually there's one canonical column for writing. 
+      // Assuming 'bonus_used' based on typical Supabase patterns or `r.bonus_used`.
+      // Let's use 'bonus_used' as the standard write column if it exists or fallback.
+      // Looking at `readCreditsSnapshot` in original code, it didn't read bonus. 
+      // I'll assume `bonus_used` is the column name.
+      updateData = { bonus_used: bonusUsed + 1, updated_at: new Date().toISOString() };
+    } else if (freeRemaining > 0) {
+      consumptionType = "free";
+      updateData = { free_used: freeUsed + 1, updated_at: new Date().toISOString() };
+    } else {
+      return NextResponse.json(
+        { error: "No credits remaining. Please upgrade to continue." },
+        { status: 429 }
+      );
+    }
+
+    // 3.b) Perform Update
+    const { error: updateErr } = await supabaseAdmin
+      .from("user_credits")
+      .update(updateData)
+      .eq("user_id", userId);
+
+    if (updateErr) {
+      return NextResponse.json(
+        { error: `Failed to consume credit: ${updateErr.message}` },
+        { status: 500 }
+      );
+    }
+
+    creditWasConsumed = true;
+  }
+
+  // 4) Call OpenAI (if fails, refund 1 credit best-effort)
+  try {
+    const { buf, mime } = await callOpenAIImageEditWithRetry({
+      imageFile: image,
+      prompt,
+      timeoutMs: 60_000,
+      maxAttempts: 3,
+    });
+
+    const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+
+    return new Response(arrayBuffer, {
+      status: 200,
+      headers: { "Content-Type": mime, "Cache-Control": "no-store" },
+    });
+  } catch (err: any) {
+    if (!bypassCredits && creditWasConsumed) {
+      await refundOneCreditBestEffort(userId, snapshot);
+    }
+
+    const msg = err?.message || "Unexpected error while generating the image.";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

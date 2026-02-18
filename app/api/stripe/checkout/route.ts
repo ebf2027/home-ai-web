@@ -30,14 +30,14 @@ export async function POST(req: Request) {
     const stripe = getStripe();
 
     const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.auth.getSession();
-    const user = data.session?.user;
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
     }
 
-    // ✅ Optional: choose plan via JSON body (default: pro)
+    // ✅ Choose plan via JSON body (default: pro)
     const body = await safeReadJson(req);
     const plan: Plan = body?.plan === "pro_plus" ? "pro_plus" : "pro";
 
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
     const baseUrl = getBaseUrl(req);
 
-    // 1) Pega/Cria customer
+    // 1) Read customerId from profile (if exists)
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
       .select("stripe_customer_id")
@@ -74,32 +74,52 @@ export async function POST(req: Request) {
 
     let customerId = profile?.stripe_customer_id || null;
 
+    // 2) Create customer if missing
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
         metadata: { user_id: user.id },
       });
+
       customerId = customer.id;
 
-      await supabaseAdmin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+      // ✅ Use UPSERT so profile row exists even if it didn't before
+      const { error: upErr } = await supabaseAdmin
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            stripe_customer_id: customerId,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+
+      if (upErr) {
+        return NextResponse.json({ ok: false, error: upErr.message }, { status: 500 });
+      }
     }
 
-    // 2) Checkout session (subscription)
+    // 3) Create Checkout Session (subscription)
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
 
+      // helps linking even without metadata
       client_reference_id: user.id,
 
+      // ✅ Put metadata also on the Subscription (important!)
       subscription_data: {
         metadata: { user_id: user.id, plan },
       },
 
+      // ✅ Session metadata too (handy)
       metadata: { user_id: user.id, plan },
 
-      success_url: `${baseUrl}/upgrade?success=1&plan=${plan}`,
+      // ✅ include session_id for debugging / future checks
+      success_url: `${baseUrl}/upgrade?success=1&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/upgrade?canceled=1`,
     });
 

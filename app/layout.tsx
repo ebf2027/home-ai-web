@@ -1,5 +1,6 @@
 import "./globals.css";
-import BottomTabs from "./components/BottomTabs";
+import { ThemeProvider } from "./components/ThemeProvider";
+import ConditionalBottomBar from "./components/ConditionalBottomBar"; // Importamos o porteiro
 
 export const metadata = {
   title: "Home AI",
@@ -9,9 +10,14 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-zinc-50 text-zinc-900">
-        <div className="min-h-screen pb-24">{children}</div>
-        <BottomTabs />
+      <body>
+        <ThemeProvider>
+          <div className="min-h-screen pb-24">
+            {children}
+          </div>
+          {/* Usamos o porteiro aqui em vez do BottomTabs direto */}
+          <ConditionalBottomBar />
+        </ThemeProvider>
       </body>
     </html>
   );

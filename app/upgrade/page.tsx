@@ -1,145 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import { useState } from "react";
+import { useTheme } from "../components/ThemeProvider";
+import clsx from "clsx";
 
-type Theme = "light" | "dark";
+// --- Tipos ---
 type Plan = "pro" | "pro_plus";
 type Busy = null | "checkout_pro" | "checkout_pro_plus" | "portal";
 
-function clsx(...arr: Array<string | false | null | undefined>) {
-  return arr.filter(Boolean).join(" ");
-}
-
+// --- Ícones ---
 function SunIcon({ className = "" }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="12" cy="12" r="4" />
-      <line x1="12" y1="2" x2="12" y2="4" />
-      <line x1="12" y1="20" x2="12" y2="22" />
-      <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
-      <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" />
-      <line x1="2" y1="12" x2="4" y2="12" />
-      <line x1="20" y1="12" x2="22" y2="12" />
-      <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" />
-      <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" />
-    </svg>
-  );
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4" /><line x1="12" y1="2" x2="12" y2="4" /><line x1="12" y1="20" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="6.34" y2="6.34" /><line x1="17.66" y1="17.66" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="4" y2="12" /><line x1="20" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="6.34" y2="17.66" /><line x1="17.66" y1="6.34" x2="19.07" y2="4.93" /></svg>;
 }
-
 function MoonIcon({ className = "" }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-    </svg>
-  );
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>;
 }
-
 function CheckIcon({ className = "" }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 6 9 17l-5-5" /></svg>;
 }
 
-function Badge({ children, isDark }: { children: ReactNode; isDark: boolean }) {
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
-        isDark ? "bg-white/10 text-white" : "bg-zinc-900/5 text-zinc-900"
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
+// --- Função Auxiliar do Stripe ---
 async function postForRedirectUrl(endpoint: string, body?: any) {
   const res = await fetch(endpoint, {
     method: "POST",
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   });
-
   const data = await res.json().catch(() => null);
-
-  if (res.status === 401 || res.status === 403) {
-    const msg = data?.error || data?.message || "You need to be signed in to continue.";
-    throw new Error(msg);
-  }
-
-  if (!res.ok) {
-    const msg = data?.error || data?.message || `Request failed (${res.status})`;
-    throw new Error(msg);
-  }
-
-  const url: string | undefined = data?.url;
-  if (!url) throw new Error("Stripe URL not returned by the API.");
-
-  return url;
+  if (res.status === 401 || res.status === 403) throw new Error(data?.error || "Please sign in to continue.");
+  if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
+  if (!data?.url) throw new Error("Stripe URL not returned.");
+  return data.url;
 }
 
 export default function UpgradePage() {
-  const [theme, setTheme] = useState<Theme>("light");
-  const isDark = theme === "dark";
-
+  // Conecta ao tema global
+  const { isDark, toggleTheme } = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("homeai_theme") as Theme | null;
-      if (saved === "light" || saved === "dark") {
-        setTheme(saved);
-        return;
-      }
-      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-      setTheme(prefersDark ? "dark" : "light");
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("homeai_theme", theme);
-    } catch {}
-  }, [theme]);
-
-  const pageBg = isDark ? "bg-zinc-950 text-white" : "bg-zinc-50 text-zinc-900";
-  const cardBg = isDark ? "bg-white/5 ring-white/10" : "bg-white ring-zinc-200";
-  const mutedText = isDark ? "text-white/70" : "text-zinc-600";
-  const subtleText = isDark ? "text-white/60" : "text-zinc-500";
-
   const isBusy = busy !== null;
+
+  // Estilos dinâmicos
+  const mutedText = isDark ? "text-zinc-400" : "text-zinc-600";
+  const subtleText = isDark ? "text-zinc-500" : "text-zinc-500";
+  const goldAccent = "#D4AF37";
 
   async function handleCheckout(plan: Plan) {
     try {
@@ -166,269 +71,120 @@ export default function UpgradePage() {
   }
 
   return (
-    <main className={clsx("min-h-screen", pageBg)}>
-      <div className="mx-auto max-w-md px-4 pb-24">
-        {/* Header */}
-        <header className="pt-10 pb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge isDark={isDark}>Home AI</Badge>
-              <span className={clsx("text-xs", subtleText)}>Upgrade</span>
-            </div>
+    <main className={clsx("min-h-screen transition-colors duration-300 pb-24", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
+      <div className="mx-auto max-w-md px-4 pt-6">
 
+        {/* --- CABEÇALHO (Recuperado) --- */}
+        <header className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className={clsx("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-zinc-600")}>Home AI</span>
+              <span className={subtleText}>/</span>
+              <span className={clsx("text-xs font-bold uppercase tracking-wider", goldAccent && `text-[${goldAccent}]`)}>Upgrade</span>
+            </div>
+            {/* Botão de Tema Global */}
             <button
-              type="button"
-              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-              aria-label="Toggle theme"
-              title="Toggle theme"
-              className={clsx(
-                "flex h-9 w-9 items-center justify-center rounded-full border transition",
-                isDark
-                  ? "border-white/15 text-white hover:bg-white/10"
-                  : "border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-              )}
-              disabled={isBusy}
+              onClick={toggleTheme}
+              className={clsx("flex h-9 w-9 items-center justify-center rounded-full border transition", isDark ? "border-white/10 text-white hover:bg-white/10" : "border-zinc-200 text-zinc-900 hover:bg-zinc-100")}
             >
               {isDark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
             </button>
           </div>
 
-          <h1 className="mt-4 text-3xl font-semibold leading-tight">Choose your plan</h1>
-          <p className={clsx("mt-2", mutedText)}>
-            Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
-          </p>
+          <h1 className="text-3xl font-black tracking-tight mb-2">Choose your plan</h1>
+          <p className={mutedText}>Credits reset every billing cycle and do not roll over.</p>
 
-          <div className="mt-4 flex items-center gap-3">
-            <Link
-              href="/"
-              className={clsx(
-                "rounded-full border px-4 py-2 text-sm font-medium transition",
-                isDark ? "border-white/15 hover:bg-white/10" : "border-zinc-200 hover:bg-zinc-100"
-              )}
-            >
-              ← Back to Home
-            </Link>
-
-            <Link
-              href="/gallery"
-              className={clsx(
-                "rounded-full border px-4 py-2 text-sm font-medium transition",
-                isDark ? "border-white/15 hover:bg-white/10" : "border-zinc-200 hover:bg-zinc-100"
-              )}
-            >
-              View Gallery
-            </Link>
+          {/* Links de Navegação */}
+          <div className="flex items-center gap-3 mt-6">
+            <Link href="/" className={clsx("text-sm font-medium transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-zinc-600 hover:text-black")}>← Back to Home</Link>
+            <Link href="/gallery" className={clsx("text-sm font-medium transition-colors", isDark ? "text-zinc-400 hover:text-white" : "text-zinc-600 hover:text-black")}>View Gallery</Link>
           </div>
         </header>
 
-        {/* Error banner */}
+        {/* Banner de Erro */}
         {error && (
-          <div
-            className={clsx(
-              "mb-3 rounded-2xl p-3 text-sm ring-1",
-              isDark ? "bg-red-500/10 text-red-200 ring-red-500/20" : "bg-red-50 text-red-700 ring-red-200"
-            )}
-          >
+          <div className={clsx("mb-6 rounded-xl p-4 text-sm text-center border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
             {error}
           </div>
         )}
 
-        {/* Cards */}
-        <section className="space-y-3">
-          {/* Free */}
-          <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-            <div className="flex items-start justify-between gap-3">
+        {/* --- CARTÕES DE PLANOS --- */}
+        <div className="space-y-4">
+
+          {/* Plan FREE (Recuperado e Estilizado) */}
+          <div className={clsx("rounded-2xl p-5 border transition-all", isDark ? "bg-zinc-900/30 border-zinc-800" : "bg-white border-zinc-200")}>
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <div className="text-base font-semibold">Free</div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>Perfect to try it out</div>
+                <h3 className="text-lg font-bold">Free</h3>
+                <p className={clsx("text-xs", mutedText)}>Perfect to try it out</p>
               </div>
-              <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">$0</div>
-              </div>
+              <span className="text-xl font-black">$0</span>
             </div>
-
-            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                3 total credits included
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                +1 credit when you complete your profile
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                +1 credit for each friend you refer (when they qualify)
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Save results to your gallery
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Download designs
-              </li>
+            <ul className={clsx("space-y-2.5 text-sm", subtleText)}>
+              <li className="flex items-center gap-2"><CheckIcon className="h-4 w-4 opacity-70" /> 3 total credits included</li>
+              <li className="flex items-center gap-2"><CheckIcon className="h-4 w-4 opacity-70" /> Standard quality</li>
             </ul>
-
-            <p className={clsx("mt-2 text-xs", subtleText)}>
-              Free credits are limited and do not renew. 1 credit = 1 render.
-            </p>
           </div>
 
-          {/* Pro */}
-          <div className={clsx("rounded-2xl p-4 ring-1", isDark ? "bg-white/7 ring-white/15" : "bg-white ring-zinc-300")}>
-            <div className="flex items-start justify-between gap-3">
+          {/* Plan PRO (Design Luxo) */}
+          <div className={clsx("rounded-2xl p-6 border-2 transition-all relative", isDark ? "bg-zinc-900/80 border-zinc-800/60" : "bg-white border-zinc-200")}>
+            {isDark && <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>}
+            <div className="flex justify-between items-start mb-4 relative">
               <div>
-                <div className="text-base font-semibold">Pro</div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>Best for creators, real estate, and daily use</div>
+                <h3 className="text-lg font-black" style={{ color: isDark ? goldAccent : 'inherit' }}>Pro</h3>
+                <p className={clsx("text-xs", mutedText)}>Best for daily use</p>
               </div>
-              <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">$9.99</div>
-                <div className="text-xs">/ month</div>
+              <div className="text-right">
+                <span className="text-2xl font-black">$9.99</span>
+                <p className={clsx("text-[10px] uppercase font-bold", subtleText)}>/ month</p>
               </div>
             </div>
-
-            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                100 credits per month
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Priority generation (faster)
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Higher quality output
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Premium styles
-              </li>
+            <ul className="space-y-3 mb-6 relative">
+              <li className="flex items-center gap-3 text-sm font-medium"><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> 100 credits per month</li>
+              <li className="flex items-center gap-3 text-sm font-medium"><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> Priority generation</li>
+              <li className="flex items-center gap-3 text-sm font-medium"><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> Premium Styles</li>
             </ul>
-
-            <button
-              type="button"
-              onClick={() => handleCheckout("pro")}
-              disabled={isBusy}
-              className={clsx(
-                "mt-4 w-full rounded-xl py-3 font-semibold transition",
-                isBusy && "opacity-70 cursor-not-allowed",
-                isDark ? "bg-white text-zinc-950 hover:bg-white/90" : "bg-zinc-900 text-white hover:bg-zinc-800"
-              )}
-            >
+            <button onClick={() => handleCheckout("pro")} disabled={isBusy} className={clsx("w-full py-3.5 rounded-xl font-bold transition-all active:scale-95 relative", isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-black")}>
               {busy === "checkout_pro" ? "Redirecting..." : "Upgrade to Pro"}
             </button>
-
-            <p className={clsx("mt-2 text-xs", subtleText)}>
-              Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
-            </p>
           </div>
 
-          {/* Pro+ */}
-          <div className={clsx("rounded-2xl p-4 ring-1", isDark ? "bg-white/9 ring-white/20" : "bg-white ring-zinc-300")}>
-            <div className="flex items-start justify-between gap-3">
+          {/* Plan PRO+ (Design Luxo Destaque) */}
+          <div className={clsx("rounded-2xl p-6 border-2 relative overflow-hidden transition-all", isDark ? "bg-zinc-900" : "bg-zinc-50")} style={{ borderColor: goldAccent }}>
+            <div className="absolute top-0 right-0 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-wider" style={{ backgroundColor: goldAccent }}>Best Value</div>
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <div className="text-base font-semibold">Pro+</div>
-                  <span
-                    className={clsx(
-                      "rounded-full px-2 py-0.5 text-[11px] font-medium",
-                      isDark ? "bg-amber-400/15 text-amber-200" : "bg-amber-100 text-amber-800"
-                    )}
-                  >
-                    Best value
-                  </span>
-                </div>
-                <div className={clsx("mt-1 text-sm", mutedText)}>
-                  Built for heavy usage, teams, and high-volume clients
-                </div>
+                <h3 className="text-lg font-black">Pro+</h3>
+                <p className={clsx("text-xs", mutedText)}>For high volume</p>
               </div>
-              <div className={clsx("text-right", mutedText)}>
-                <div className="text-lg font-semibold">$19.99</div>
-                <div className="text-xs">/ month</div>
+              <div className="text-right">
+                <span className="text-2xl font-black" style={{ color: goldAccent }}>$19.99</span>
+                <p className={clsx("text-[10px] uppercase font-bold", subtleText)}>/ month</p>
               </div>
             </div>
-
-            <ul className={clsx("mt-3 space-y-2 text-sm", isDark ? "text-white/80" : "text-zinc-700")}>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                300 credits per month
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Priority generation (faster)
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Higher quality output
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckIcon className="mt-0.5 h-4 w-4" />
-                Premium styles
-              </li>
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-center gap-3 text-sm font-bold"><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> 300 credits per month</li>
+              <li className="flex items-center gap-3 text-sm font-medium" style={{ color: mutedText }}><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> All Pro features</li>
+              <li className="flex items-center gap-3 text-sm font-medium" style={{ color: mutedText }}><CheckIcon className="h-4 w-4" style={{ color: goldAccent }} /> Commercial license</li>
             </ul>
-
-            <button
-              type="button"
-              onClick={() => handleCheckout("pro_plus")}
-              disabled={isBusy}
-              className={clsx(
-                "mt-4 w-full rounded-xl py-3 font-semibold transition",
-                isBusy && "opacity-70 cursor-not-allowed",
-                isDark
-                  ? "bg-amber-200 text-zinc-950 hover:bg-amber-200/90"
-                  : "bg-amber-500 text-white hover:bg-amber-600"
-              )}
-            >
-              {busy === "checkout_pro_plus" ? "Redirecting..." : "Upgrade to Pro+"}
+            <button onClick={() => handleCheckout("pro_plus")} disabled={isBusy} className="w-full rounded-xl py-3.5 font-black text-white shadow-lg transition-all active:scale-95 relative overflow-hidden" style={{ background: `linear-gradient(to right, ${goldAccent}, #B6922E)` }}>
+              <span className="relative z-10">{busy === "checkout_pro_plus" ? "Redirecting..." : "Upgrade to Pro+"}</span>
             </button>
-
-            <p className={clsx("mt-2 text-xs", subtleText)}>
-              Credits reset every billing cycle and do not roll over. 1 credit = 1 render.
-            </p>
           </div>
+        </div>
 
-          {/* Manage subscription */}
-          <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-            <div className="text-sm font-semibold">Already subscribed?</div>
-            <p className={clsx("mt-1 text-sm", mutedText)}>
-              Manage your subscription, update your payment method, cancel, or view invoices.
-            </p>
-
-            <button
-              type="button"
-              onClick={handlePortal}
-              disabled={isBusy}
-              className={clsx(
-                "mt-3 w-full rounded-xl py-3 font-semibold transition ring-1",
-                isBusy && "opacity-70 cursor-not-allowed",
-                isDark
-                  ? "bg-transparent text-white ring-white/15 hover:bg-white/10"
-                  : "bg-white text-zinc-900 ring-zinc-200 hover:bg-zinc-50"
-              )}
-            >
-              {busy === "portal" ? "Opening..." : "Manage subscription"}
+        {/* --- RODAPÉ (Gerenciar e FAQ) --- */}
+        <footer className="mt-10 pt-6 border-t border-zinc-200/10 text-center space-y-6">
+          <div>
+            <button onClick={handlePortal} disabled={isBusy} className={clsx("text-xs font-bold uppercase tracking-widest transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-zinc-400 hover:text-zinc-900")}>
+              {busy === "portal" ? "Opening..." : "Already subscribed? Manage Billing"}
             </button>
-
-            <p className={clsx("mt-2 text-xs", subtleText)}>
-              Secure payments by Stripe. You can manage or cancel anytime.
-            </p>
           </div>
+          <p className={clsx("text-xs", subtleText)}>
+            Secure payments by Stripe. Cancel anytime. <br />After upgrade, credits become available automatically.
+          </p>
+        </footer>
 
-          {/* FAQ / Notes */}
-          <div className={clsx("rounded-2xl p-4 ring-1", cardBg)}>
-            <div className="text-sm font-semibold">What happens after I upgrade?</div>
-            <p className={clsx("mt-2 text-sm", mutedText)}>
-              After payment, your plan is activated by the Stripe webhook and your monthly credits become available
-              automatically. Credits reset each billing cycle and do not roll over.
-            </p>
-
-            <div className={clsx("mt-4 text-xs", subtleText)}>
-              Tip: if you get “You need to be signed in”, log in first and try again.
-            </div>
-          </div>
-        </section>
       </div>
     </main>
   );
