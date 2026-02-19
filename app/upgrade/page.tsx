@@ -230,7 +230,7 @@ export default function UpgradePage() {
       </div>
 
       {/* --- MENU FLUTUANTE (DOCK) --- */}
-      <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+      <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] justify-center pointer-events-none">
         <nav className={clsx(
           "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
           "rounded-[2rem]",
