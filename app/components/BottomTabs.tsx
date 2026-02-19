@@ -7,36 +7,39 @@ function clsx(...arr: Array<string | false | null | undefined>) {
   return arr.filter(Boolean).join(" ");
 }
 
+// --- Ícones Premium Padronizados ---
 function HomeIcon({ active, isDark }: { active: boolean; isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 10v10h14V10" />
+    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
   );
 }
-function GridIcon({ active, isDark }: { active: boolean; isDark: boolean }) {
+
+function GalleryIcon({ active, isDark }: { active: boolean; isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4h7v7H4z" />
-      <path d="M13 4h7v7h-7z" />
-      <path d="M4 13h7v7H4z" />
-      <path d="M13 13h7v7h-7z" />
+    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
     </svg>
   );
 }
+
 function StarIcon({ active, isDark }: { active: boolean; isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2l3 7 7 .5-5.5 4.5L18 22l-6-3.5L6 22l1.5-8L2 9.5 9 9z" />
+    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
 }
+
 function UserIcon({ active, isDark }: { active: boolean; isDark: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21a8 8 0 0 0-16 0" />
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
+    <svg viewBox="0 0 24 24" className={clsx("h-5 w-5", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   );
 }
@@ -81,7 +84,7 @@ export function BottomTabs() {
 
   const tabs = [
     { href: "/", label: "Home", icon: HomeIcon, match: (p: string) => p === "/" },
-    { href: "/gallery", label: "Gallery", icon: GridIcon, match: (p: string) => p.startsWith("/gallery") },
+    { href: "/gallery", label: "Gallery", icon: GalleryIcon, match: (p: string) => p.startsWith("/gallery") },
     { href: "/upgrade", label: "Upgrade", icon: StarIcon, match: (p: string) => p.startsWith("/upgrade") },
     { href: "/profile", label: "Profile", icon: UserIcon, match: (p: string) => p.startsWith("/profile") },
   ];
@@ -89,7 +92,7 @@ export function BottomTabs() {
   return (
     <nav
       className={clsx(
-        "fixed bottom-0 left-0 right-0 z-50",
+        "fixed bottom-0 left-0 right-0 z-50 md:hidden",
         isDark ? "bg-zinc-950 border-zinc-800" : "bg-white/90 border-zinc-200",
         "border-t backdrop-blur"
       )}
@@ -110,7 +113,7 @@ export function BottomTabs() {
                 )}
               >
                 <Icon active={active} isDark={isDark} />
-                <div className={clsx("text-[11px]", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))}>
+                <div className={clsx("text-[11px] font-black uppercase tracking-widest mt-1", active ? (isDark ? "text-[#D4AF37]" : "text-zinc-900") : (isDark ? "text-zinc-500" : "text-zinc-500"))}>
                   {t.label}
                 </div>
               </Link>

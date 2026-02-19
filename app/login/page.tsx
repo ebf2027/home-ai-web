@@ -16,7 +16,14 @@ const GoogleIcon = () => (
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
   </svg>
 );
-
+function SparklesIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3L14.5 9L21 10L16 14.5L17.5 21L12 18L6.5 21L8 14.5L3 10L9.5 9L12 3Z" fill="#3B82F6" />
+      <path d="M19 3L20 5.5L22.5 6.5L20 7.5L19 10L18 7.5L15.5 6.5L18 5.5L19 3Z" fill="#60A5FA" />
+    </svg>
+  );
+}
 function LoginForm() {
   const { isDark } = useTheme();
   const router = useRouter();
@@ -101,7 +108,7 @@ function LoginForm() {
 
   return (
     <main className={clsx("min-h-screen transition-colors duration-500 flex items-center justify-center relative overflow-hidden", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
-      
+
       {/* Glow de fundo luxuoso no modo Dark */}
       {isDark && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
@@ -110,12 +117,13 @@ function LoginForm() {
       <div className="w-full max-w-md px-6 py-12 relative z-10">
         <div className={clsx("rounded-[2.5rem] p-10 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] border transition-all duration-700", isDark ? "bg-zinc-900/40 border-white/10" : "bg-white border-zinc-100")}>
 
-          {/* Logo Badge Animado */}
+          {/* Logo Grande e Destacado */}
           <div className="flex justify-center mb-8">
-            <div className={clsx("inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border", isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-zinc-200 text-zinc-900 shadow-sm")}>
-              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: goldAccent }} />
-              Home AI • Premium Access
-            </div>
+            <h1 className="text-4xl font-black tracking-tighter flex items-center">
+              <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
+              <span className="text-blue-500">RenovAi</span>
+              <SparklesIcon className="h-9 w-9 ml-1" />
+            </h1>
           </div>
 
           <header className="text-center mb-10">
