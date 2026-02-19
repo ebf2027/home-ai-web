@@ -118,3 +118,43 @@ Debug da Gallery: Investigar e corrigir a falha na inserção de imagens geradas
 Refinamento da Gallery: Aplicar o novo padrão visual de luxo na visualização das imagens salvas.
 
 Ajuste da Bottom Bar: Decidir sobre a ocultação da barra inferior em telas grandes para evitar redundância com o novo menu.
+
+PROJECT STATE — HOMERENOVAI (Atualizado em 18/02/2026)
+
+1) Visão Geral
+Nome do App: HomeRenovAi
+Status Atual: MVP de Luxo Cross-Platform (Web & Mobile).
+A versão Web recebeu um tratamento exclusivo de "Big Screen Experience", transformando listas verticais em Dashboards, Grids e Tabelas de Preços horizontais, mantendo a identidade visual Premium (#0A0A0A + #D4AF37).
+
+2) Identidade Visual & UI Premium
+Navegação Unificada:
+- Mobile: Barra fixa no rodapé (Bottom Bar).
+- Desktop: "Dock" Flutuante Translúcida (Glassmorphism) centralizada, estilo Apple/Mac, com ícones e labels dourados ativos.
+Cabeçalho Padrão: Logo HomeRenovAi com estrela azul e botão de tema (Sol/Lua) minimalista implementado em todas as páginas.
+
+3) Funcionalidades & Layouts Web (Novos)
+Gallery (Web):
+- Layout em Grid Responsivo (Masonry Style) em vez de lista única.
+- Botões de ação e visualização Full Screen mantidos e otimizados.
+- Menu Dock flutuante para não competir com o rodapé.
+
+Upgrade (Web):
+- Layout "Pricing Table": Cards de planos (Free, Pro, Pro+) dispostos lado a lado (horizontal) no PC.
+- Hierarquia Visual: Plano Pro+ com destaque de tamanho/cor e faixa "Best Value".
+- Transparência: Textos ajustados para "Personal use only" (Free) e remoção de "Private Mode" (Pro+).
+
+Profile (Web - "Cockpit"):
+- Layout Dashboard: Grid de 2 colunas para Desktop.
+- Coluna Esquerda: Status, Avatar, Créditos e Banner de Promoção.
+- Coluna Direita: Menu de Configurações, Políticas e botão Sign Out.
+
+4) Problemas Resolvidos (Hoje)
+Bug da Galeria (Crítico): Corrigida a função `onGenerate` que falhava ao salvar no Supabase (faltava o campo `prompt`). Imagens agora aparecem corretamente.
+Erro de Build (Vercel): Corrigido erro de TypeScript no componente `CheckIcon` que impedia o deploy.
+Legibilidade Light Mode: Ajustada a cor da fonte no card Pro+ para ser visível em fundo branco (texto preto) e fundo escuro (texto branco).
+Cache Mobile: Confirmada a atualização dos textos dos planos via aba anônima.
+
+5) Próximos Passos (Prioridade para Amanhã)
+Alinhamento do Profile (Web): Criar componente "Quick Stats" (Total Designs / Favorite Style) na coluna direita para igualar a altura com a coluna esquerda.
+Legibilidade UI: Aumentar fonte e contraste dos textos internos do accordion "Personal Information".
+Dados Reais: Conectar o "Quick Stats" com o banco de dados (contagem real de imagens).

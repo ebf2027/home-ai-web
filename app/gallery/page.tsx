@@ -4,13 +4,34 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/app/lib/supabase/client";
 import clsx from "clsx";
 import { useTheme } from "../components/ThemeProvider";
+import Link from "next/link";
 
-// --- Icons ---
-const SunIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4" /><line x1="12" y1="2" x2="12" y2="4" /><line x1="12" y1="20" x2="12" y2="22" /><line x1="4.93" y1="4.93" x2="6.34" y2="6.34" /><line x1="17.66" y1="17.66" x2="19.07" y2="19.07" /><line x1="2" y1="12" x2="4" y2="12" /><line x1="20" y1="12" x2="22" y2="12" /><line x1="4.93" y1="19.07" x2="6.34" y2="17.66" /><line x1="17.66" y1="6.34" x2="19.07" y2="4.93" /></svg>;
-const MoonIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>;
+// --- Icons (Sistema Unificado) ---
+function SparklesIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3L14.5 9L21 10L16 14.5L17.5 21L12 18L6.5 21L8 14.5L3 10L9.5 9L12 3Z" fill="#3B82F6" />
+      <path d="M19 3L20 5.5L22.5 6.5L20 7.5L19 10L18 7.5L15.5 6.5L18 5.5L19 3Z" fill="#60A5FA" />
+    </svg>
+  );
+}
 const ShareIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>;
 const DownloadIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
 const XIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
+
+// --- Menu Icons (Novos, iguais ao Figma) ---
+function HomeIcon({ className = "" }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>;
+}
+function GalleryIcon({ className = "" }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>;
+}
+function StarIcon({ className = "" }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
+}
+function UserIcon({ className = "" }) {
+  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+}
 
 // --- Types ---
 type UiItem = {
@@ -95,25 +116,32 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-10 px-4", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
+    <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-10 px-4 relative", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
       <div className="mx-auto max-w-6xl">
 
-        {/* Header Section */}
+        {/* --- Header Section (REMODELADO) --- */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-          <div className="text-center md:text-left">
-            <div className={clsx("inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border mb-4 shadow-sm", isDark ? "bg-white/5 border-white/10" : "bg-white border-zinc-200")}>
-              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: goldAccent }} />
-              Gallery • Premium Collection
-            </div>
-            <h1 className="text-4xl font-black tracking-tighter">Your Creations</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-3xl font-black tracking-tighter flex items-center">
+              <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
+              <span className="text-blue-500">RenovAi</span>
+              <SparklesIcon className="h-8 w-8 ml-1" />
+            </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <div className={clsx("inline-flex items-center gap-2 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm", isDark ? "bg-white/5 border-white/10" : "bg-white border-zinc-200")}>
+              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: goldAccent }} />
+              Premium Collection
+            </div>
+
             <button onClick={() => setShowFavorites(!showFavorites)} className={clsx("px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 shadow-sm", showFavorites ? "bg-[#D4AF37] border-transparent text-black" : (isDark ? "bg-white/5 border-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200"))}>
               {showFavorites ? "★ Show All" : "☆ Favorites"}
             </button>
-            <button onClick={toggleTheme} className={clsx("h-11 w-11 flex items-center justify-center rounded-full border transition-all active:scale-95 shadow-sm", isDark ? "border-white/10 bg-white/5" : "border-zinc-200 bg-white hover:bg-zinc-100")}>
-              {isDark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+
+            {/* CORREÇÃO 1: Botão de Tema usando EMOJIS (igual à Home) */}
+            <button onClick={toggleTheme} className="text-2xl hover:scale-110 transition-transform px-2">
+              {isDark ? "☀️" : "🌙"}
             </button>
           </div>
         </header>
@@ -129,7 +157,7 @@ export default function GalleryPage() {
             {filtered.map((it) => (
               <div key={it.id} className={clsx("group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500", isDark ? "bg-zinc-900/40 border-white/5" : "bg-white border-zinc-100 shadow-xl")}>
 
-                {/* Image Container - AO CLICAR AQUI, ELA ABRE */}
+                {/* Image Container */}
                 <div
                   className="relative aspect-square overflow-hidden cursor-pointer"
                   onClick={() => setSelectedImage(it)}
@@ -137,7 +165,6 @@ export default function GalleryPage() {
                   <img src={it.imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
-                  {/* Botão Favoritar permanece no card */}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(it.id, !it.isFavorite); }}
                     className="absolute top-5 right-5 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white transition-all hover:scale-110 active:scale-90 z-10"
@@ -181,6 +208,50 @@ export default function GalleryPage() {
         )}
       </div>
 
+      {/* --- MENU FLUTUANTE (DOCK) --- */}
+      <div className="fixed bottom-6 md:bottom-10 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+        <nav className={clsx(
+          "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
+          // Forma de cápsula tanto no Mobile quanto Desktop para testar o visual
+          "rounded-[2rem]",
+          // Largura ajustada para não colar nas bordas
+          "w-[90%] md:w-auto",
+          isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
+        )}>
+
+          <Link href="/" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <HomeIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
+              Home
+            </span>
+          </Link>
+
+          <Link href="/gallery" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
+            {/* Ícone e Texto Dourados pois estamos na Galeria */}
+            <GalleryIcon className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
+              Gallery
+            </span>
+            {/* Ponto indicador */}
+            <div className="h-1 w-1 bg-[#D4AF37] rounded-full absolute -bottom-1" />
+          </Link>
+
+          <Link href="/upgrade" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <StarIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
+              Upgrade
+            </span>
+          </Link>
+
+          <Link href="/profile" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <UserIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
+              Profile
+            </span>
+          </Link>
+        </nav>
+      </div>
+
       {/* --- MODAL DE VISUALIZAÇÃO (FULL SCREEN) --- */}
       {selectedImage && (
         <div
@@ -195,7 +266,7 @@ export default function GalleryPage() {
             <XIcon className="h-6 w-6" />
           </button>
 
-          {/* Imagem Ampliada (Sem Labels conforme pedido) */}
+          {/* Imagem Ampliada */}
           <div
             className="relative max-w-5xl w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
