@@ -231,7 +231,7 @@ export default function Home() {
             </h1>
           </div>
           <p className={clsx("text-lg font-bold leading-tight", isDark ? "text-white" : "text-zinc-800")}>Redesign your space with Ai</p>
-          <p className="text-sm text-white md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
+          <p className="text-sm md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
         </header>
 
         {/* PAINÉIS */}
@@ -240,7 +240,7 @@ export default function Home() {
           {/* PAINEL ESQUERDO (Workspace Estável) */}
           <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
             <div className="flex justify-between items-center mb-6 px-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white md:text-zinc-400">Workspace</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest md:text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
                 <CreditsBadge refreshKey={creditsTick} />
                 <button onClick={toggleTheme} className="text-xl hover:scale-110 transition-transform">
@@ -252,7 +252,7 @@ export default function Home() {
             {/* ÁREA DE UPLOAD COM PROPORÇÃO FIXA (aspect-[5/4]) */}
             <div className={clsx("relative w-full aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
-                <div className="flex flex-col items-center justify-center text-white md:text-zinc-500 px-6">
+                <div className="flex flex-col items-center justify-center md:text-zinc-500 px-6">
                   <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
                     <SparklesIcon className="h-7 w-7 text-[#D4AF37] opacity-80" />
                   </div>
@@ -272,7 +272,7 @@ export default function Home() {
             </button>
 
             <div className="mt-auto">
-              <p className="text-[10px] font-black uppercase mb-3 px-2 text-white md:text-zinc-400">1 - Choose Image</p>
+              <p className="text-[10px] font-black uppercase mb-3 px-2 md:text-zinc-400">1 - Choose Image</p>
               <div className={clsx("grid grid-cols-2 gap-4 p-2 rounded-3xl border transition-colors", isDark ? "border-white/10 bg-[#080808]" : "border-zinc-200 bg-zinc-50")}>
                 <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
                   <CameraIcon className="h-5 w-5 text-[#D4AF37] group-hover:scale-110 transition-transform" />
@@ -291,15 +291,15 @@ export default function Home() {
                 <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
                 <div className="h-1 w-4 bg-[#D4AF37] rounded-full mt-0.5" />
               </Link>
-              <Link href="/gallery" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/gallery" className="flex flex-col items-center gap-1.5 md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <GalleryIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Gallery</span>
               </Link>
-              <Link href="/upgrade" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/upgrade" className="flex flex-col items-center gap-1.5 md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <StarIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Upgrade</span>
               </Link>
-              <Link href="/profile" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/profile" className="flex flex-col items-center gap-1.5 md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <UserIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Profile</span>
               </Link>
@@ -312,7 +312,7 @@ export default function Home() {
             {/* Grupo Superior: Título, Grid e Seletor */}
             <div>
               <div className="text-center mb-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white md:text-zinc-500">2 - Select Style</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] md:text-zinc-500">2 - Select Style</p>
               </div>
 
               {/* Grid de Estilos Altos (Portrait) com Texto Externo */}
@@ -327,7 +327,7 @@ export default function Home() {
                       )}>
                         <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
                       </div>
-                      <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-white md:text-zinc-500 group-hover:text-zinc-300")}>
+                      <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "md:text-zinc-500 group-hover:text-zinc-300")}>
                         {s.title}
                       </span>
                     </button>
@@ -336,7 +336,7 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white md:text-zinc-500 mb-4">3 - Room Type</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em]md:text-zinc-500 mb-4">3 - Room Type</p>
                 <select value={roomType} onChange={(e) => setRoomType(e.target.value)} className={clsx("w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center appearance-none focus:border-[#D4AF37] outline-none transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-50 border-zinc-200")}>
                   <option value="">Select Room Environment</option>
                   {ROOM_TYPES.map(r => <option key={r.value} value={r.value}>{r.label.toUpperCase()}</option>)}
@@ -352,7 +352,7 @@ export default function Home() {
                 className={clsx(
                   "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
                   (!file || isGenerating)
-                    ? (isDark ? "bg-white/5 border border-white/5 text-zinc-600 cursor-not-allowed" : "bg-zinc-100 border border-zinc-200 text-white md:text-zinc-400 cursor-not-allowed")
+                    ? (isDark ? "bg-white/5 border border-white/5 text-zinc-600 cursor-not-allowed" : "bg-zinc-100 border border-zinc-200 md:text-zinc-400 cursor-not-allowed")
                     : "bg-gradient-to-r from-[#D4AF37] to-[#B6922E] text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] active:scale-95 hover:brightness-110"
                 )}
               >
@@ -365,7 +365,7 @@ export default function Home() {
                 className={clsx(
                   "w-full py-5 rounded-2xl border font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
                   !resultUrl
-                    ? (isDark ? "border-white/5 text-zinc-600 bg-transparent cursor-not-allowed" : "border-zinc-200 text-white md:text-zinc-400 bg-transparent cursor-not-allowed")
+                    ? (isDark ? "border-white/5 text-zinc-600 bg-transparent cursor-not-allowed" : "border-zinc-200 md:text-zinc-400 bg-transparent cursor-not-allowed")
                     : "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black active:scale-95"
                 )}
               >
@@ -393,28 +393,28 @@ export default function Home() {
                 <span className="text-2xl">☀️</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Lighting</p>
-                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Use natural daylight. Avoid dark rooms for better AI textures.</p>
+                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Use natural daylight. Avoid dark rooms for better AI textures.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">📸</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Perspective</p>
-                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Shoot from a corner. It helps the AI understand depth.</p>
+                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Shoot from a corner. It helps the AI understand depth.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">🧹</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Clutter</p>
-                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Remove small objects. A clean space gives better results.</p>
+                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Remove small objects. A clean space gives better results.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">✨</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Focus</p>
-                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Keep your phone steady. Avoid blurry photos.</p>
+                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Keep your phone steady. Avoid blurry photos.</p>
                 </div>
               </div>
             </div>
