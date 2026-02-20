@@ -216,7 +216,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 items-stretch">
 
           {/* PAINEL ESQUERDO (Workspace Estável) */}
-          <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
             <div className="flex justify-between items-center mb-6 px-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
@@ -359,7 +359,7 @@ export default function Home() {
       {tipsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setTipsOpen(false)} />
-          <div className="relative w-full max-w-sm p-8 rounded-[2.5rem] border border-white/10 bg-[#0F0F0F] text-white shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-sm p-8 rounded-[2.5rem] border border-white/10 bg-black text-white shadow-2xl animate-in fade-in zoom-in-95 duration-300">
             <div className="flex items-center gap-3 mb-8 text-left">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#D4AF37]/10">
                 <LightbulbIcon className="h-7 w-7 text-[#D4AF37]" />
