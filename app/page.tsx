@@ -285,7 +285,7 @@ export default function Home() {
           </section>
 
           {/* PAINEL DIREITO (Layout Flexível Sem Buracos) */}
-          <section className={clsx("rounded-b-[2.5rem] rounded-t-none md:rounded-[2.5rem] border-t-0 md:border-t p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          <section className={clsx("rounded-b-[2.5rem] rounded-t-none md:rounded-[2.5rem] border-t-0 md:border-t p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
 
             {/* Grupo Superior: Título, Grid e Seletor */}
             <div>
