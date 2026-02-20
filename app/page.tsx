@@ -231,7 +231,7 @@ export default function Home() {
             </h1>
           </div>
           <p className={clsx("text-lg font-bold leading-tight", isDark ? "text-white" : "text-zinc-800")}>Redesign your space with Ai</p>
-          <p className="text-xs text-zinc-500">Upload a room photo and generate design variations in different styles</p>
+          <p className="text-xs text-white md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
         </header>
 
         {/* PAINÉIS */}
@@ -252,7 +252,7 @@ export default function Home() {
             {/* ÁREA DE UPLOAD COM PROPORÇÃO FIXA (aspect-[5/4]) */}
             <div className={clsx("relative w-full aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
-                <div className="flex flex-col items-center justify-center text-zinc-500 px-6">
+                <div className="flex flex-col items-center justify-center text-white md:text-zinc-500 px-6">
                   <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
                     <SparklesIcon className="h-7 w-7 text-[#D4AF37] opacity-80" />
                   </div>
@@ -291,15 +291,15 @@ export default function Home() {
                 <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
                 <div className="h-1 w-4 bg-[#D4AF37] rounded-full mt-0.5" />
               </Link>
-              <Link href="/gallery" className="flex flex-col items-center gap-1.5 text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/gallery" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <GalleryIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Gallery</span>
               </Link>
-              <Link href="/upgrade" className="flex flex-col items-center gap-1.5 text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/upgrade" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <StarIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Upgrade</span>
               </Link>
-              <Link href="/profile" className="flex flex-col items-center gap-1.5 text-zinc-500 hover:text-[#D4AF37] transition-all group">
+              <Link href="/profile" className="flex flex-col items-center gap-1.5 text-white md:text-zinc-500 hover:text-[#D4AF37] transition-all group">
                 <UserIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Profile</span>
               </Link>
@@ -312,7 +312,7 @@ export default function Home() {
             {/* Grupo Superior: Título, Grid e Seletor */}
             <div>
               <div className="text-center mb-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">2 - Select Style</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white md:text-zinc-500">2 - Select Style</p>
               </div>
 
               {/* Grid de Estilos Altos (Portrait) com Texto Externo */}
@@ -336,7 +336,7 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4">3 - Room Type</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white md:text-zinc-500 mb-4">3 - Room Type</p>
                 <select value={roomType} onChange={(e) => setRoomType(e.target.value)} className={clsx("w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center appearance-none focus:border-[#D4AF37] outline-none transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-50 border-zinc-200")}>
                   <option value="">Select Room Environment</option>
                   {ROOM_TYPES.map(r => <option key={r.value} value={r.value}>{r.label.toUpperCase()}</option>)}
