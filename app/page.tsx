@@ -240,7 +240,7 @@ export default function Home() {
           {/* PAINEL ESQUERDO (Workspace Estável) */}
           <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
             <div className="flex justify-between items-center mb-6 px-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Workspace</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white md:text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
                 <CreditsBadge refreshKey={creditsTick} />
                 <button onClick={toggleTheme} className="text-xl hover:scale-110 transition-transform">
@@ -272,7 +272,7 @@ export default function Home() {
             </button>
 
             <div className="mt-auto">
-              <p className="text-[10px] font-black uppercase mb-3 px-2 text-zinc-400">1 - Choose Image</p>
+              <p className="text-[10px] font-black uppercase mb-3 px-2 text-white md:text-zinc-400">1 - Choose Image</p>
               <div className={clsx("grid grid-cols-2 gap-4 p-2 rounded-3xl border transition-colors", isDark ? "border-white/10 bg-[#080808]" : "border-zinc-200 bg-zinc-50")}>
                 <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
                   <CameraIcon className="h-5 w-5 text-[#D4AF37] group-hover:scale-110 transition-transform" />
@@ -327,7 +327,7 @@ export default function Home() {
                       )}>
                         <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
                       </div>
-                      <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-zinc-500 group-hover:text-zinc-300")}>
+                      <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-white md:text-zinc-500 group-hover:text-zinc-300")}>
                         {s.title}
                       </span>
                     </button>
@@ -352,7 +352,7 @@ export default function Home() {
                 className={clsx(
                   "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
                   (!file || isGenerating)
-                    ? (isDark ? "bg-white/5 border border-white/5 text-zinc-600 cursor-not-allowed" : "bg-zinc-100 border border-zinc-200 text-zinc-400 cursor-not-allowed")
+                    ? (isDark ? "bg-white/5 border border-white/5 text-zinc-600 cursor-not-allowed" : "bg-zinc-100 border border-zinc-200 text-white md:text-zinc-400 cursor-not-allowed")
                     : "bg-gradient-to-r from-[#D4AF37] to-[#B6922E] text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] active:scale-95 hover:brightness-110"
                 )}
               >
@@ -365,7 +365,7 @@ export default function Home() {
                 className={clsx(
                   "w-full py-5 rounded-2xl border font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
                   !resultUrl
-                    ? (isDark ? "border-white/5 text-zinc-600 bg-transparent cursor-not-allowed" : "border-zinc-200 text-zinc-400 bg-transparent cursor-not-allowed")
+                    ? (isDark ? "border-white/5 text-zinc-600 bg-transparent cursor-not-allowed" : "border-zinc-200 text-white md:text-zinc-400 bg-transparent cursor-not-allowed")
                     : "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black active:scale-95"
                 )}
               >
@@ -393,28 +393,28 @@ export default function Home() {
                 <span className="text-2xl">☀️</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Lighting</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-medium">Use natural daylight. Avoid dark rooms for better AI textures.</p>
+                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Use natural daylight. Avoid dark rooms for better AI textures.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">📸</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Perspective</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-medium">Shoot from a corner. It helps the AI understand depth.</p>
+                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Shoot from a corner. It helps the AI understand depth.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">🧹</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Clutter</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-medium">Remove small objects. A clean space gives better results.</p>
+                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Remove small objects. A clean space gives better results.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">✨</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Focus</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-medium">Keep your phone steady. Avoid blurry photos.</p>
+                  <p className="text-xs text-white md:text-zinc-400 leading-relaxed font-medium">Keep your phone steady. Avoid blurry photos.</p>
                 </div>
               </div>
             </div>
