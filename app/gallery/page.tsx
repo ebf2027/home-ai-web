@@ -53,12 +53,28 @@ async function forceDownload(url: string, filename = "homeai-design") {
   try {
     const res = await fetch(url);
     const blob = await res.blob();
+
+    // A mesma mágica da Gaveta Nativa para o celular
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], `${filename}.jpg`, { type: "image/jpeg" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "HomeRenovAi Design",
+        });
+        return;
+      }
+    }
+
+    // O download normal para Computador
+    const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = objectUrl;
     a.download = `${filename}.jpg`;
     document.body.appendChild(a);
     a.click();
     a.remove();
+    URL.revokeObjectURL(objectUrl);
   } catch (err) {
     window.open(url, "_blank");
   }

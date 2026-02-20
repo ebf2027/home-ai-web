@@ -137,13 +137,35 @@ export default function Home() {
   async function downloadResult() {
     if (!resultUrl) return;
     try {
+      // 1. Pega a imagem real do banco
       const res = await fetch(resultUrl);
       const blob = await res.blob();
+
+      // 2. Tenta invocar a "Gaveta Nativa" do celular (com a imagem dentro)
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], "homerenovai-design.jpg", { type: "image/jpeg" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "HomeRenovAi Design",
+          });
+          return; // Se a gaveta abrir, nosso trabalho aqui terminou
+        }
+      }
+
+      // 3. Se for PC (ou o celular não suportar a gaveta), faz o download normal
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = `homerenovai-design.jpg`;
-      a.click(); URL.revokeObjectURL(url);
-    } catch { window.open(resultUrl, "_blank"); }
+      a.href = url; 
+      a.download = `homerenovai-design.jpg`;
+      document.body.appendChild(a); // Essencial para navegadores chatos
+      a.click(); 
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch { 
+      // Último recurso de segurança caso a internet pisque
+      window.open(resultUrl, "_blank"); 
+    }
   }
 
   async function onGenerate() {
