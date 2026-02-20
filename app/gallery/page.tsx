@@ -18,6 +18,7 @@ function SparklesIcon({ className = "" }) {
 const ShareIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>;
 const DownloadIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
 const XIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
+const TrashIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>;
 
 // --- Menu Icons (Novos, iguais ao Figma) ---
 function HomeIcon({ className = "" }) {
@@ -74,7 +75,6 @@ export default function GalleryPage() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // FUNÇÃO DE ABERTURA: Estado para controlar a imagem ampliada
   const [selectedImage, setSelectedImage] = useState<UiItem | null>(null);
 
   async function load() {
@@ -119,7 +119,7 @@ export default function GalleryPage() {
     <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-10 px-4 relative", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
       <div className="mx-auto max-w-6xl">
 
-        {/* --- Header Section (REMODELADO) --- */}
+        {/* --- Header Section --- */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-3xl font-black tracking-tighter flex items-center">
@@ -139,7 +139,6 @@ export default function GalleryPage() {
               {showFavorites ? "★ Show All" : "☆ Favorites"}
             </button>
 
-            {/* CORREÇÃO 1: Botão de Tema usando EMOJIS (igual à Home) */}
             <button onClick={toggleTheme} className="text-2xl hover:scale-110 transition-transform px-2">
               {isDark ? "☀️" : "🌙"}
             </button>
@@ -155,50 +154,67 @@ export default function GalleryPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((it) => (
-              <div key={it.id} className={clsx("group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500", isDark ? "bg-zinc-900/40 border-white/5" : "bg-white border-zinc-100 shadow-xl")}>
+              <div key={it.id} className={clsx(
+                "group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 hover:-translate-y-1",
+                isDark
+                  ? "bg-zinc-900/40 border-white/5 hover:border-[#D4AF37]/30 hover:shadow-[0_8px_30px_rgba(212,175,55,0.08)]"
+                  : "bg-white border-zinc-100 shadow-xl hover:shadow-2xl hover:border-[#D4AF37]/30"
+              )}>
 
                 {/* Image Container */}
                 <div
                   className="relative aspect-square overflow-hidden cursor-pointer"
                   onClick={() => setSelectedImage(it)}
                 >
-                  <img src={it.imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={it.imageUrl} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(it.id, !it.isFavorite); }}
-                    className="absolute top-5 right-5 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white transition-all hover:scale-110 active:scale-90 z-10"
+                    className="absolute top-5 right-5 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white transition-all hover:scale-110 active:scale-90 z-10 hover:border-[#D4AF37]/50 hover:text-[#D4AF37]"
                   >
                     {it.isFavorite ? "★" : "☆"}
                   </button>
 
                   <div className="absolute top-5 left-5">
-                    <span className="px-3 py-1 bg-[#D4AF37] text-black text-[9px] font-black uppercase tracking-widest rounded-lg">
+                    <span className="px-3 py-1.5 bg-[#D4AF37]/90 backdrop-blur-sm text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg border border-[#D4AF37]/20">
                       {it.style}
                     </span>
                   </div>
                 </div>
 
-                {/* Bottom Content */}
-                <div className="p-6">
-                  <div className="mb-6">
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{it.roomType || "Environment"}</p>
-                    <p className="text-[11px] opacity-60 line-clamp-1 italic">"{it.prompt}"</p>
+                {/* Bottom Content - REFINADO */}
+                <div className="p-6 flex flex-col justify-between h-[160px]">
+
+                  {/* Textos (Placa de Museu) */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-2 text-[#D4AF37] flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/50" />
+                      {it.roomType || "Environment"}
+                    </p>
+                    <div className="relative pl-3 border-l-2 border-[#D4AF37]/30">
+                      <p className="text-[12px] opacity-70 line-clamp-2 italic font-light leading-relaxed">
+                        "{it.prompt}"
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <button onClick={() => forceDownload(it.imageUrl, `homeai-${it.id}`)} className={clsx("flex flex-col items-center gap-1 py-3 rounded-xl border transition-all active:scale-95", isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200")}>
-                      <DownloadIcon className="h-3.5 w-3.5" />
-                      <span className="text-[8px] font-black uppercase">Save</span>
-                    </button>
+                  {/* Botões Minimalistas & Alinhados */}
+                  <div className="flex items-center justify-between gap-2 mt-4">
+                    <div className="flex gap-2 w-full">
+                      <button onClick={() => forceDownload(it.imageUrl, `homeai-${it.id}`)} className={clsx("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border transition-all active:scale-95 group/btn", isDark ? "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10" : "bg-zinc-50 border-zinc-100 hover:bg-zinc-100")}>
+                        <DownloadIcon className="h-4 w-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:text-[#D4AF37] transition-colors" />
+                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover/btn:opacity-100">Save</span>
+                      </button>
 
-                    <button onClick={() => navigator.share?.({ title: 'Home AI', url: it.imageUrl })} className={clsx("flex flex-col items-center gap-1 py-3 rounded-xl border transition-all active:scale-95", isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200")}>
-                      <ShareIcon className="h-3.5 w-3.5" />
-                      <span className="text-[8px] font-black uppercase">Share</span>
-                    </button>
+                      <button onClick={() => navigator.share?.({ title: 'Home AI', url: it.imageUrl })} className={clsx("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border transition-all active:scale-95 group/btn", isDark ? "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10" : "bg-zinc-50 border-zinc-100 hover:bg-zinc-100")}>
+                        <ShareIcon className="h-4 w-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:text-[#D4AF37] transition-colors" />
+                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover/btn:opacity-100">Share</span>
+                      </button>
+                    </div>
 
-                    <button onClick={() => removeItem(it)} className={clsx("flex flex-col items-center gap-1 py-3 rounded-xl border border-red-500/20 text-red-500 transition-all active:scale-95", isDark ? "bg-red-500/5 hover:bg-red-500/10" : "bg-red-50 hover:bg-red-100")}>
-                      <span className="text-[8px] font-black uppercase mt-4">Delete</span>
+                    <button onClick={() => removeItem(it)} className={clsx("w-11 flex items-center justify-center py-2.5 rounded-xl border transition-all active:scale-95 group/del", isDark ? "bg-white/5 border-white/5 hover:bg-red-500/10 hover:border-red-500/20" : "bg-zinc-50 border-zinc-100 hover:bg-red-50 hover:border-red-200")}>
+                      <TrashIcon className="h-4 w-4 opacity-30 group-hover/del:opacity-100 group-hover/del:text-red-500 transition-colors" />
                     </button>
                   </div>
                 </div>
@@ -212,9 +228,7 @@ export default function GalleryPage() {
       <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] justify-center pointer-events-none">
         <nav className={clsx(
           "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
-          // Forma de cápsula tanto no Mobile quanto Desktop para testar o visual
           "rounded-[2rem]",
-          // Largura ajustada para não colar nas bordas
           "w-[90%] md:w-auto",
           isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
         )}>
@@ -227,12 +241,10 @@ export default function GalleryPage() {
           </Link>
 
           <Link href="/gallery" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
-            {/* Ícone e Texto Dourados pois estamos na Galeria */}
             <GalleryIcon className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
             <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
               Gallery
             </span>
-            {/* Ponto indicador */}
             <div className="h-1 w-1 bg-[#D4AF37] rounded-full absolute -bottom-1" />
           </Link>
 
@@ -252,13 +264,12 @@ export default function GalleryPage() {
         </nav>
       </div>
 
-      {/* --- MODAL DE VISUALIZAÇÃO (FULL SCREEN) --- */}
+      {/* --- MODAL DE VISUALIZAÇÃO --- */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-10 animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
-          {/* Botão de Fechar */}
           <button
             className="absolute top-6 right-6 h-12 w-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors z-[110]"
             onClick={() => setSelectedImage(null)}
@@ -266,7 +277,6 @@ export default function GalleryPage() {
             <XIcon className="h-6 w-6" />
           </button>
 
-          {/* Imagem Ampliada */}
           <div
             className="relative max-w-5xl w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
@@ -277,7 +287,6 @@ export default function GalleryPage() {
               className="max-w-full max-h-full object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
             />
 
-            {/* Ações rápidas dentro do Modal */}
             <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 flex gap-4">
               <button
                 onClick={() => forceDownload(selectedImage.imageUrl)}

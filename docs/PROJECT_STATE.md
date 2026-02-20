@@ -158,3 +158,23 @@ Cache Mobile: Confirmada a atualização dos textos dos planos via aba anônima.
 Alinhamento do Profile (Web): Criar componente "Quick Stats" (Total Designs / Favorite Style) na coluna direita para igualar a altura com a coluna esquerda.
 Legibilidade UI: Aumentar fonte e contraste dos textos internos do accordion "Personal Information".
 Dados Reais: Conectar o "Quick Stats" com o banco de dados (contagem real de imagens).
+## Atualizações Recentes (19 de Fevereiro de 2026)
+
+### 🎨 UI/UX & Design (Concluído)
+* **Página de Login:** Atualização do logotipo para a versão premium, destacando o texto em tamanho maior (`text-4xl`) e o ícone de estrela sem a limitação do antigo badge.
+* **Navegação Responsiva (Híbrida):**
+  * **Versão Web (Desktop):** Implementação do Menu Flutuante (Dock) inferior, translúcido e elegante, com margem ajustada para `md:bottom-2`.
+  * **Versão Mobile:** Manutenção da barra fixa no rodapé (`BottomTabs.tsx`), com a adição da classe `md:hidden` para desaparecer automaticamente em telas grandes.
+  * **Ícones Padronizados:** Substituição dos ícones antigos da versão mobile pelos mesmos ícones premium em formato SVG (Home, Gallery, Upgrade e Profile) usados na versão web.
+  * **Correção de Responsividade:** Limpeza de classes Tailwind duplicadas (conflito entre `hidden md:flex` e `flex` solto) que estavam quebrando a alternância de menus no celular.
+
+### 💳 Integração Stripe & Pagamentos (Em andamento)
+* **Setup de Ambiente:** Fixação do desenvolvimento no Modo de Teste (`Test Mode`) no Vercel para permitir simulações de compra seguras e gratuitas.
+* **Configuração de Webhook na Nuvem:** * Novo destino de Webhook criado no painel do Stripe, apontando para a URL de produção do Vercel (`https://[seu-app].vercel.app/api/webhook`).
+  * Evento `checkout.session.completed` devidamente configurado para escutar aprovações de pagamento.
+* **Variáveis e Deploy:** Atualização das chaves de teste (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PRICE_IDs`) no painel do Vercel, seguida de um Redeploy bem-sucedido.
+* **Status Atual:** O checkout processa o cartão de teste e exibe a tela de sucesso, mas a comunicação de volta (Webhook -> Supabase) para liberar os créditos e atualizar o plano ainda está falhando.
+
+### 🚀 Próximos Passos (Para a próxima sessão)
+1. **Debugging do Webhook:** Checar os logs de erro na aba de "Eventos" do Stripe para entender por que a rota `/api/webhook` não está atualizando o banco de dados do Supabase.
+2. **Redesign da Galeria:** Dar o "banho de luxo" nos cards das imagens geradas na página Gallery, finalizando a identidade visual premium do aplicativo. 

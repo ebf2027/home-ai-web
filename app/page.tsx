@@ -78,7 +78,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
   const [pos, setPos] = useState(50);
   const [dragging, setDragging] = useState(false);
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-2xl select-none touch-none bg-black"
+    <div className="relative w-full h-full overflow-hidden rounded-3xl select-none touch-none bg-black"
       onPointerDown={(e) => { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); setDragging(true); }}
       onPointerMove={(e) => { if (dragging) { const r = e.currentTarget.getBoundingClientRect(); setPos(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))); } }}
       onPointerUp={() => setDragging(false)}>
@@ -86,11 +86,11 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={beforeSrc} alt="Before" className="h-full w-full object-cover" draggable={false} />
       </div>
-      <div className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[8px] font-black uppercase text-white border border-white/10">Before</div>
+      <div className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[8px] font-black uppercase text-white border border-white/10 backdrop-blur-sm">Before</div>
       <div className="absolute right-3 top-3 z-10 rounded-full bg-[#D4AF37] px-3 py-1 text-[8px] font-black uppercase text-black shadow-lg">After</div>
       <div className="absolute top-0 h-full" style={{ left: `calc(${pos}% - 1px)` }}>
-        <div className="h-full w-[2px] bg-white shadow-xl" />
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white shadow-2xl flex items-center justify-center text-black font-bold">‹›</div>
+        <div className="h-full w-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white shadow-2xl flex items-center justify-center text-black font-bold cursor-ew-resize">‹›</div>
       </div>
     </div>
   );
@@ -170,7 +170,6 @@ export default function Home() {
       await supabase.storage.from("homeai").upload(path, finalBlob);
       const imageUrl = supabase.storage.from("homeai").getPublicUrl(path).data.publicUrl;
 
-      // CORREÇÃO: Criar um prompt descritivo para garantir a inserção
       const generatedPrompt = `${selectedStyle} style ${roomType || "room"}`;
 
       const { error: dbError } = await supabase.from("gallery_items").insert({
@@ -180,16 +179,15 @@ export default function Home() {
         style: selectedStyle,
         image_url: imageUrl,
         thumb_url: imageUrl,
-        prompt: generatedPrompt, // CAMPO ADICIONADO PARA CORRIGIR O ERRO
+        prompt: generatedPrompt,
         is_favorite: false
       });
 
-      // CORREÇÃO: Tratativa de erro explícita
       if (dbError) throw dbError;
 
       setResultUrl(imageUrl);
     } catch (err: any) {
-      console.error("Erro detalhado:", err); // Log para ajudar a debugar se persistir
+      console.error("Erro detalhado:", err);
       setErrorMsg("Error generating image.");
     } finally {
       setIsGenerating(false);
@@ -217,9 +215,9 @@ export default function Home() {
         {/* PAINÉIS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
 
-          {/* PAINEL ESQUERDO */}
-          <section className={clsx("rounded-[2.5rem] p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
-            <div className="flex justify-between items-center mb-4 px-2">
+          {/* PAINEL ESQUERDO (Workspace Estável) */}
+          <section className={clsx("rounded-[2.5rem] p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+            <div className="flex justify-between items-center mb-6 px-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
                 <CreditsBadge refreshKey={creditsTick} />
@@ -229,11 +227,17 @@ export default function Home() {
               </div>
             </div>
 
-            <div className={clsx("relative aspect-video rounded-3xl border overflow-hidden mb-6 flex items-center justify-center transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-100 border-zinc-200")}>
+            {/* ÁREA DE UPLOAD COM PROPORÇÃO FIXA (aspect-[5/4]) */}
+            <div className={clsx("relative w-full aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
-                <p className="text-[10px] text-center text-zinc-500 uppercase font-black tracking-widest leading-relaxed">
-                  Select a high-quality photo<br />of your room
-                </p>
+                <div className="flex flex-col items-center justify-center text-zinc-500 px-6">
+                  <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
+                    <SparklesIcon className="h-7 w-7 text-[#D4AF37] opacity-80" />
+                  </div>
+                  <p className="text-[10px] text-center uppercase font-black tracking-widest leading-relaxed">
+                    Select a high-quality photo<br />of your room
+                  </p>
+                </div>
               ) : resultUrl ? (
                 <BeforeAfterSlider beforeSrc={previewUrl} afterSrc={resultUrl} />
               ) : (
@@ -241,25 +245,25 @@ export default function Home() {
               )}
             </div>
 
-            <button onClick={() => setTipsOpen(true)} className="flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-8 hover:brightness-125 transition-all outline-none">
+            <button onClick={() => setTipsOpen(true)} className="flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-5 hover:scale-105 transition-all outline-none">
               <LightbulbIcon className="h-5 w-5" /> PHOTO TIPS
             </button>
 
             <div className="mt-auto">
               <p className="text-[10px] font-black uppercase mb-3 px-2 text-zinc-400">1 - Choose Image</p>
               <div className={clsx("grid grid-cols-2 gap-4 p-2 rounded-3xl border transition-colors", isDark ? "border-white/10 bg-[#080808]" : "border-zinc-200 bg-zinc-50")}>
-                <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95", isDark ? "hover:bg-white/5" : "hover:bg-black/5")}>
-                  <CameraIcon className="h-5 w-5 text-[#D4AF37]" />
+                <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
+                  <CameraIcon className="h-5 w-5 text-[#D4AF37] group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-tighter">Use Camera</span>
                 </button>
-                <button onClick={() => uploadInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95", isDark ? "hover:bg-white/5" : "hover:bg-black/5")}>
-                  <UploadIcon className="h-5 w-5 text-[#D4AF37]" />
+                <button onClick={() => uploadInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
+                  <UploadIcon className="h-5 w-5 text-[#D4AF37] group-hover:-translate-y-1 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-tighter">From Gallery</span>
                 </button>
               </div>
             </div>
 
-            <nav className="flex justify-around mt-8 pt-6 border-t border-zinc-500/10 pb-2">
+            <nav className="hidden md:flex justify-around mt-4 pt-3 border-t border-zinc-500/10 pb-1">
               <Link href="/" className="flex flex-col items-center gap-1.5 text-[#D4AF37] group">
                 <HomeIcon className="h-5 w-5" />
                 <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
@@ -280,41 +284,69 @@ export default function Home() {
             </nav>
           </section>
 
-          {/* PAINEL DIREITO */}
-          <section className={clsx("rounded-[2.5rem] p-8 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
-            <div className="text-center mb-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">2 - Select Style</p>
+          {/* PAINEL DIREITO (Layout Flexível Sem Buracos) */}
+          <section className={clsx("rounded-[2.5rem] p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+
+            {/* Grupo Superior: Título, Grid e Seletor */}
+            <div>
+              <div className="text-center mb-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">2 - Select Style</p>
+              </div>
+
+              {/* Grid de Estilos Altos (Portrait) com Texto Externo */}
+              <div className="grid grid-cols-4 gap-2 mb-8">
+                {STYLES.map((s) => {
+                  const isSel = s.id === selectedStyle;
+                  return (
+                    <button key={s.id} onClick={() => setSelectedStyle(s.id)} className="group outline-none flex flex-col gap-3">
+                      <div className={clsx(
+                        "relative w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all duration-300",
+                        isSel ? "border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.3)] scale-105" : "border-transparent hover:border-white/20 hover:scale-105"
+                      )}>
+                        <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
+                      </div>
+                      <span className={clsx("text-[9px] font-black text-center tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-zinc-500 group-hover:text-zinc-300")}>
+                        {s.title}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4">3 - Room Type</p>
+                <select value={roomType} onChange={(e) => setRoomType(e.target.value)} className={clsx("w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center appearance-none focus:border-[#D4AF37] outline-none transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-50 border-zinc-200")}>
+                  <option value="">Select Room Environment</option>
+                  {ROOM_TYPES.map(r => <option key={r.value} value={r.value}>{r.label.toUpperCase()}</option>)}
+                </select>
+              </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 mb-12">
-              {STYLES.map((s) => {
-                const isSel = s.id === selectedStyle;
-                return (
-                  <button key={s.id} onClick={() => setSelectedStyle(s.id)} className="flex flex-col gap-2 group outline-none">
-                    <div className={clsx("relative aspect-square rounded-2xl overflow-hidden border-2 transition-all duration-500", isSel ? "border-[#D4AF37] scale-105 shadow-xl" : "border-transparent opacity-60 group-hover:opacity-100 group-hover:scale-110")}>
-                      <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
-                      {isSel && <div className="absolute inset-0 border-4 border-[#D4AF37]/20 pointer-events-none" />}
-                    </div>
-                    <span className={clsx("text-[8px] font-black text-center transition-colors tracking-widest", isSel ? "text-[#D4AF37]" : "text-zinc-500")}>{s.title}</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="mb-10 text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-4">3 - Room Type</p>
-              <select value={roomType} onChange={(e) => setRoomType(e.target.value)} className={clsx("w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center appearance-none focus:border-[#D4AF37] outline-none transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-50 border-zinc-200")}>
-                <option value="">Select Room Environment</option>
-                {ROOM_TYPES.map(r => <option key={r.value} value={r.value}>{r.label.toUpperCase()}</option>)}
-              </select>
-            </div>
-
-            <div className="mt-auto space-y-4 pt-4">
-              <button onClick={onGenerate} disabled={!file || isGenerating} className={clsx("w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all active:scale-95 shadow-xl", (!file || isGenerating) ? "bg-zinc-800 text-zinc-600 opacity-40 cursor-not-allowed" : "bg-gradient-to-r from-[#D4AF37] to-[#B6922E] text-white hover:brightness-110")}>
+            {/* Botões de Ação (Fixos no Rodapé) */}
+            <div className="mt-auto space-y-4 pt-8">
+              <button
+                onClick={onGenerate}
+                disabled={!file || isGenerating}
+                className={clsx(
+                  "w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
+                  (!file || isGenerating)
+                    ? (isDark ? "bg-white/5 border border-white/5 text-zinc-600 cursor-not-allowed" : "bg-zinc-100 border border-zinc-200 text-zinc-400 cursor-not-allowed")
+                    : "bg-gradient-to-r from-[#D4AF37] to-[#B6922E] text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] active:scale-95 hover:brightness-110"
+                )}
+              >
                 {isGenerating ? "Redesigning..." : "Generate Design"}
               </button>
 
-              <button onClick={downloadResult} disabled={!resultUrl} className={clsx("w-full py-5 rounded-2xl border-2 font-black text-xs uppercase tracking-[0.3em] transition-all active:scale-95", !resultUrl ? "border-zinc-800 text-zinc-600 opacity-30 cursor-not-allowed" : "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black")}>
+              <button
+                onClick={downloadResult}
+                disabled={!resultUrl}
+                className={clsx(
+                  "w-full py-5 rounded-2xl border font-black text-xs uppercase tracking-[0.3em] transition-all duration-300",
+                  !resultUrl
+                    ? (isDark ? "border-white/5 text-zinc-600 bg-transparent cursor-not-allowed" : "border-zinc-200 text-zinc-400 bg-transparent cursor-not-allowed")
+                    : "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black active:scale-95"
+                )}
+              >
                 Download
               </button>
             </div>
@@ -323,7 +355,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- PHOTO TIPS MODAL REINVENTADO --- */}
+      {/* --- PHOTO TIPS MODAL (Intacto) --- */}
       {tipsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setTipsOpen(false)} />
@@ -364,7 +396,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <button onClick={() => setTipsOpen(false)} className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform bg-[#D4AF37] text-black">
+            <button onClick={() => setTipsOpen(false)} className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform bg-[#D4AF37] text-black hover:brightness-110">
               Got it, thanks!
             </button>
           </div>
