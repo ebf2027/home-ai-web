@@ -213,10 +213,10 @@ export default function Home() {
         </header>
 
         {/* PAINÉIS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 items-stretch">
 
           {/* PAINEL ESQUERDO (Workspace Estável) */}
-          <section className={clsx("rounded-[2.5rem] p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
             <div className="flex justify-between items-center mb-6 px-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
@@ -285,7 +285,7 @@ export default function Home() {
           </section>
 
           {/* PAINEL DIREITO (Layout Flexível Sem Buracos) */}
-          <section className={clsx("rounded-[2.5rem] p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          <section className={clsx("rounded-b-[2.5rem] rounded-t-none md:rounded-[2.5rem] border-t-0 md:border-t p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-[#0F0F0F] border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
 
             {/* Grupo Superior: Título, Grid e Seletor */}
             <div>
