@@ -156,15 +156,15 @@ export default function Home() {
       // 3. Se for PC (ou o celular não suportar a gaveta), faz o download normal
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; 
+      a.href = url;
       a.download = `homerenovai-design.jpg`;
       document.body.appendChild(a); // Essencial para navegadores chatos
-      a.click(); 
+      a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    } catch { 
+    } catch {
       // Último recurso de segurança caso a internet pisque
-      window.open(resultUrl, "_blank"); 
+      window.open(resultUrl, "_blank");
     }
   }
 
@@ -231,7 +231,7 @@ export default function Home() {
             </h1>
           </div>
           <p className={clsx("text-lg font-bold leading-tight", isDark ? "text-white" : "text-zinc-800")}>Redesign your space with Ai</p>
-          <p className="text-xs text-white md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
+          <p className="text-sm text-white md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
         </header>
 
         {/* PAINÉIS */}
