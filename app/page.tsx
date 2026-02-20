@@ -305,7 +305,7 @@ export default function Home() {
                       )}>
                         <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
                       </div>
-                      <span className={clsx("text-[9px] font-black text-center tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-zinc-500 group-hover:text-zinc-300")}>
+                      <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "text-zinc-500 group-hover:text-zinc-300")}>
                         {s.title}
                       </span>
                     </button>
