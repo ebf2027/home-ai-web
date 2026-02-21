@@ -267,7 +267,7 @@ export default function UpgradePage() {
             {busy === "portal" ? "Opening..." : "ALREADY SUBSCRIBED? MANAGE BILLING"}
           </button>
 
-          <div className={clsx("text-[10px] md:text-xs leading-relaxed max-w-lg mx-auto opacity-70", subtleText)}>
+          <div className={clsx("text-xs md:text-sm leading-relaxed max-w-lg mx-auto", isDark ? "text-white" : "text-zinc-600")}>
             <p className="mb-1">Secure payments by Stripe. Cancel anytime.</p>
             <p>After upgrade, credits become available automatically.</p>
           </div>
