@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../components/ThemeProvider";
 import clsx from "clsx";
 import type React from "react";
@@ -53,11 +53,30 @@ async function postForRedirectUrl(endpoint: string, body?: any) {
 
 export default function UpgradePage() {
   const { isDark, toggleTheme } = useTheme();
-  
+
   // 🌟 MOCK STATE ADICIONADO AQUI 🌟
   // Altere manualmente a palavra "pro" abaixo para "free" ou "pro_plus" e salve para testar o visual!
-  const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "pro_plus">("pro"); 
-  
+  // 🌟 ESTADO DO PLANO (Começa como 'free' até o banco responder) 🌟
+  const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "pro_plus">("free");
+
+  // 🌟 BUSCA O PLANO REAL NO SUPABASE (Reaproveitando a inteligência do Perfil) 🌟
+  useEffect(() => {
+    async function getUserPlan() {
+      try {
+        const res = await fetch("/api/credits", { cache: "no-store" });
+        const data = await res.json();
+
+        if (data.ok && data.plan) {
+          // data.plan já vem do seu banco como "free", "pro" ou "pro_plus"
+          setCurrentPlan(data.plan);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar o plano:", error);
+      }
+    }
+    getUserPlan();
+  }, []);
+
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
   const isBusy = busy !== null;
@@ -147,7 +166,7 @@ export default function UpgradePage() {
               <li className="flex items-center gap-3"><CheckIcon className="h-5 w-5 opacity-70" /> Standard quality</li>
               <li className="flex items-center gap-3"><CheckIcon className="h-5 w-5 opacity-70" /> Personal use only</li>
             </ul>
-            
+
             {/* Lógica Condicional do Botão Free */}
             {currentPlan === "free" ? (
               <button disabled className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider opacity-50 cursor-default border", isDark ? "border-white/10" : "border-zinc-200")}>
@@ -178,12 +197,16 @@ export default function UpgradePage() {
               <li className="flex items-center gap-3 font-medium"><CheckIcon className="h-5 w-5" style={{ color: goldAccent }} /> Priority generation</li>
               <li className="flex items-center gap-3 font-medium"><CheckIcon className="h-5 w-5" style={{ color: goldAccent }} /> Premium Styles</li>
             </ul>
-            
+
             {/* Lógica Condicional do Botão Pro */}
             {currentPlan === "pro" ? (
               <button disabled className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider cursor-default border-2 opacity-60" style={{ borderColor: goldAccent, color: goldAccent }}>
                 Current Plan
               </button>
+            ) : currentPlan === "pro_plus" ? (
+              <div className={clsx("w-full py-4 text-center font-bold text-xs uppercase tracking-widest opacity-40", isDark ? "text-white" : "text-zinc-900")}>
+                Included in your plan
+              </div>
             ) : (
               <button onClick={() => handleCheckout("pro")} disabled={isBusy} className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95", isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-black")}>
                 {busy === "checkout_pro" ? "Redirecting..." : "Upgrade to Pro"}
