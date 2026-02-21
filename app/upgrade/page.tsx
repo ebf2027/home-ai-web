@@ -53,6 +53,11 @@ async function postForRedirectUrl(endpoint: string, body?: any) {
 
 export default function UpgradePage() {
   const { isDark, toggleTheme } = useTheme();
+  
+  // 🌟 MOCK STATE ADICIONADO AQUI 🌟
+  // Altere manualmente a palavra "pro" abaixo para "free" ou "pro_plus" e salve para testar o visual!
+  const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "pro_plus">("pro"); 
+  
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
   const isBusy = busy !== null;
@@ -91,7 +96,7 @@ export default function UpgradePage() {
     <main className={clsx("min-h-screen transition-colors duration-300 pb-40 pt-6 px-4 md:px-10", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
       <div className="mx-auto max-w-6xl">
 
-        {/* --- CABEÇALHO (NOVO - Igual Home/Gallery) --- */}
+        {/* --- CABEÇALHO --- */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-3xl font-black tracking-tighter flex items-center">
@@ -102,11 +107,9 @@ export default function UpgradePage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Texto Descritivo (só no PC) */}
             <p className={clsx("hidden md:block text-xs font-medium uppercase tracking-widest", subtleText)}>
               Invest in your creativity
             </p>
-            {/* Botão de Tema (Emojis) */}
             <button onClick={toggleTheme} className="text-2xl hover:scale-110 transition-transform px-2">
               {isDark ? "☀️" : "🌙"}
             </button>
@@ -120,14 +123,13 @@ export default function UpgradePage() {
           </p>
         </div>
 
-        {/* Banner de Erro */}
         {error && (
           <div className={clsx("mb-8 max-w-md mx-auto rounded-xl p-4 text-sm text-center border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
             {error}
           </div>
         )}
 
-        {/* --- GRID DE PLANOS (Horizontal no PC / Vertical no Mobile) --- */}
+        {/* --- GRID DE PLANOS --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start max-w-5xl mx-auto">
 
           {/* Plan FREE */}
@@ -145,9 +147,17 @@ export default function UpgradePage() {
               <li className="flex items-center gap-3"><CheckIcon className="h-5 w-5 opacity-70" /> Standard quality</li>
               <li className="flex items-center gap-3"><CheckIcon className="h-5 w-5 opacity-70" /> Personal use only</li>
             </ul>
-            <button disabled className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider opacity-50 cursor-default border", isDark ? "border-white/10" : "border-zinc-200")}>
-              Current Plan
-            </button>
+            
+            {/* Lógica Condicional do Botão Free */}
+            {currentPlan === "free" ? (
+              <button disabled className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider opacity-50 cursor-default border", isDark ? "border-white/10" : "border-zinc-200")}>
+                Current Plan
+              </button>
+            ) : (
+              <div className={clsx("w-full py-4 text-center font-bold text-xs uppercase tracking-widest opacity-40", isDark ? "text-white" : "text-zinc-900")}>
+                Included in your plan
+              </div>
+            )}
           </div>
 
           {/* Plan PRO */}
@@ -168,9 +178,17 @@ export default function UpgradePage() {
               <li className="flex items-center gap-3 font-medium"><CheckIcon className="h-5 w-5" style={{ color: goldAccent }} /> Priority generation</li>
               <li className="flex items-center gap-3 font-medium"><CheckIcon className="h-5 w-5" style={{ color: goldAccent }} /> Premium Styles</li>
             </ul>
-            <button onClick={() => handleCheckout("pro")} disabled={isBusy} className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95", isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-black")}>
-              {busy === "checkout_pro" ? "Redirecting..." : "Upgrade to Pro"}
-            </button>
+            
+            {/* Lógica Condicional do Botão Pro */}
+            {currentPlan === "pro" ? (
+              <button disabled className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider cursor-default border-2 opacity-60" style={{ borderColor: goldAccent, color: goldAccent }}>
+                Current Plan
+              </button>
+            ) : (
+              <button onClick={() => handleCheckout("pro")} disabled={isBusy} className={clsx("w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95", isDark ? "bg-white text-black hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-black")}>
+                {busy === "checkout_pro" ? "Redirecting..." : "Upgrade to Pro"}
+              </button>
+            )}
           </div>
 
           {/* Plan PRO+ (BEST VALUE) */}
@@ -183,7 +201,6 @@ export default function UpgradePage() {
 
             <div className="flex justify-between items-start mb-6 mt-2">
               <div>
-                {/* CORREÇÃO: Cor do título agora é dinâmica (Preto no Light / Branco no Dark) */}
                 <h3 className={clsx("text-xl font-black", isDark ? "text-white" : "text-zinc-900")}>Pro+</h3>
                 <p className={clsx("text-xs mt-1", mutedText)}>For high volume</p>
               </div>
@@ -196,7 +213,6 @@ export default function UpgradePage() {
             <div className="h-px w-full bg-[#D4AF37]/20 mb-6" />
 
             <ul className="space-y-4 text-sm mb-8">
-              {/* CORREÇÃO: Cor dos itens agora é dinâmica */}
               <li className={clsx("flex items-center gap-3 font-bold", isDark ? "text-white" : "text-zinc-900")}>
                 <CheckIcon className="h-5 w-5" style={{ color: goldAccent }} /> 300 credits / mo
               </li>
@@ -208,14 +224,21 @@ export default function UpgradePage() {
               </li>
             </ul>
 
-            <button onClick={() => handleCheckout("pro_plus")} disabled={isBusy} className="w-full rounded-xl py-4 font-black text-sm uppercase tracking-wider text-white shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all active:scale-95 relative overflow-hidden group hover:brightness-110" style={{ background: `linear-gradient(to right, ${goldAccent}, #B6922E)` }}>
-              <span className="relative z-10">{busy === "checkout_pro_plus" ? "Redirecting..." : "Upgrade to Pro+"}</span>
-            </button>
+            {/* Lógica Condicional do Botão Pro+ */}
+            {currentPlan === "pro_plus" ? (
+              <button disabled className="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider cursor-default border-2 opacity-60" style={{ borderColor: goldAccent, color: goldAccent }}>
+                Current Plan
+              </button>
+            ) : (
+              <button onClick={() => handleCheckout("pro_plus")} disabled={isBusy} className="w-full rounded-xl py-4 font-black text-sm uppercase tracking-wider text-white shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all active:scale-95 relative overflow-hidden group hover:brightness-110" style={{ background: `linear-gradient(to right, ${goldAccent}, #B6922E)` }}>
+                <span className="relative z-10">{busy === "checkout_pro_plus" ? "Redirecting..." : "Upgrade to Pro+"}</span>
+              </button>
+            )}
           </div>
 
         </div>
 
-        {/* --- RODAPÉ DE PAGAMENTO E SEGURANÇA (AQUI ESTÁ A INCLUSÃO SOLICITADA) --- */}
+        {/* --- RODAPÉ DE PAGAMENTO E SEGURANÇA --- */}
         <div className="mt-16 md:mt-24 pt-8 border-t border-zinc-200/10 text-center space-y-4">
           <button onClick={handlePortal} disabled={isBusy} className={clsx("text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-colors border-b border-transparent hover:border-current pb-0.5", isDark ? "text-zinc-500 hover:text-white" : "text-zinc-400 hover:text-zinc-900")}>
             {busy === "portal" ? "Opening..." : "ALREADY SUBSCRIBED? MANAGE BILLING"}
@@ -253,7 +276,6 @@ export default function UpgradePage() {
           </Link>
 
           <Link href="/upgrade" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
-            {/* Ícone e Texto Dourados pois estamos em Upgrade */}
             <StarIcon className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
             <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
               Upgrade

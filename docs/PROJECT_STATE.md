@@ -178,3 +178,31 @@ Dados Reais: Conectar o "Quick Stats" com o banco de dados (contagem real de ima
 ### 🚀 Próximos Passos (Para a próxima sessão)
 1. **Debugging do Webhook:** Checar os logs de erro na aba de "Eventos" do Stripe para entender por que a rota `/api/webhook` não está atualizando o banco de dados do Supabase.
 2. **Redesign da Galeria:** Dar o "banho de luxo" nos cards das imagens geradas na página Gallery, finalizando a identidade visual premium do aplicativo. 
+# Diário de Desenvolvimento - HomeRenovAi
+
+## 🛠️ Atualizações Recentes (Refinamento de UI/UX e Mobile)
+
+### 1. Reestruturação da "Mesa de Trabalho" (Home)
+* **Estabilidade do Painel de Upload:** A área da imagem recebeu uma proporção fixa (`aspect-[5/4]`), eliminando o "pula-pula" de layout ao carregar fotos.
+* **Layout Limpo no Painel Direito:** * Imagens de estilos alteradas para o formato retrato (`aspect-[3/4]`), dando mais protagonismo visual.
+  * Texto dos estilos movido para baixo das imagens.
+  * Otimização dos espaços verticais (gaps, margins e paddings) para eliminar os "buracos" no layout.
+* **Paleta de Cores Premium:** Retornamos o fundo dos painéis para o preto puro (`bg-black`) estilo OLED, destacando as imagens, e ajustamos os botões de câmera/galeria para um cinza escuro (`#161616`) para manter o contraste elegante.
+* **Ajuste de Tipografia:** Aumento da fonte do subtítulo do cabeçalho de `text-xs` para `text-sm` para melhor legibilidade.
+
+### 2. Otimização Perfeita para Mobile (Responsividade)
+* **Fim da Duplicidade de Menus:** Ocultamos o menu interno de navegação no painel esquerdo apenas na versão mobile (`hidden md:flex`), deixando apenas a barra inferior (Bottom Bar) nativa, limpando a tela.
+* **Fusão de Painéis (Efeito App Nativo):** Removemos o espaçamento e as bordas divisórias entre o painel de cima e o de baixo no celular. Agora eles parecem uma única "folha" contínua e fluida na rolagem.
+* **Ajuste de Textos Vazados:** Implementação de truncamento (`truncate`) e redução dinâmica de fonte nos nomes dos estilos compridos (ex: SCANDINAVIAN) para evitar que as letras invadam o espaço ao lado em telas estreitas.
+* **Contraste Dinâmico de Textos:** Uso de herança de cores (camaleão) nos textos de apoio. Eles agora ficam brancos no modo escuro e escuros no modo claro automaticamente no celular, garantindo leitura perfeita sem invisibilidade.
+
+### 3. Correções de Funcionalidade
+* **Download Nativo em Celulares:** Rescrita das funções de download nas abas `Home` e `Gallery`. Agora, ao invés de forçar um download silencioso (que era bloqueado pelo iPhone/Android), o app aciona a "Gaveta de Compartilhamento Nativa" (`navigator.share`), permitindo que o usuário clique em "Salvar Imagem" de forma oficial e segura no aparelho. No PC, o download direto continua normal.
+
+### 4. Workflow de Desenvolvimento
+* **Ambiente Local:** Adoção do uso do `npm run dev` (`localhost:3000`) para testes de UI instantâneos e em tempo real, deixando o envio para o Vercel (`git push`) apenas para validações de código mobile ou fechamento de pacotes.
+
+---
+
+## 🚀 Próximo Passo (Agendado)
+* **Inteligência da Tela de Upgrade:** Conectar a aba Upgrade ao banco de dados (Supabase) para que os cartões leiam o plano atual do usuário em tempo real. O botão "CURRENT PLAN" deverá sair da posição fixa do cartão Free e se posicionar dinamicamente no plano correto (ex: Pro), bloqueando upgrades desnecessários e refletindo o status real da assinatura.
