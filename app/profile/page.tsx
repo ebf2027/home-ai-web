@@ -371,7 +371,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <footer className="mt-16 text-center opacity-30">
+        <footer className="mt-16 text-center opacity-60">
           <p className="text-[8px] font-black uppercase tracking-[0.4em]">HomeRenovAi v2.1.0 • Built for Excellence</p>
         </footer>
       </div>
