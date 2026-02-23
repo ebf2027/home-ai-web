@@ -166,7 +166,14 @@ export default function GalleryPage() {
             <div className="h-8 w-8 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 opacity-30 text-[10px] font-black uppercase tracking-[0.3em]">No designs found yet.</div>
+          <div className="text-center py-20 opacity-30">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em]">
+              No designs found yet.
+            </div>
+            <div className="mt-3 text-xs md:text-sm font-normal normal-case tracking-normal">
+              Create your first image and view it here in your gallery.
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((it) => (

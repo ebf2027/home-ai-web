@@ -377,47 +377,56 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- PHOTO TIPS MODAL (Intacto) --- */}
+      {/* --- PHOTO TIPS MODAL (Dinâmico Light/Dark) --- */}
       {tipsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setTipsOpen(false)} />
-          <div className="relative w-full max-w-sm p-8 rounded-[2.5rem] border border-white/10 bg-black text-white shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          {/* Fundo escurecido/clareado translúcido */}
+          <div
+            className={clsx("absolute inset-0 backdrop-blur-md", isDark ? "bg-black/80" : "bg-white/80")}
+            onClick={() => setTipsOpen(false)}
+          />
+
+          {/* Caixa Principal */}
+          <div className={clsx("relative w-full max-w-sm p-8 rounded-[2.5rem] border shadow-2xl animate-in fade-in zoom-in-95 duration-300", isDark ? "bg-black text-white border-white/10" : "bg-white text-zinc-900 border-zinc-200")}>
+
             <div className="flex items-center gap-3 mb-8 text-left">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#D4AF37]/10">
                 <LightbulbIcon className="h-7 w-7 text-[#D4AF37]" />
               </div>
               <h3 className="text-xl font-black uppercase tracking-tighter italic">Photo Tips</h3>
             </div>
+
             <div className="space-y-8 mb-10 text-left">
               <div className="flex gap-5">
                 <span className="text-2xl">☀️</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Lighting</p>
-                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Use natural daylight. Avoid dark rooms for better AI textures.</p>
+                  <p className={clsx("text-xs leading-relaxed font-medium", isDark ? "text-zinc-300" : "text-zinc-600")}>Use natural daylight. Avoid dark rooms for better AI textures.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">📸</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Perspective</p>
-                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Shoot from a corner. It helps the AI understand depth.</p>
+                  <p className={clsx("text-xs leading-relaxed font-medium", isDark ? "text-zinc-300" : "text-zinc-600")}>Shoot from a corner. It helps the AI understand depth.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">🧹</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Clutter</p>
-                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Remove small objects. A clean space gives better results.</p>
+                  <p className={clsx("text-xs leading-relaxed font-medium", isDark ? "text-zinc-300" : "text-zinc-600")}>Remove small objects. A clean space gives better results.</p>
                 </div>
               </div>
               <div className="flex gap-5">
                 <span className="text-2xl">✨</span>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1">Focus</p>
-                  <p className="text-xs md:text-zinc-400 leading-relaxed font-medium">Keep your phone steady. Avoid blurry photos.</p>
+                  <p className={clsx("text-xs leading-relaxed font-medium", isDark ? "text-zinc-300" : "text-zinc-600")}>Keep your phone steady. Avoid blurry photos.</p>
                 </div>
               </div>
             </div>
+
             <button onClick={() => setTipsOpen(false)} className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform bg-[#D4AF37] text-black hover:brightness-110">
               Got it, thanks!
             </button>

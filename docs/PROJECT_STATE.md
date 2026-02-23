@@ -206,3 +206,37 @@ Dados Reais: Conectar o "Quick Stats" com o banco de dados (contagem real de ima
 
 ## 🚀 Próximo Passo (Agendado)
 * **Inteligência da Tela de Upgrade:** Conectar a aba Upgrade ao banco de dados (Supabase) para que os cartões leiam o plano atual do usuário em tempo real. O botão "CURRENT PLAN" deverá sair da posição fixa do cartão Free e se posicionar dinamicamente no plano correto (ex: Pro), bloqueando upgrades desnecessários e refletindo o status real da assinatura.
+PROJECT STATE — HOMERENOVAI (Atualizado em 21/02/2026)
+1) Visão Geral
+
+Nome do App: HomeRenovAi
+
+Status Atual: MVP de Luxo Cross-Platform (Web & Mobile) com integração real de banco de dados e UI refinada.
+
+Identidade Visual: Dark Profundo (#0A0A0A) com Gold Accent (#D4AF37), adaptável perfeitamente ao Light Mode.
+
+2) Funcionalidades & Integrações (Vitórias de Hoje)
+
+Upgrade Dinâmico (Supabase): A página de Upgrade agora lê o status real do usuário (via /api/credits).
+
+Hierarquia de Planos (UX): Implementada a lógica inteligente nos botões de assinatura. O app reconhece níveis (Free < Pro < Pro+) e bloqueia downgrades acidentais, exibindo "Included in your plan" para planos inferiores e "Current Plan" para o atual.
+
+Photo Tips Modal: O modal de dicas de fotografia agora respeita o sistema global de temas, alternando seu fundo glassmorphism e textos entre claro e escuro de forma suave.
+
+3) Otimização Responsiva e Legibilidade (Hoje)
+
+Textos Híbridos (Mobile vs. Desktop): Textos de rodapé na aba Upgrade (sobre o Stripe) e na aba Profile ("Built for Excellence") receberam regras específicas de legibilidade.
+
+Mobile: Cores sólidas (brancas no modo escuro) e sem transparência para leitura perfeita em telas pequenas.
+
+Desktop: Retorno à opacidade sutil (30% a 70%) e tons de cinza (zinc-500) para manter a elegância e descrição em telas grandes.
+
+4) Branding & App Icon (Conceito Definido)
+
+Conceito "O Rascunho e a Realidade": O ícone do aplicativo não terá letras nem "luzes de IA" clichês. O símbolo é o contorno de uma casa, dividido verticalmente:
+
+Metade Esquerda: Linha de ouro finíssima (representando o "Antes" e a planta do arquiteto).
+
+Metade Direita: Bloco de ouro escovado, grosso e sólido (representando o "Depois" e a realidade tátil e luxuosa).
+
+Próximo Passo do Ícone: Gerar a imagem oficial através de um prompt estruturado em um gerador externo (Midjourney/DALL-E) nos fundos Dark (Oficial) e Light.
