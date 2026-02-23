@@ -250,7 +250,7 @@ export default function Home() {
             </div>
 
             {/* ÁREA DE UPLOAD COM PROPORÇÃO FIXA (aspect-[5/4]) */}
-            <div className={clsx("relative w-full aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
+            <div className={clsx("relative w-full aspect-square md:aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
                 <div className="flex flex-col items-center justify-center md:text-zinc-500 px-6">
                   <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
