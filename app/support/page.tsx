@@ -3,7 +3,7 @@ export default function SupportPage() {
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-3xl font-semibold">Support</h1>
       <p className="mt-3 text-zinc-700">
-        Need help with Home AI? Contact us and we’ll get back to you as soon as possible.
+        Need help with HomeRenovAi? Contact us and we’ll get back to you as soon as possible.
       </p>
 
       <div className="mt-6 space-y-2">
@@ -14,7 +14,7 @@ export default function SupportPage() {
           </a>
         </p>
         <p className="text-zinc-700">
-          Subject suggestion: “Home AI — Billing/Subscription” or “Home AI — Technical Support”
+          Subject suggestion: “HomeRenovAi — Billing/Subscription” or “HomeRenovAi — Technical Support”
         </p>
       </div>
     </main>

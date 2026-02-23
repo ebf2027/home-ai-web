@@ -29,6 +29,14 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
+  const refCode = searchParams.get("ref");
+
+  // "Agarra" o código de indicação do amigo e salva na memória secreta do navegador
+  useEffect(() => {
+    if (refCode) {
+      localStorage.setItem("homerenovai_ref", refCode);
+    }
+  }, [refCode]);
 
   const supabase = useMemo(() => createClient(), []);
 

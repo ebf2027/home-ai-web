@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Privacy Policy — Home AI",
+  title: "Privacy Policy — HomeRenovAi",
 };
 
 export default function PrivacyPage() {
@@ -9,7 +9,7 @@ export default function PrivacyPage() {
 
       <section className="mt-6 space-y-4 text-zinc-700">
         <p>
-          Home AI collects the information you provide to create your account and generate design results,
+          HomeRenovAi collects the information you provide to create your account and generate design results,
           including images you upload and basic account data.
         </p>
         <p>

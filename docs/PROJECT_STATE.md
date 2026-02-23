@@ -1,6 +1,6 @@
 PROJECT STATE — HOME-AI-WEB (Atualizado em 14/02/2026)
 1) Visão Geral
-Nome do app: Home AI
+Nome do app: HomeRenovAi
 
 Status atual: MVP de Luxo com Identidade Visual Premium. Sistema de Tema Global Persistente (Light/Dark) implementado. Login e Fluxo de Assinatura totalmente customizados com acabamento em Gold Accent.
 
@@ -16,7 +16,7 @@ Paleta de Cores: Fundo Dark Profundo (#0A0A0A) e acentos em Dourado Premium (#D4
 
 Home (Smoking de Gala):
 
-Badge superior animado: Home AI • Premium.
+Badge superior animado: HomeRenovAi • Premium.
 
 Botão de Geração com gradiente dourado e efeito de brilho.
 
@@ -65,7 +65,7 @@ PROJECT STATE — HOME-AI-WEB (Versão atualizada em 16/02/2026)
 Aqui está o documento atualizado com as vitórias de hoje (incluindo o Photo Tips):
 
 1) Visão Geral
-Nome: Home AI
+Nome: HomeRenovAi
 
 Status: MVP de Luxo. Identidade visual consolidada com acabamento em Gold Accent (#D4AF37) e Dark Mode profundo.
 

@@ -50,6 +50,7 @@ function UserIconMenu({ className = "" }) {
 const goldAccent = "#D4AF37";
 
 export default function ProfilePage() {
+  const [showInviteInfo, setShowInviteInfo] = useState(false);
   const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const supabase = createClient();
@@ -244,7 +245,7 @@ export default function ProfilePage() {
 
               <button
                 onClick={() => {
-                  const link = `https://homeai.web/join?ref=${user?.id}`;
+                  const link = `${window.location.origin}/login?ref=${user?.id}`;
                   navigator.clipboard.writeText(link);
                   alert("Referral link copied! Share it to earn +1 credit per friend.");
                 }}
@@ -252,6 +253,12 @@ export default function ProfilePage() {
                   isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200")}
               >
                 Invite Friend • Earn +1 Credit
+              </button>
+              <button
+                onClick={() => setShowInviteInfo(true)}
+                className="mt-4 w-full text-center text-[9px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-[#D4AF37] transition-all flex items-center justify-center gap-1.5"
+              >
+                <span className="text-[12px]">ⓘ</span> How it works
               </button>
             </section>
 
@@ -415,7 +422,52 @@ export default function ProfilePage() {
           </Link>
         </nav>
       </div>
+      {/* MODAL: HOW IT WORKS (REFERRAL) - CORRIGIDO */}
+      {showInviteInfo && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
+          onClick={() => setShowInviteInfo(false)}
+        >
+          <div
+            className={clsx(
+              "relative w-full max-w-sm p-8 rounded-[2rem] border shadow-2xl text-center transition-all",
+              isDark ? "bg-[#0A0A0A] border-white/10" : "bg-white border-zinc-200"
+            )}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 flex items-center justify-center gap-2">
+              <span className="text-[#D4AF37]">✦</span> How It Works
+            </h3>
 
+            <div className={clsx("space-y-4 text-xs font-light leading-relaxed mb-8 text-left", isDark ? "opacity-80" : "text-zinc-600")}>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">1.</span>
+                <span>Copy your unique referral link and send it to a friend.</span>
+              </p>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">2.</span>
+                <span>Your friend clicks the link and creates a new account.</span>
+              </p>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">3.</span>
+                <span>
+                  You automatically earn <b className="text-[#D4AF37] font-black">+1 Free Credit</b> the moment they log in for the first time!
+                </span>
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowInviteInfo(false)}
+              className={clsx(
+                "w-full py-4 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-colors",
+                isDark ? "border-white/10 hover:bg-white/5" : "border-zinc-200 hover:bg-zinc-50"
+              )}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

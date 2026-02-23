@@ -19,7 +19,8 @@ const ShareIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg
 const DownloadIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
 const XIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 const TrashIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>;
-
+const ChevronLeftIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="15 18 9 12 15 6" /></svg>;
+const ChevronRightIcon = ({ className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6" /></svg>;
 // --- Menu Icons (Novos, iguais ao Figma) ---
 function HomeIcon({ className = "" }) {
   return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>;
@@ -92,6 +93,24 @@ export default function GalleryPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [selectedImage, setSelectedImage] = useState<UiItem | null>(null);
+  // --- Lógica do Modo Cinema (Carrossel) ---
+  function showNextImage(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!selectedImage) return;
+    const currentIndex = filtered.findIndex((img) => img.id === selectedImage.id);
+    if (currentIndex < filtered.length - 1) {
+      setSelectedImage(filtered[currentIndex + 1]);
+    }
+  }
+
+  function showPrevImage(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!selectedImage) return;
+    const currentIndex = filtered.findIndex((img) => img.id === selectedImage.id);
+    if (currentIndex > 0) {
+      setSelectedImage(filtered[currentIndex - 1]);
+    }
+  }
 
   async function load() {
     setLoading(true); setErrorMsg(null);
@@ -230,7 +249,7 @@ export default function GalleryPage() {
                         <span className="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover/btn:opacity-100">Save</span>
                       </button>
 
-                      <button onClick={() => navigator.share?.({ title: 'Home AI', url: it.imageUrl })} className={clsx("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border transition-all active:scale-95 group/btn", isDark ? "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10" : "bg-zinc-50 border-zinc-100 hover:bg-zinc-100")}>
+                      <button onClick={() => navigator.share?.({ title: 'HomeRenovAi', url: it.imageUrl })} className={clsx("flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border transition-all active:scale-95 group/btn", isDark ? "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10" : "bg-zinc-50 border-zinc-100 hover:bg-zinc-100")}>
                         <ShareIcon className="h-4 w-4 opacity-50 group-hover/btn:opacity-100 group-hover/btn:text-[#D4AF37] transition-colors" />
                         <span className="text-[9px] font-bold uppercase tracking-wider opacity-60 group-hover/btn:opacity-100">Share</span>
                       </button>
@@ -287,12 +306,13 @@ export default function GalleryPage() {
         </nav>
       </div>
 
-      {/* --- MODAL DE VISUALIZAÇÃO --- */}
+      {/* --- MODAL DE VISUALIZAÇÃO (MODO CINEMA) --- */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-10 animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
+          {/* Botão Fechar */}
           <button
             className="absolute top-6 right-6 h-12 w-12 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors z-[110]"
             onClick={() => setSelectedImage(null)}
@@ -300,6 +320,16 @@ export default function GalleryPage() {
             <XIcon className="h-6 w-6" />
           </button>
 
+          {/* Botão Anterior (Seta Esquerda) */}
+          <button
+            onClick={showPrevImage}
+            disabled={filtered.findIndex(img => img.id === selectedImage.id) === 0}
+            className="absolute left-2 md:left-8 h-12 w-12 flex items-center justify-center rounded-full bg-black/50 border border-white/10 text-white hover:bg-[#D4AF37] hover:text-black transition-all z-[110] disabled:opacity-20 disabled:hover:bg-black/50 disabled:hover:text-white"
+          >
+            <ChevronLeftIcon className="h-6 w-6" />
+          </button>
+
+          {/* Imagem Central */}
           <div
             className="relative max-w-5xl w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
@@ -319,6 +349,15 @@ export default function GalleryPage() {
               </button>
             </div>
           </div>
+
+          {/* Botão Próximo (Seta Direita) */}
+          <button
+            onClick={showNextImage}
+            disabled={filtered.findIndex(img => img.id === selectedImage.id) === filtered.length - 1}
+            className="absolute right-2 md:right-8 h-12 w-12 flex items-center justify-center rounded-full bg-black/50 border border-white/10 text-white hover:bg-[#D4AF37] hover:text-black transition-all z-[110] disabled:opacity-20 disabled:hover:bg-black/50 disabled:hover:text-white"
+          >
+            <ChevronRightIcon className="h-6 w-6" />
+          </button>
         </div>
       )}
     </div>
