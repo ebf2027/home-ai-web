@@ -182,6 +182,17 @@ export default function ProfilePage() {
 
   return (
     <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-6 px-6 md:px-10", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
+      {/* --- INÍCIO: Logo HomeRenovAi Exclusivo para Mobile --- */}
+      <div className="flex md:hidden items-center justify-start w-full mb-8 pt-4 px-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white tracking-tight">
+          HomeRenov<span className="text-[#D4AF37]">Ai</span>
+          {/* Ícone de Estrela Azul Royal */}
+          <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        </h1>
+      </div>
+      {/* --- FIM: Logo HomeRenovAi Exclusivo para Mobile --- */}
       <div className="mx-auto max-w-6xl">
 
         {/* --- HEADER --- */}
@@ -368,48 +379,48 @@ export default function ProfilePage() {
                   <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-2">Favorite Style</p>
                 </div>
               </div>
- {/* --- INÍCIO: Seção Help & Support --- */}
-<div className={clsx(
-  "border rounded-2xl p-6 mb-6 backdrop-blur-md transition-colors",
-  isDark ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-zinc-200"
-)}>
-  <h3 className={clsx(
-    "text-lg font-semibold mb-3 flex items-center gap-2",
-    isDark ? "text-white" : "text-zinc-900"
-  )}>
-    {/* Ícone de Ajuda Dourado */}
-    <svg className="w-5 h-5 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-    Help & Support
-  </h3>
-  
-  <p className={clsx(
-    "text-sm mb-5",
-    isDark ? "text-zinc-400" : "text-zinc-600"
-  )}>
-    Need assistance with your premium account or have questions about generating designs? We are here for you.
-  </p>
-  
-  <a 
-    href="mailto:suporte@homerenovai.com?subject=Support%20Request%20-%20HomeRenovAi"
-    className={clsx(
-      "w-full py-3 px-4 border rounded-xl transition-all duration-300 flex justify-between items-center group cursor-pointer",
-      isDark 
-        ? "bg-[#161616] hover:bg-[#222] border-zinc-800 text-zinc-300 hover:text-white" 
-        : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900"
-    )}
-  >
-    <span className="text-sm font-medium">Contact Support</span>
-    <svg className={clsx(
-      "w-4 h-4 transition-colors",
-      isDark ? "text-zinc-500 group-hover:text-[#D4AF37]" : "text-zinc-400 group-hover:text-[#D4AF37]"
-    )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  </a>
-</div>
-{/* --- FIM: Seção Help & Support --- */}
+              {/* --- INÍCIO: Seção Help & Support --- */}
+              <div className={clsx(
+                "border rounded-2xl p-6 mb-6 backdrop-blur-md transition-colors",
+                isDark ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-zinc-200"
+              )}>
+                <h3 className={clsx(
+                  "text-lg font-semibold mb-3 flex items-center gap-2",
+                  isDark ? "text-white" : "text-zinc-900"
+                )}>
+                  {/* Ícone de Ajuda Dourado */}
+                  <svg className="w-5 h-5 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Help & Support
+                </h3>
+
+                <p className={clsx(
+                  "text-sm mb-5",
+                  isDark ? "text-zinc-400" : "text-zinc-600"
+                )}>
+                  Need assistance with your premium account or have questions about generating designs? We are here for you.
+                </p>
+
+                <a
+                  href="mailto:suporte@homerenovai.com?subject=Support%20Request%20-%20HomeRenovAi"
+                  className={clsx(
+                    "w-full py-3 px-4 border rounded-xl transition-all duration-300 flex justify-between items-center group cursor-pointer",
+                    isDark
+                      ? "bg-[#161616] hover:bg-[#222] border-zinc-800 text-zinc-300 hover:text-white"
+                      : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900"
+                  )}
+                >
+                  <span className="text-sm font-medium">Contact Support</span>
+                  <svg className={clsx(
+                    "w-4 h-4 transition-colors",
+                    isDark ? "text-zinc-500 group-hover:text-[#D4AF37]" : "text-zinc-400 group-hover:text-[#D4AF37]"
+                  )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+              {/* --- FIM: Seção Help & Support --- */}
             </div>
           </div>
         </div>
