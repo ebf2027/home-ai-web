@@ -61,7 +61,6 @@ export default function ProfilePage() {
   const [plan, setPlan] = useState<string>("Free Member");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Novos estados para os Quick Stats
   const [totalDesigns, setTotalDesigns] = useState<number | string>("...");
   const [favoriteStyle, setFavoriteStyle] = useState<string>("...");
 
@@ -90,9 +89,7 @@ export default function ProfilePage() {
           .single();
         if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
 
-        // --- BUSCA DAS ESTATÍSTICAS RÁPIDAS ---
         try {
-          // 1. Total de Designs (Conta as linhas na tabela "gallery_items")
           const { count, error: countError } = await supabase
             .from("gallery_items")
             .select("*", { count: "exact", head: true })
@@ -104,7 +101,6 @@ export default function ProfilePage() {
             setTotalDesigns(0);
           }
 
-          // 2. Estilo Favorito (Busca os estilos para calcular o mais frequente)
           const { data: styleData, error: styleError } = await supabase
             .from("gallery_items")
             .select("style")
@@ -127,7 +123,6 @@ export default function ProfilePage() {
             });
 
             if (fav !== "-") {
-              // Deixa a primeira letra maiúscula para ficar bonito no layout
               setFavoriteStyle(fav.charAt(0).toUpperCase() + fav.slice(1));
             } else {
               setFavoriteStyle("-");
@@ -182,7 +177,7 @@ export default function ProfilePage() {
 
   return (
     <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-6 px-6 md:px-10", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
-      {/* --- INÍCIO: Logo HomeRenovAi Exclusivo para Mobile --- */}
+      {/* Logo Mobile */}
       <div className="flex md:hidden items-center justify-start w-full mb-8 pt-4">
         <h1 className="text-3xl font-black tracking-tighter flex items-center">
           <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
@@ -190,10 +185,10 @@ export default function ProfilePage() {
           <SparklesIcon className="h-8 w-8 ml-1" />
         </h1>
       </div>
-      {/* --- FIM: Logo HomeRenovAi Exclusivo para Mobile --- */}
+
       <div className="mx-auto max-w-6xl">
 
-        {/* --- HEADER --- */}
+        {/* HEADER */}
         <header className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
           <div className="flex items-center gap-2 mb-1 self-start md:self-auto">
             <h1 className="text-3xl font-black tracking-tighter hidden md:flex items-center">
@@ -208,19 +203,19 @@ export default function ProfilePage() {
               <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: goldAccent }} />
               Account • Executive
             </div>
-
             <button onClick={toggleTheme} className="text-2xl hover:scale-110 transition-transform px-2">
               {isDark ? "☀️" : "🌙"}
             </button>
           </div>
         </header>
 
-        {/* --- GRID LAYOUT (COCKPIT) --- */}
+        {/* GRID LAYOUT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start">
 
-          {/* COLUNA ESQUERDA: PERFIL E CRÉDITOS */}
+          {/* ===================== COLUNA ESQUERDA ===================== */}
           <div className="space-y-6">
 
+            {/* Avatar */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left mb-6">
               <div className="relative group cursor-pointer mb-4" onClick={() => fileInputRef.current?.click()}>
                 <div className="absolute -inset-1 bg-gradient-to-r from-[#D4AF37] to-[#F1D279] rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
@@ -236,11 +231,11 @@ export default function ProfilePage() {
                 </div>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} />
               </div>
-
               <h1 className="text-3xl font-black tracking-tight">{user?.email?.split('@')[0]}</h1>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-40 mt-1">{plan}</p>
             </div>
 
+            {/* Card de Créditos */}
             <section className={clsx("rounded-[2.5rem] p-8 border transition-all", isDark ? "bg-zinc-900/40 border-white/5" : "bg-white border-zinc-100 shadow-md")}>
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -251,7 +246,6 @@ export default function ProfilePage() {
                   <GiftIcon className="h-7 w-7 text-[#D4AF37]" />
                 </div>
               </div>
-
               <button
                 onClick={() => {
                   const link = `${window.location.origin}/login?ref=${user?.id}`;
@@ -271,7 +265,10 @@ export default function ProfilePage() {
               </button>
             </section>
 
-            <section className={clsx("hidden md:block rounded-[2.5rem] p-8 border relative overflow-hidden transition-all", isDark ? "bg-zinc-900/40 border-white/10 shadow-2xl" : "bg-white border-zinc-100 shadow-xl")}>
+            {/* ✅ CORREÇÃO: Card Best Plan agora está na coluna esquerda para AMBOS mobile e desktop */}
+            {/* No mobile aparece aqui (logo abaixo do card de créditos, sem gap estranho) */}
+            {/* No desktop também aparece aqui (comportamento igual ao original) */}
+            <section className={clsx("rounded-[2.5rem] p-8 border relative overflow-hidden transition-all", isDark ? "bg-zinc-900/40 border-white/10 shadow-2xl" : "bg-white border-zinc-100 shadow-xl")}>
               <div className="relative z-10 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Best Plan</p>
@@ -285,27 +282,13 @@ export default function ProfilePage() {
                 </button>
               </div>
             </section>
+
           </div>
+          {/* ===================== FIM COLUNA ESQUERDA ===================== */}
 
-          {/* COLUNA DIREITA: CONFIGURAÇÕES, STATS E LISTA */}
-          <div className="space-y-6">
-
-            {/* MOBILE ONLY - Promo Card */}
-            <section className={clsx("md:hidden rounded-[2.5rem] p-8 border relative overflow-hidden transition-all -mt-8 md:mt-0", isDark ?
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Best Plan</p>
-                  <h2 className="text-xl font-black flex items-center gap-2 text-[#D4AF37]">
-                    Pro+ Elite <CrownIcon className="h-5 w-5" />
-                  </h2>
-                </div>
-                <button onClick={() => router.push('/upgrade')} className="px-5 py-2.5 rounded-xl bg-[#D4AF37] text-black text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all">
-                  Upgrade
-                </button>
-              </div>
-            </section>
-
+          {/* ===================== COLUNA DIREITA ===================== */}
           <div className="space-y-4">
+
             {/* Accordion: Personal Information */}
             <div className="flex flex-col gap-2">
               <button
@@ -322,7 +305,7 @@ export default function ProfilePage() {
 
               {showDetails && (
                 <div className={clsx("mx-2 p-6 rounded-2xl border-x border-b animate-in slide-in-from-top-2 duration-300", isDark ? "border-white/5 bg-white/[0.02]" : "border-zinc-100 bg-zinc-50")}>
-                  <div className="space-y-6 -mt-8 md:mt-0">
+                  <div className="space-y-6">
                     <div className="flex items-center gap-4">
                       <div className={clsx("p-2.5 rounded-xl", isDark ? "bg-white/5" : "bg-zinc-200/50")}>
                         <MailIcon className="h-5 w-5 opacity-70" />
@@ -346,7 +329,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Accordion: Privacy Policy */}
+            {/* Privacy Policy */}
             <button onClick={() => router.push('/privacy')} className={clsx("w-full flex items-center justify-between p-6 rounded-2xl border transition-all active:scale-[0.98]", isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200")}>
               <div className="flex items-center gap-4">
                 <ShieldIcon className="h-5 w-5 opacity-60" />
@@ -355,7 +338,7 @@ export default function ProfilePage() {
               <ChevronRight className="h-4 w-4 opacity-40" />
             </button>
 
-            {/* Accordion: Terms of Service */}
+            {/* Terms of Service */}
             <button onClick={() => router.push('/terms')} className={clsx("w-full flex items-center justify-between p-6 rounded-2xl border transition-all active:scale-[0.98]", isDark ? "bg-white/5 border-white/10 hover:bg-white/10" : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200")}>
               <div className="flex items-center gap-4">
                 <ShieldIcon className="h-5 w-5 opacity-60" />
@@ -364,7 +347,7 @@ export default function ProfilePage() {
               <ChevronRight className="h-4 w-4 opacity-40" />
             </button>
 
-            {/* --- QUICK STATS CARD (AGORA COM DADOS REAIS) --- */}
+            {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className={clsx("p-6 rounded-2xl border flex flex-col justify-center items-center text-center transition-all hover:-translate-y-1 cursor-default", isDark ? "bg-zinc-900/40 border-white/5" : "bg-white border-zinc-100 shadow-sm")}>
                 <PhotoIcon className="h-6 w-6 text-[#D4AF37] mb-3 opacity-80" />
@@ -377,153 +360,112 @@ export default function ProfilePage() {
                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-2">Favorite Style</p>
               </div>
             </div>
-            {/* --- INÍCIO: Seção Help & Support --- */}
-            <div className={clsx(
-              "border rounded-2xl p-6 mb-6 backdrop-blur-md transition-colors",
-              isDark ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-zinc-200"
-            )}>
-              <h3 className={clsx(
-                "text-lg font-semibold mb-3 flex items-center gap-2",
-                isDark ? "text-white" : "text-zinc-900"
-              )}>
-                {/* Ícone de Ajuda Dourado */}
+
+            {/* Help & Support */}
+            <div className={clsx("border rounded-2xl p-6 mb-6 backdrop-blur-md transition-colors", isDark ? "bg-zinc-900/40 border-zinc-800/50" : "bg-white border-zinc-200")}>
+              <h3 className={clsx("text-lg font-semibold mb-3 flex items-center gap-2", isDark ? "text-white" : "text-zinc-900")}>
                 <svg className="w-5 h-5 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Help & Support
               </h3>
-
-              <p className={clsx(
-                "text-sm mb-5",
-                isDark ? "text-zinc-400" : "text-zinc-600"
-              )}>
+              <p className={clsx("text-sm mb-5", isDark ? "text-zinc-400" : "text-zinc-600")}>
                 Need assistance with your premium account or have questions about generating designs? We are here for you.
               </p>
-
               <a
                 href="mailto:suporte@homerenovai.com?subject=Support%20Request%20-%20HomeRenovAi"
-                className={clsx(
-                  "w-full py-3 px-4 border rounded-xl transition-all duration-300 flex justify-between items-center group cursor-pointer",
-                  isDark
-                    ? "bg-[#161616] hover:bg-[#222] border-zinc-800 text-zinc-300 hover:text-white"
-                    : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900"
-                )}
+                className={clsx("w-full py-3 px-4 border rounded-xl transition-all duration-300 flex justify-between items-center group cursor-pointer",
+                  isDark ? "bg-[#161616] hover:bg-[#222] border-zinc-800 text-zinc-300 hover:text-white" : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900")}
               >
                 <span className="text-sm font-medium">Contact Support</span>
-                <svg className={clsx(
-                  "w-4 h-4 transition-colors",
-                  isDark ? "text-zinc-500 group-hover:text-[#D4AF37]" : "text-zinc-400 group-hover:text-[#D4AF37]"
-                )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={clsx("w-4 h-4 transition-colors", isDark ? "text-zinc-500 group-hover:text-[#D4AF37]" : "text-zinc-400 group-hover:text-[#D4AF37]")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
             </div>
-            {/* --- FIM: Seção Help & Support --- */}
+
           </div>
+          {/* ===================== FIM COLUNA DIREITA ===================== */}
+
         </div>
-      </div>
 
-      {/* --- INÍCIO: Botão de Sign Out Centralizado na Tela --- */}
-      <div className="flex justify-center w-full max-w-xs mx-auto mt-12 mb-8">
-        <button onClick={handleSignOut} className={clsx("w-full flex items-center justify-center gap-3 p-6 rounded-2xl border transition-all active:scale-95", isDark ? "border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10" : "border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200")}>
-          <LogOutIcon className="h-4 w-4" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sign Out</span>
-        </button>
-      </div>
-      {/* --- FIM: Botão de Sign Out Centralizado na Tela --- */}
-
-      <footer className="mt-16 text-center opacity-60">
-        <p className="text-[8px] font-black uppercase tracking-[0.4em]">HomeRenovAi v2.1.0 • Built for Excellence</p>
-      </footer>
-    </div>
-
-      {/* --- MENU FLUTUANTE (DOCK) --- */ }
-  <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] justify-center pointer-events-none">
-    <nav className={clsx(
-      "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
-      "rounded-[2rem]",
-      "w-[90%] md:w-auto",
-      isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
-    )}>
-
-      <Link href="/" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-        <HomeIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-        <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-          Home
-        </span>
-      </Link>
-
-      <Link href="/gallery" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-        <GalleryIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-        <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-          Gallery
-        </span>
-      </Link>
-
-      <Link href="/upgrade" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-        <StarIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-        <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-          Upgrade
-        </span>
-      </Link>
-
-      <Link href="/profile" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
-        <UserIconMenu className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
-          Profile
-        </span>
-        <div className="h-1 w-1 bg-[#D4AF37] rounded-full absolute -bottom-1" />
-      </Link>
-    </nav>
-  </div>
-  {/* MODAL: HOW IT WORKS (REFERRAL) - CORRIGIDO */ }
-  {
-    showInviteInfo && (
-      <div
-        className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
-        onClick={() => setShowInviteInfo(false)}
-      >
-        <div
-          className={clsx(
-            "relative w-full max-w-sm p-8 rounded-[2rem] border shadow-2xl text-center transition-all",
-            isDark ? "bg-[#0A0A0A] border-white/10" : "bg-white border-zinc-200"
-          )}
-          onClick={e => e.stopPropagation()}
-        >
-          <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 flex items-center justify-center gap-2">
-            <span className="text-[#D4AF37]">✦</span> How It Works
-          </h3>
-
-          <div className={clsx("space-y-4 text-xs font-light leading-relaxed mb-8 text-left", isDark ? "opacity-80" : "text-zinc-600")}>
-            <p className="flex items-start gap-3">
-              <span className="font-black text-[#D4AF37] shrink-0">1.</span>
-              <span>Copy your unique referral link and send it to a friend.</span>
-            </p>
-            <p className="flex items-start gap-3">
-              <span className="font-black text-[#D4AF37] shrink-0">2.</span>
-              <span>Your friend clicks the link and creates a new account.</span>
-            </p>
-            <p className="flex items-start gap-3">
-              <span className="font-black text-[#D4AF37] shrink-0">3.</span>
-              <span>
-                You automatically earn <b className="text-[#D4AF37] font-black">+1 Free Credit</b> the moment they log in for the first time!
-              </span>
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowInviteInfo(false)}
-            className={clsx(
-              "w-full py-4 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-colors",
-              isDark ? "border-white/10 hover:bg-white/5" : "border-zinc-200 hover:bg-zinc-50"
-            )}
-          >
-            Got it
+        {/* Sign Out */}
+        <div className="flex justify-center w-full max-w-xs mx-auto mt-12 mb-8">
+          <button onClick={handleSignOut} className={clsx("w-full flex items-center justify-center gap-3 p-6 rounded-2xl border transition-all active:scale-95", isDark ? "border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10" : "border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200")}>
+            <LogOutIcon className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sign Out</span>
           </button>
         </div>
+
+        <footer className="mt-16 text-center opacity-60">
+          <p className="text-[8px] font-black uppercase tracking-[0.4em]">HomeRenovAi v2.1.0 • Built for Excellence</p>
+        </footer>
       </div>
-    )
-  }
-    </div >
+
+      {/* MENU FLUTUANTE (DOCK) */}
+      <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] justify-center pointer-events-none">
+        <nav className={clsx(
+          "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
+          "rounded-[2rem]",
+          "w-[90%] md:w-auto",
+          isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
+        )}>
+          <Link href="/" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <HomeIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>Home</span>
+          </Link>
+          <Link href="/gallery" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <GalleryIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>Gallery</span>
+          </Link>
+          <Link href="/upgrade" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+            <StarIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
+            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>Upgrade</span>
+          </Link>
+          <Link href="/profile" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
+            <UserIconMenu className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">Profile</span>
+            <div className="h-1 w-1 bg-[#D4AF37] rounded-full absolute -bottom-1" />
+          </Link>
+        </nav>
+      </div>
+
+      {/* MODAL: HOW IT WORKS */}
+      {showInviteInfo && (
+        <div
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
+          onClick={() => setShowInviteInfo(false)}
+        >
+          <div
+            className={clsx("relative w-full max-w-sm p-8 rounded-[2rem] border shadow-2xl text-center transition-all", isDark ? "bg-[#0A0A0A] border-white/10" : "bg-white border-zinc-200")}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-6 flex items-center justify-center gap-2">
+              <span className="text-[#D4AF37]">✦</span> How It Works
+            </h3>
+            <div className={clsx("space-y-4 text-xs font-light leading-relaxed mb-8 text-left", isDark ? "opacity-80" : "text-zinc-600")}>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">1.</span>
+                <span>Copy your unique referral link and send it to a friend.</span>
+              </p>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">2.</span>
+                <span>Your friend clicks the link and creates a new account.</span>
+              </p>
+              <p className="flex items-start gap-3">
+                <span className="font-black text-[#D4AF37] shrink-0">3.</span>
+                <span>You automatically earn <b className="text-[#D4AF37] font-black">+1 Free Credit</b> the moment they log in for the first time!</span>
+              </p>
+            </div>
+            <button
+              onClick={() => setShowInviteInfo(false)}
+              className={clsx("w-full py-4 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-colors", isDark ? "border-white/10 hover:bg-white/5" : "border-zinc-200 hover:bg-zinc-50")}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
