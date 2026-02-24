@@ -125,14 +125,15 @@ function LoginForm() {
       <div className="w-full max-w-md px-6 py-12 relative z-10">
         <div className={clsx("rounded-[2.5rem] p-10 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] border transition-all duration-700", isDark ? "bg-zinc-900/40 border-white/10" : "bg-white border-zinc-100")}>
 
-          {/* Logo Grande e Destacado */}
-          <div className="flex justify-center mb-8">
+          {/* --- INÍCIO: Logo HomeRenovAi Exclusivo para Mobile --- */}
+          <div className="flex md:hidden justify-center mb-8 pt-4">
             <h1 className="text-4xl font-black tracking-tighter flex items-center">
               <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
               <span className="text-blue-500">RenovAi</span>
               <SparklesIcon className="h-9 w-9 ml-1" />
             </h1>
           </div>
+          {/* --- FIM: Logo HomeRenovAi Exclusivo para Mobile --- */}
 
           <header className="text-center mb-10">
             <h1 className="text-4xl font-black tracking-tighter leading-none mb-3">
