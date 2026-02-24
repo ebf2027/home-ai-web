@@ -78,7 +78,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
   const [pos, setPos] = useState(50);
   const [dragging, setDragging] = useState(false);
   return (
-    <div className="relative w-full h-full overflow-hidden select-none touch-none bg-black"
+    <div className="relative w-full h-full overflow-hidden rounded-3xl select-none touch-none bg-black"
       onPointerDown={(e) => { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); setDragging(true); }}
       onPointerMove={(e) => { if (dragging) { const r = e.currentTarget.getBoundingClientRect(); setPos(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))); } }}
       onPointerUp={() => setDragging(false)}>
@@ -137,24 +137,33 @@ export default function Home() {
   async function downloadResult() {
     if (!resultUrl) return;
     try {
+      // 1. Pega a imagem real do banco
       const res = await fetch(resultUrl);
       const blob = await res.blob();
+
+      // 2. Tenta invocar a "Gaveta Nativa" do celular (com a imagem dentro)
       if (navigator.share && navigator.canShare) {
         const file = new File([blob], "homerenovai-design.jpg", { type: "image/jpeg" });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "HomeRenovAi Design" });
-          return;
+          await navigator.share({
+            files: [file],
+            title: "HomeRenovAi Design",
+          });
+          return; // Se a gaveta abrir, nosso trabalho aqui terminou
         }
       }
+
+      // 3. Se for PC (ou o celular não suportar a gaveta), faz o download normal
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `homerenovai-design.jpg`;
-      document.body.appendChild(a);
+      document.body.appendChild(a); // Essencial para navegadores chatos
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     } catch {
+      // Último recurso de segurança caso a internet pisque
       window.open(resultUrl, "_blank");
     }
   }
@@ -209,15 +218,11 @@ export default function Home() {
   }
 
   return (
-    <main className={clsx(
-      "min-h-screen transition-colors duration-500",
-      "px-0 pt-0 pb-4 md:p-10",
-      isDark ? "bg-[#0A0A0A]" : "bg-[#F4F4F5]"
-    )}>
+    <main className={clsx("min-h-screen pt-4 pb-24 px-0 md:p-10 transition-colors duration-500", isDark ? "bg-[#0A0A0A]" : "bg-[#F4F4F5]")}>
       <div className="mx-auto max-w-6xl">
 
-        {/* HEADER — padding lateral apenas no mobile via px-4 */}
-        <header className="px-4 pt-6 pb-6 md:px-0 md:pt-0 md:pb-0 md:mb-8 md:ml-2">
+        {/* HEADER */}
+        <header className="mb-8 px-6 md:px-0 md:ml-2">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-3xl font-black tracking-tighter flex items-center">
               <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
@@ -232,14 +237,10 @@ export default function Home() {
         {/* PAINÉIS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 items-stretch">
 
-          {/* PAINEL ESQUERDO */}
+          {/* PAINEL ESQUERDO (Workspace - Flat no mobile, Card no PC) */}
           <section className={clsx(
-            "p-6 border shadow-2xl flex flex-col transition-colors",
-            // Mobile: sem arredondamento, sem borda lateral → ocupa tela toda
-            // Desktop: arredondamento e borda completa original
-            "rounded-none md:rounded-[2.5rem]",
-            "border-b-0 md:border-b",
-            isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900"
+            "rounded-none md:rounded-[2.5rem] border-0 md:border px-4 py-2 md:p-6 shadow-none md:shadow-2xl flex flex-col transition-colors",
+            isDark ? "bg-transparent md:bg-black md:border-white/5 text-white" : "bg-transparent md:bg-white md:border-zinc-200 text-zinc-900"
           )}>
             <div className="flex justify-between items-center mb-6 px-2">
               <span className="text-[10px] font-bold uppercase tracking-widest md:text-zinc-400">Workspace</span>
@@ -251,15 +252,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ÁREA DE UPLOAD — sem rounded no mobile, ocupa largura toda */}
-            <div className={clsx(
-              "relative w-full aspect-square md:aspect-[5/4] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300",
-              "rounded-none md:rounded-[2rem]",
-              !previewUrl && "border-y-2 border-dashed md:border-2",
-              isDark
-                ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border-y border-white/10 md:border")
-                : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border-y border-zinc-200 md:border")
-            )}>
+            {/* ÁREA DE UPLOAD (Mais espaço lateral no mobile) */}
+            <div className={clsx("relative w-full aspect-square md:aspect-[5/4] rounded-3xl md:rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
                 <div className="flex flex-col items-center justify-center md:text-zinc-500 px-6">
                   <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
@@ -280,14 +274,15 @@ export default function Home() {
               <LightbulbIcon className="h-5 w-5" /> PHOTO TIPS
             </button>
 
-            <div className="mt-auto px-2">
-              <p className="text-[10px] font-black uppercase mb-3 md:text-zinc-400">1 - Choose Image</p>
-              <div className={clsx("grid grid-cols-2 gap-4 p-2 rounded-3xl border transition-colors", isDark ? "border-white/10 bg-[#080808]" : "border-zinc-200 bg-zinc-50")}>
-                <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
+            <div className="mt-auto">
+              <p className="text-[10px] font-black uppercase mb-3 px-2 md:text-zinc-400">1 - Choose Image</p>
+              {/* Botões nativos sem caixa externa no mobile */}
+              <div className={clsx("grid grid-cols-2 gap-3 md:gap-4 md:p-2 border-0 md:border rounded-2xl md:rounded-3xl transition-colors", isDark ? "md:border-white/10 md:bg-[#080808]" : "md:border-zinc-200 md:bg-zinc-50")}>
+                <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all active:scale-95 group border", isDark ? "bg-[#111] border-white/5 md:bg-transparent md:border-transparent hover:bg-white/5" : "bg-white border-zinc-200 shadow-sm md:shadow-none md:bg-transparent md:border-transparent hover:bg-white")}>
                   <CameraIcon className="h-5 w-5 text-[#D4AF37] group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-tighter">Use Camera</span>
                 </button>
-                <button onClick={() => uploadInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
+                <button onClick={() => uploadInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all active:scale-95 group border", isDark ? "bg-[#111] border-white/5 md:bg-transparent md:border-transparent hover:bg-white/5" : "bg-white border-zinc-200 shadow-sm md:shadow-none md:bg-transparent md:border-transparent hover:bg-white")}>
                   <UploadIcon className="h-5 w-5 text-[#D4AF37] group-hover:-translate-y-1 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-tighter">From Gallery</span>
                 </button>
@@ -315,19 +310,17 @@ export default function Home() {
             </nav>
           </section>
 
-          {/* PAINEL DIREITO */}
+          {/* PAINEL DIREITO (Sem bordas e fundos no celular) */}
           <section className={clsx(
-            "p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors",
-            "rounded-none md:rounded-[2.5rem]",
-            "border-t-0 md:border-t",
-            isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900"
+            "rounded-none md:rounded-[2.5rem] border-0 md:border px-4 py-6 md:p-8 shadow-none md:shadow-2xl flex flex-col h-full justify-between transition-colors",
+            isDark ? "bg-transparent md:bg-black md:border-white/5 text-white" : "bg-transparent md:bg-white md:border-zinc-200 text-zinc-900"
           )}>
-
             <div>
               <div className="text-center mb-6">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] md:text-zinc-500">2 - Select Style</p>
               </div>
 
+              {/* Grid de Estilos */}
               <div className="grid grid-cols-4 gap-2 mb-8">
                 {STYLES.map((s) => {
                   const isSel = s.id === selectedStyle;
@@ -356,6 +349,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Botões de Ação */}
             <div className="mt-auto space-y-4 pt-8">
               <button
                 onClick={onGenerate}
@@ -388,7 +382,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* PHOTO TIPS MODAL */}
+      {/* --- PHOTO TIPS MODAL --- */}
       {tipsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div
