@@ -240,3 +240,55 @@ Metade Esquerda: Linha de ouro finíssima (representando o "Antes" e a planta do
 Metade Direita: Bloco de ouro escovado, grosso e sólido (representando o "Depois" e a realidade tátil e luxuosa).
 
 Próximo Passo do Ícone: Gerar a imagem oficial através de um prompt estruturado em um gerador externo (Midjourney/DALL-E) nos fundos Dark (Oficial) e Light.
+
+Gemini said
+Com certeza! Hoje foi um dia de avanços gigantescos na estrutura profissional do seu aplicativo. O sistema de pagamentos ficou 100% autônomo e nós construímos um motor de indicações (Referral) do zero!
+
+Aqui está a atualização completa para você copiar e colar no seu arquivo PROJECT_STATE.md (ou qualquer que seja o nome do arquivo onde você anota o progresso):
+
+📅 Atualização: 23 de Fevereiro de 2026
+✅ O Que Foi Feito Hoje:
+
+1. Configurações Profissionais do Stripe (Pagamentos & Marca)
+
+Automação de Cancelamentos: Adicionamos os eventos customer.subscription.updated e customer.subscription.deleted no Webhook do Stripe. Agora, o aplicativo corta os benefícios premium e zera a franquia automaticamente quando o ciclo do cliente cancelado chega ao fim. (O código no route.ts já estava preparado para isso e foi validado).
+
+Branding (Identidade de Luxo): O nome da conta no Stripe foi alterado de "GreatBuyHub" para "HomeRenovAi" (tanto interno quanto no perfil público).
+
+Nomenclatura Premium: Os nomes dos produtos/planos no Stripe foram atualizados para o inglês "HomeRenovAi Membership", visando maior conversão no mercado internacional.
+
+2. Sistema de Indicações (Referral System) - Motor Completo
+
+Frontend (A Vitrine):
+
+Atualização do link de indicação no app/profile/page.tsx para gerar a URL dinâmica correta apontando para o login (/login?ref=user_id).
+
+Criação de um Modal Premium (Janelinha) "How It Works" no Profile, explicando as regras de indicação (1 amigo logado = +1 crédito) com design elegante e legível (Dark/Light mode).
+
+Atualização da página de Login (app/login/page.tsx) para capturar o código de indicação (ref) na URL e salvá-lo silenciosamente no localStorage do navegador.
+
+Backend (O Motor Invisível):
+
+Criação da API de Recompensa (app/api/referral/route.ts) que verifica o banco de dados e deposita +1 crédito base na conta de quem indicou.
+
+Criação do Componente Rastreador (app/components/ReferralTracker.tsx) que dispara automaticamente o pagamento do crédito quando um usuário novo entra no app.
+
+Integração do Rastreador no arquivo raiz do projeto (app/layout.tsx), fazendo o sistema funcionar globalmente.
+
+📁 Arquivos Modificados/Criados Hoje:
+
+app/profile/page.tsx (Modificado: Link dinâmico, botão de info e Modal How it Works)
+
+app/login/page.tsx (Modificado: Captura do refCode no localStorage)
+
+app/api/referral/route.ts (NOVO: API do robô de recompensa)
+
+app/components/ReferralTracker.tsx (NOVO: Gatilho automático pós-login)
+
+app/layout.tsx (Modificado: Importação do ReferralTracker)
+
+🔜 Próximos Passos (Para a próxima sessão):
+
+Ajuste de UI/UX no Profile: Preencher o espaço vazio no lado direito da tela de Profile (abaixo das estatísticas) para que o botão "Sign Out" alinhe perfeitamente com a altura do card "Best Plan" da esquerda.
+
+Criação do Botão "Help & Support": Adicionar esse botão nesse espaço vazio para transmitir mais segurança ao usuário assinante e cumprir o padrão de apps premium.
