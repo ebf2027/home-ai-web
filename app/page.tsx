@@ -231,7 +231,7 @@ export default function Home() {
             </h1>
           </div>
           <p className={clsx("text-lg font-bold leading-tight", isDark ? "text-white" : "text-zinc-800")}>Redesign your space with Ai</p>
-          <p className="text-sm md:text-zinc-500">Upload a room photo and generate design variations in different styles</p>
+          <p className={clsx("text-sm", isDark ? "text-zinc-400" : "text-zinc-500")}>Upload a room photo and generate design variations in different styles</p>
         </header>
 
         {/* PAINÉIS */}
