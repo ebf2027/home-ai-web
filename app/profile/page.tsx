@@ -183,11 +183,11 @@ export default function ProfilePage() {
   return (
     <div className={clsx("min-h-screen transition-colors duration-500 pb-32 pt-6 px-6 md:px-10", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
       {/* --- INÍCIO: Logo HomeRenovAi Exclusivo para Mobile --- */}
-      <div className="flex md:hidden items-center justify-start w-full mb-8 pt-4 px-6">
-        <h1 className="text-4xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white tracking-tight">
-          HomeRenov<span className="text-[#D4AF37]">Ai</span>
-          {/* Usando o seu próprio componente de estrela original */}
-          <SparklesIcon className="w-8 h-8" />
+      <div className="flex md:hidden items-center justify-start w-full mb-8 pt-4">
+        <h1 className="text-3xl font-black tracking-tighter flex items-center">
+          <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
+          <span className="text-blue-500">RenovAi</span>
+          <SparklesIcon className="h-8 w-8 ml-1" />
         </h1>
       </div>
       {/* --- FIM: Logo HomeRenovAi Exclusivo para Mobile --- */}
