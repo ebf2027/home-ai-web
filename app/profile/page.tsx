@@ -216,7 +216,7 @@ export default function ProfilePage() {
         </header>
 
         {/* --- GRID LAYOUT (COCKPIT) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap- md:gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start">
 
           {/* COLUNA ESQUERDA: PERFIL E CRÉDITOS */}
           <div className="space-y-6">
@@ -291,7 +291,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
 
             {/* MOBILE ONLY - Promo Card */}
-            <section className={clsx("md:hidden rounded-[2.5rem] p-8 border relative overflow-hidden transition-all -mt-10 md:mt-0", isDark ?
+            <section className={clsx("md:hidden rounded-[2.5rem] p-8 border relative overflow-hidden transition-all -mt-8 md:mt-0", isDark ?
               <div className="relative z-10 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Best Plan</p>
