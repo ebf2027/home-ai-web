@@ -78,7 +78,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
   const [pos, setPos] = useState(50);
   const [dragging, setDragging] = useState(false);
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-3xl select-none touch-none bg-black"
+    <div className="relative w-full h-full overflow-hidden select-none touch-none bg-black"
       onPointerDown={(e) => { (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId); setDragging(true); }}
       onPointerMove={(e) => { if (dragging) { const r = e.currentTarget.getBoundingClientRect(); setPos(Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))); } }}
       onPointerUp={() => setDragging(false)}>
@@ -137,33 +137,24 @@ export default function Home() {
   async function downloadResult() {
     if (!resultUrl) return;
     try {
-      // 1. Pega a imagem real do banco
       const res = await fetch(resultUrl);
       const blob = await res.blob();
-
-      // 2. Tenta invocar a "Gaveta Nativa" do celular (com a imagem dentro)
       if (navigator.share && navigator.canShare) {
         const file = new File([blob], "homerenovai-design.jpg", { type: "image/jpeg" });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: "HomeRenovAi Design",
-          });
-          return; // Se a gaveta abrir, nosso trabalho aqui terminou
+          await navigator.share({ files: [file], title: "HomeRenovAi Design" });
+          return;
         }
       }
-
-      // 3. Se for PC (ou o celular não suportar a gaveta), faz o download normal
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `homerenovai-design.jpg`;
-      document.body.appendChild(a); // Essencial para navegadores chatos
+      document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     } catch {
-      // Último recurso de segurança caso a internet pisque
       window.open(resultUrl, "_blank");
     }
   }
@@ -218,11 +209,15 @@ export default function Home() {
   }
 
   return (
-    <main className={clsx("min-h-screen p-4 md:p-10 transition-colors duration-500", isDark ? "bg-[#0A0A0A]" : "bg-[#F4F4F5]")}>
+    <main className={clsx(
+      "min-h-screen transition-colors duration-500",
+      "px-0 pt-0 pb-4 md:p-10",
+      isDark ? "bg-[#0A0A0A]" : "bg-[#F4F4F5]"
+    )}>
       <div className="mx-auto max-w-6xl">
 
-        {/* HEADER */}
-        <header className="mb-8 ml-2">
+        {/* HEADER — padding lateral apenas no mobile via px-4 */}
+        <header className="px-4 pt-6 pb-6 md:px-0 md:pt-0 md:pb-0 md:mb-8 md:ml-2">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-3xl font-black tracking-tighter flex items-center">
               <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
@@ -237,8 +232,15 @@ export default function Home() {
         {/* PAINÉIS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 items-stretch">
 
-          {/* PAINEL ESQUERDO (Workspace Estável) */}
-          <section className={clsx("rounded-t-[2.5rem] rounded-b-none md:rounded-[2.5rem] border-b-0 md:border-b p-6 border shadow-2xl flex flex-col transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          {/* PAINEL ESQUERDO */}
+          <section className={clsx(
+            "p-6 border shadow-2xl flex flex-col transition-colors",
+            // Mobile: sem arredondamento, sem borda lateral → ocupa tela toda
+            // Desktop: arredondamento e borda completa original
+            "rounded-none md:rounded-[2.5rem]",
+            "border-b-0 md:border-b",
+            isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900"
+          )}>
             <div className="flex justify-between items-center mb-6 px-2">
               <span className="text-[10px] font-bold uppercase tracking-widest md:text-zinc-400">Workspace</span>
               <div className="flex items-center gap-4">
@@ -249,8 +251,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ÁREA DE UPLOAD COM PROPORÇÃO FIXA (aspect-[5/4]) */}
-            <div className={clsx("relative w-full aspect-square md:aspect-[5/4] rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
+            {/* ÁREA DE UPLOAD — sem rounded no mobile, ocupa largura toda */}
+            <div className={clsx(
+              "relative w-full aspect-square md:aspect-[5/4] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300",
+              "rounded-none md:rounded-[2rem]",
+              !previewUrl && "border-y-2 border-dashed md:border-2",
+              isDark
+                ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border-y border-white/10 md:border")
+                : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border-y border-zinc-200 md:border")
+            )}>
               {!previewUrl ? (
                 <div className="flex flex-col items-center justify-center md:text-zinc-500 px-6">
                   <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
@@ -271,8 +280,8 @@ export default function Home() {
               <LightbulbIcon className="h-5 w-5" /> PHOTO TIPS
             </button>
 
-            <div className="mt-auto">
-              <p className="text-[10px] font-black uppercase mb-3 px-2 md:text-zinc-400">1 - Choose Image</p>
+            <div className="mt-auto px-2">
+              <p className="text-[10px] font-black uppercase mb-3 md:text-zinc-400">1 - Choose Image</p>
               <div className={clsx("grid grid-cols-2 gap-4 p-2 rounded-3xl border transition-colors", isDark ? "border-white/10 bg-[#080808]" : "border-zinc-200 bg-zinc-50")}>
                 <button onClick={() => cameraInputRef.current?.click()} className={clsx("flex items-center justify-center gap-3 py-4 rounded-xl transition-all border border-transparent active:scale-95 group", isDark ? "hover:bg-white/5" : "hover:bg-white shadow-sm")}>
                   <CameraIcon className="h-5 w-5 text-[#D4AF37] group-hover:scale-110 transition-transform" />
@@ -306,16 +315,19 @@ export default function Home() {
             </nav>
           </section>
 
-          {/* PAINEL DIREITO (Layout Flexível Sem Buracos) */}
-          <section className={clsx("rounded-b-[2.5rem] rounded-t-none md:rounded-[2.5rem] border-t-0 md:border-t p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors", isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900")}>
+          {/* PAINEL DIREITO */}
+          <section className={clsx(
+            "p-8 border shadow-2xl flex flex-col h-full justify-between transition-colors",
+            "rounded-none md:rounded-[2.5rem]",
+            "border-t-0 md:border-t",
+            isDark ? "bg-black border-white/5 text-white" : "bg-white border-zinc-200 text-zinc-900"
+          )}>
 
-            {/* Grupo Superior: Título, Grid e Seletor */}
             <div>
               <div className="text-center mb-6">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] md:text-zinc-500">2 - Select Style</p>
               </div>
 
-              {/* Grid de Estilos Altos (Portrait) com Texto Externo */}
               <div className="grid grid-cols-4 gap-2 mb-8">
                 {STYLES.map((s) => {
                   const isSel = s.id === selectedStyle;
@@ -336,7 +348,7 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em]md:text-zinc-500 mb-4">3 - Room Type</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] md:text-zinc-500 mb-4">3 - Room Type</p>
                 <select value={roomType} onChange={(e) => setRoomType(e.target.value)} className={clsx("w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center appearance-none focus:border-[#D4AF37] outline-none transition-colors", isDark ? "bg-[#111] border-white/10" : "bg-zinc-50 border-zinc-200")}>
                   <option value="">Select Room Environment</option>
                   {ROOM_TYPES.map(r => <option key={r.value} value={r.value}>{r.label.toUpperCase()}</option>)}
@@ -344,7 +356,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Botões de Ação (Fixos no Rodapé) */}
             <div className="mt-auto space-y-4 pt-8">
               <button
                 onClick={onGenerate}
@@ -377,25 +388,20 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- PHOTO TIPS MODAL (Dinâmico Light/Dark) --- */}
+      {/* PHOTO TIPS MODAL */}
       {tipsOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          {/* Fundo escurecido/clareado translúcido */}
           <div
             className={clsx("absolute inset-0 backdrop-blur-md", isDark ? "bg-black/80" : "bg-white/80")}
             onClick={() => setTipsOpen(false)}
           />
-
-          {/* Caixa Principal */}
           <div className={clsx("relative w-full max-w-sm p-8 rounded-[2.5rem] border shadow-2xl animate-in fade-in zoom-in-95 duration-300", isDark ? "bg-black text-white border-white/10" : "bg-white text-zinc-900 border-zinc-200")}>
-
             <div className="flex items-center gap-3 mb-8 text-left">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#D4AF37]/10">
                 <LightbulbIcon className="h-7 w-7 text-[#D4AF37]" />
               </div>
               <h3 className="text-xl font-black uppercase tracking-tighter italic">Photo Tips</h3>
             </div>
-
             <div className="space-y-8 mb-10 text-left">
               <div className="flex gap-5">
                 <span className="text-2xl">☀️</span>
@@ -426,7 +432,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             <button onClick={() => setTipsOpen(false)} className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform bg-[#D4AF37] text-black hover:brightness-110">
               Got it, thanks!
             </button>
