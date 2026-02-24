@@ -116,8 +116,8 @@ export default function UpgradePage() {
       <div className="mx-auto max-w-6xl">
 
         {/* --- CABEÇALHO --- */}
-        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-          <div className="flex items-center gap-2 mb-1">
+        <header className="flex items-center justify-between w-full mb-12 pt-2 md:pt-0">
+          <div className="flex items-center gap-2">
             <h1 className="text-3xl font-black tracking-tighter flex items-center">
               <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
               <span className="text-blue-500">RenovAi</span>
