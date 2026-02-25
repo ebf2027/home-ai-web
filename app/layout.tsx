@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   title: "HomeRenovAi",
   description: "Transform your home with AI",
   manifest: "/manifest.json",
+  appleWebApp: {
+    title: "HomeRenovAi",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
