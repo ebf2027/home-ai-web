@@ -6,6 +6,7 @@ import { ReferralTracker } from "./components/ReferralTracker"; // 1. Importamos
 export const metadata = {
   title: "HomeRenovAi",
   description: "Redesign your space with AI",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
