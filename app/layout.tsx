@@ -8,9 +8,6 @@ export const metadata: Metadata = {
   title: "HomeRenovAi",
   description: "Transform your home with AI",
   manifest: "/manifest.json",
-  icons: {
-    apple: "/icon-192x192.png", // 👉 É essa linha que obriga o iPhone a mostrar a sua logo!
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
