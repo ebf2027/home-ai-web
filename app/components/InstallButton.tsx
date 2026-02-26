@@ -54,7 +54,7 @@ export default function InstallButton() {
                         <ol className="text-left space-y-4 mb-8">
                             <li className="flex items-center gap-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
                                 <span className="text-2xl font-bold text-[#D4AF37]">1.</span>
-                                <p className="text-sm">Toque no ícone de <strong>Compartilhar</strong> na barra inferior.</p>
+                                <p className="text-sm">Recomendamos abrir este site no <strong>Safari</strong>. Toque no ícone de <strong>Compartilhar</strong> na barra inferior.</p>
                             </li>
                             <li className="flex items-center gap-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
                                 <span className="text-2xl font-bold text-[#D4AF37]">2.</span>
