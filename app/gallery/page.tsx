@@ -185,11 +185,25 @@ export default function GalleryPage() {
             <div className="h-8 w-8 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20 opacity-30">
-            <div className="text-[10px] font-black uppercase tracking-[0.3em]">
+          <div className="text-center py-24 px-6 flex flex-col items-center">
+            {/* Ícone de luxo para não deixar a tela vazia demais */}
+            <div className={clsx("mb-6 opacity-20", isDark ? "text-white" : "text-zinc-900")}>
+              <GalleryIcon className="h-12 w-12" />
+            </div>
+
+            {/* Título Principal */}
+            <div className={clsx(
+              "text-[11px] font-black uppercase tracking-[0.4em]",
+              isDark ? "text-white" : "text-zinc-900"
+            )}>
               No designs found yet.
             </div>
-            <div className="mt-3 text-xs md:text-sm font-normal normal-case tracking-normal">
+
+            {/* Frase de Instrução */}
+            <div className={clsx(
+              "mt-4 text-sm font-medium tracking-tight max-w-[280px] mx-auto leading-relaxed",
+              isDark ? "text-zinc-400" : "text-zinc-500"
+            )}>
               Create your first image and view it here in your gallery.
             </div>
           </div>

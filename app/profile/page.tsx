@@ -149,12 +149,21 @@ export default function ProfilePage() {
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // 1. Faz upload do arquivo no Storage
       const { error: uploadError } = await supabase.storage.from("homeai").upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
+
+      // 2. Pega a URL pública com timestamp para evitar cache
       const { data: { publicUrl } } = supabase.storage.from("homeai").getPublicUrl(filePath);
-      const { error: updateError } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+      const avatarUrlFinal = `${publicUrl}?t=${Date.now()}`;
+
+      // 3. Salva a URL na tabela profiles
+      const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrlFinal }).eq("id", user.id);
       if (updateError) throw updateError;
-      setAvatarUrl(publicUrl);
+
+      // 4. Atualiza a foto na tela imediatamente
+      setAvatarUrl(avatarUrlFinal);
       alert("Profile picture updated!");
     } catch (error: any) {
       alert("Error uploading: " + error.message);
