@@ -2,6 +2,7 @@
 
 import { createClient } from "./lib/supabase/client";
 import CreditsBadge from "./components/CreditsBadge";
+import { useRouter } from "next/navigation"; // <-- ADICIONE ESTA LINHA EXATAMENTE AQUI
 import type React from "react";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useTheme } from "./components/ThemeProvider";
@@ -109,6 +110,7 @@ const STYLES = [
 
 export default function Home() {
   const { isDark, toggleTheme } = useTheme();
+  const router = useRouter(); // <-- ADICIONE ESTA LINHA AQUI
   const [file, setFile] = useState<File | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<typeof STYLES[number]["id"]>("Modern");
   const [roomType, setRoomType] = useState<string>("");
@@ -125,7 +127,15 @@ export default function Home() {
     const saved = sessionStorage.getItem("homeai_last_result");
     if (saved) setResultUrl(saved);
   }, []);
-
+  // TRAVA DE SEGURANÇA: Se não estiver logado, manda para o Login
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        router.push("/login");
+      }
+    });
+  }, [router]);
   const previewUrl = useMemo(() => file ? URL.createObjectURL(file) : null, [file]);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {

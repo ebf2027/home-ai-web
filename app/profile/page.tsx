@@ -171,7 +171,24 @@ export default function ProfilePage() {
       setUploading(false);
     }
   }
+  async function handleDeleteAvatar() {
+    if (!confirm("Tem certeza que deseja remover sua foto de perfil?")) return;
+    try {
+      // 1. Diz ao banco para deixar o campo da foto vazio (null)
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", user.id);
 
+      if (error) throw error;
+
+      // 2. Avisa a tela do app para voltar a mostrar a letra do nome
+      setAvatarUrl(null);
+      alert("Foto removida com sucesso!");
+    } catch (error: any) {
+      alert("Erro ao remover: " + error.message);
+    }
+  }
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -242,6 +259,14 @@ export default function ProfilePage() {
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} />
               </div>
               <h1 className="text-3xl font-black tracking-tight">{user?.email?.split('@')[0]}</h1>
+              {avatarUrl && (
+                <button
+                  onClick={handleDeleteAvatar}
+                  className="mt-2 text-[10px] font-bold uppercase tracking-widest text-red-500/60 hover:text-red-500 transition-colors"
+                >
+                  Remove Photo
+                </button>
+              )}
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-40 mt-1">{plan}</p>
             </div>
 
