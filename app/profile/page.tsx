@@ -1,5 +1,6 @@
 "use client";
 
+import InstallButton from '@/app/components/InstallButton';
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/app/lib/supabase/client";
 import { useTheme } from "../components/ThemeProvider";
@@ -388,7 +389,10 @@ export default function ProfilePage() {
           {/* ===================== FIM COLUNA DIREITA ===================== */}
 
         </div>
-
+        {/* --- BOTÃO DE INSTALAÇÃO --- */}
+        <div className="flex justify-center w-full mb-6">
+          <InstallButton />
+        </div>
         {/* Sign Out */}
         <div className="flex justify-center w-full max-w-xs mx-auto mt-12 mb-8">
           <button onClick={handleSignOut} className={clsx("w-full flex items-center justify-center gap-3 p-6 rounded-2xl border transition-all active:scale-95", isDark ? "border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10" : "border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200")}>
