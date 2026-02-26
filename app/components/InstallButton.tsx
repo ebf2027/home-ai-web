@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from 'react';
 
 export default function InstallButton() {
@@ -7,18 +6,41 @@ export default function InstallButton() {
     const [isIOS, setIsIOS] = useState(false);
     const [showIOSModal, setShowIOSModal] = useState(false);
 
+    // 🌟 NOVO: Inteligência para saber se já está instalado
+    const [isInstalled, setIsInstalled] = useState(false);
+
     useEffect(() => {
+        // 1. Verifica se está rodando como aplicativo nativo (standalone)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isIOSStandalone = (window.navigator as any).standalone === true;
+
+        if (isStandalone || isIOSStandalone) {
+            setIsInstalled(true); // Se sim, avisa o sistema que já está instalado
+        }
+
+        // 2. Detecta se é um iPhone/iPad
         const userAgent = window.navigator.userAgent.toLowerCase();
         const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
         setIsIOS(isIosDevice);
 
+        // 3. Escuta o evento nativo de instalação (para Android/PC)
         const handleBeforeInstallPrompt = (e: any) => {
             e.preventDefault();
             setInstallPrompt(e);
         };
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        // 4. Se o usuário instalar agora, esconde o botão na mesma hora!
+        const handleAppInstalled = () => {
+            setIsInstalled(true);
+        };
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
     }, []);
 
     const handleInstallClick = async () => {
@@ -27,11 +49,19 @@ export default function InstallButton() {
         } else if (installPrompt) {
             await installPrompt.prompt();
             const { outcome } = await installPrompt.userChoice;
-            if (outcome === 'accepted') setInstallPrompt(null);
+            if (outcome === 'accepted') {
+                setInstallPrompt(null);
+                setIsInstalled(true); // Esconde o botão se aceitar a instalação no Android/PC
+            }
         } else {
             alert('O aplicativo já está instalado ou seu navegador não suporta esta função.');
         }
     };
+
+    // 🌟 A MÁGICA ACONTECE AQUI: Se estiver instalado, não renderiza nada!
+    if (isInstalled) {
+        return null;
+    }
 
     return (
         <>
@@ -64,7 +94,7 @@ export default function InstallButton() {
 
                         <button
                             onClick={() => setShowIOSModal(false)}
-                            className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl"
+                            className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl transition-colors"
                         >
                             Entendi
                         </button>
