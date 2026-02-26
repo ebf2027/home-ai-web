@@ -52,18 +52,17 @@ export async function middleware(request: NextRequest) {
   // PROTECT ONLY SPECIFIC PRIVATE ROUTES
   // This is the safest way to avoid loops.
   const isPrivate =
+    pathname === "/" ||
     pathname.startsWith("/gallery") ||
     pathname.startsWith("/profile") ||
     pathname.startsWith("/upgrade");
 
-  /* 
-  // TEMPORARY: Allow public access for testing
+
   if (isPrivate && !user) {
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
-  */
 
   return response;
 }
