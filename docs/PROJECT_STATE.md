@@ -95,3 +95,33 @@ Nota de Segurança: Sempre verificar o painel de Deployments da Vercel (bolinha 
 
 💾 4. Regra de Ouro do Desenvolvimento
 Proteção do Desktop: Sempre usar o prefixo md: do Tailwind ao ajustar espaçamentos e layouts para a versão Mobile. Isso garante que a versão Web continue blindada, luxuosa e com sua estrutura de painéis laterais intacta.
+
+Gemini said
+Com certeza, esse detalhe do teclado e do e-mail é prioridade máxima para amanhã. Realmente, usar "name@gmail.com" pode confundir quem usa Outlook ou iCloud; o ideal é algo neutro como "seu-email@exemplo.com" ou apenas "E-mail".
+
+Aqui está o seu project_state.md atualizado com as vitórias de hoje e os alertas para amanhã. Pode copiar e colar no seu arquivo:
+
+Project State - HomeRenovAi
+Versão: 2.1.0 - MVP Premium (Blindado)
+Status: Ajustes Finais de UI & Segurança de Sessão
+
+🎯 O que resolvemos hoje:
+PWA / Instalação: O botão de instalar agora é inteligente. Ele detecta se o app já está instalado (Desktop/Mobile) e se esconde automaticamente. Ajustamos o texto do manual para Safari/Chrome no iOS para ser "à prova de falhas".
+
+Foto de Perfil: Problema da "foto fantasma" resolvido com técnica de cache-buster (?t=timestamp). A foto agora permanece fixa ao navegar entre as abas. Adicionada a função "Remove Photo" para resetar o avatar.
+
+Galeria: Visibilidade dos textos de "Nenhum design encontrado" corrigida para Mobile, com cores inteligentes para modo claro (preto) e modo escuro (branco).
+
+Segurança (Acesso Restrito): Implementada trava de segurança dupla. O middleware.ts agora bloqueia instantaneamente acessos deslogados às páginas /, /gallery, /profile e /upgrade.
+
+🛠️ Tecnologias e Estética
+Cores: Dark Profundo (#0A0A0A) e Dourado Executive (#D4AF37).
+
+Stack: Next.js (App Router), Supabase (Auth/Storage/DB), Tailwind CSS.
+
+🔴 Pendências Urgentes (Para Amanhã):
+Bug do Teclado no Login: Corrigir os campos de E-mail e Password que não estão ganhando foco/abrindo o teclado no iPhone.
+
+Refatoração do Login: Alterar o texto do placeholder de e-mail para algo genérico e garantir que o clique nos campos funcione em toda a área.
+
+Migração de Domínio: (Aguardando sinal verde) Alterar nome na Vercel e atualizar as URLs de retorno no Supabase e Stripe.

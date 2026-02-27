@@ -42,7 +42,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup">(refCode ? "signup" : "signin");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -97,7 +97,8 @@ function LoginForm() {
         return;
       }
 
-      const { error } = await supabase.auth.signUp({
+      // No momento do Cadastro (SignUp)
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -106,14 +107,21 @@ function LoginForm() {
       });
 
       if (error) { setMsg(error.message); return; }
-      setMsg("Account created. Please check your email to confirm.");
+
+      // MÁGICA: Se o Supabase já logou o usuário (porque desligamos a confirmação), ele entra direto!
+      if (data?.user && data?.session) {
+        router.replace(next);
+      } else {
+        // Se a confirmação de e-mail ainda estiver ligada lá no painel do Supabase
+        setMsg("Account created! Please check your email to confirm.");
+      }
+
     } catch (e: any) {
       setMsg(e?.message ?? "Login failed.");
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <main className={clsx("min-h-screen transition-colors duration-500 flex items-center justify-center relative overflow-hidden", isDark ? "bg-[#0A0A0A] text-white" : "bg-zinc-50 text-zinc-900")}>
 
@@ -125,15 +133,15 @@ function LoginForm() {
       <div className="w-full max-w-md px-6 py-12 relative z-10">
         <div className={clsx("rounded-[2.5rem] p-10 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] border transition-all duration-700", isDark ? "bg-zinc-900/40 border-white/10" : "bg-white border-zinc-100")}>
 
-          {/* --- INÍCIO: Logo HomeRenovAi Exclusivo para Mobile --- */}
-          <div className="flex md:hidden justify-center mb-8 pt-4">
+          {/* --- INÍCIO: Logo HomeRenovAi (Visível em todos os dispositivos) --- */}
+          <div className="flex justify-center mb-8 pt-4">
             <h1 className="text-4xl font-black tracking-tighter flex items-center">
               <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
               <span className="text-blue-500">RenovAi</span>
               <SparklesIcon className="h-9 w-9 ml-1" />
             </h1>
           </div>
-          {/* --- FIM: Logo HomeRenovAi Exclusivo para Mobile --- */}
+          {/* --- FIM: Logo HomeRenovAi --- */}
 
           <header className="text-center mb-10">
             <h1 className="text-4xl font-black tracking-tighter leading-none mb-3">
@@ -172,20 +180,24 @@ function LoginForm() {
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] ml-1 opacity-40">Email Address</label>
               <input
+                id="email-field"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
-                placeholder="name@email.com"
+                inputMode="email"
+                placeholder="seu-email@exemplo.com"
                 className={clsx(
                   "w-full rounded-2xl border px-5 py-4 text-sm outline-none transition-all focus:ring-1",
                   isDark ? "bg-black border-white/10 text-white focus:border-[#D4AF37] focus:ring-[#D4AF37]" : "bg-zinc-50 border-zinc-200 focus:border-zinc-400 focus:ring-zinc-400 shadow-inner"
                 )}
+                style={{ fontSize: '16px' }}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] ml-1 opacity-40">Password</label>
               <input
+                id="password-field"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
@@ -194,11 +206,25 @@ function LoginForm() {
                   "w-full rounded-2xl border px-5 py-4 text-sm outline-none transition-all focus:ring-1",
                   isDark ? "bg-black border-white/10 text-white focus:border-[#D4AF37] focus:ring-[#D4AF37]" : "bg-zinc-50 border-zinc-200 focus:border-zinc-400 focus:ring-zinc-400 shadow-inner"
                 )}
+                style={{ fontSize: '16px' }}
               />
             </div>
 
             {msg && (
-              <div className={clsx("rounded-2xl border px-4 py-3 text-[10px] text-center font-black uppercase tracking-widest", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
+              <div className={clsx(
+                "rounded-2xl border px-4 py-3 text-[10px] text-center font-black uppercase tracking-widest backdrop-blur-sm",
+                // Se a mensagem for de sucesso (contém "created")
+                msg.includes("created")
+                  ? (isDark
+                    ? "bg-green-500/10 border-green-500/20 text-green-400" // Verde translúcido no Dark
+                    : "bg-green-50/50 border-green-200 text-green-700"    // Verde translúcido no Light
+                  )
+                  // Se for qualquer outra mensagem (erro)
+                  : (isDark
+                    ? "bg-red-500/10 border-red-500/20 text-red-400"
+                    : "bg-red-50/50 border-red-200 text-red-700"
+                  )
+              )}>
                 {msg}
               </div>
             )}
