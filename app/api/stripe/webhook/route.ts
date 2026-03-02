@@ -246,8 +246,8 @@ export async function POST(req: Request) {
         const sub =
           subscriptionId
             ? await stripe.subscriptions.retrieve(subscriptionId, {
-                expand: ["items.data.price"],
-              })
+              expand: ["items.data.price"],
+            })
             : null;
 
         if (userId) {
