@@ -125,3 +125,40 @@ Bug do Teclado no Login: Corrigir os campos de E-mail e Password que não estão
 Refatoração do Login: Alterar o texto do placeholder de e-mail para algo genérico e garantir que o clique nos campos funcione em toda a área.
 
 Migração de Domínio: (Aguardando sinal verde) Alterar nome na Vercel e atualizar as URLs de retorno no Supabase e Stripe.
+# 🚀 PROJECT_STATE - HomeRenovAi
+
+## 📌 1. Visão Geral & Arquitetura
+- **Nome do App:** HomeRenovAi (Transição para nome oficial concluída)
+- **Versão Atual:** v2.1.5 (Login Inteligente & UI Refinada)
+- **Status:** 6.661 linhas de código real (.tsx e .css)
+- **Tech Stack:** Next.js, Tailwind CSS, Supabase (Auth/DB), Stripe.
+- **Identidade Visual:** Fundo Dark Profundo (#0A0A0A) com Acentos em Dourado Premium (#D4AF37).
+
+## ✅ 2. Concluído Hoje (Vitórias Recentes)
+
+### 🔐 Login "Nível App Store"
+- **Correção iPhone:** Font-size em 16px e inputMode="email" para evitar zoom e garantir que o teclado suba na hora.
+- **Inteligência por Link:** O app detecta automaticamente se o usuário veio de um link de indicação (?ref=) e muda o título de "Welcome Back" para "Start Creating".
+- **Logo Onipresente:** Corrigida a visibilidade do logo no Desktop (removido md:hidden).
+
+### 🎨 Feedback Visual Premium
+- **Mensagens Inteligentes:** Sistema de cores translúcidas com efeito vidro (backdrop-blur).
+  - Sucesso (Criar conta): Verde suave translúcido.
+  - Erro: Vermelho suave translúcido.
+
+### ⚙️ Infraestrutura Supabase
+- Ajuste de Rate Limits para evitar bloqueios durante testes de tráfego.
+- Normalização para reconhecimento de e-mails reais (Confirm Email: ON).
+
+## 🎯 3. Próximos Passos (Missões de Amanhã)
+
+### 🔗 A. Migração de Domínio (Vercel) - PRIORIDADE 1
+- [ ] Renomear projeto de 'home-ai-web' para 'homerenovai' no painel da Vercel.
+- [ ] Atualizar URLs de Redirecionamento (Callback) no Supabase.
+- [ ] Atualizar Endpoints de Webhook no Stripe para o novo domínio.
+
+### 📧 B. Profissionalização de E-mail (SMTP) - NOVO
+- [ ] Configurar provedor SMTP (Resend) para envio ilimitado de e-mails de confirmação.
+
+## 💾 4. Regra de Ouro do Desenvolvimento
+- **Proteção do Desktop:** Sempre usar o prefixo md: para ajustes Mobile, garantindo que o "Big Screen Experience" do computador permaneça intacto e luxuoso.
