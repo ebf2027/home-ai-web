@@ -267,9 +267,13 @@ export default function UpgradePage() {
             {busy === "portal" ? "Opening..." : "ALREADY SUBSCRIBED? MANAGE BILLING"}
           </button>
 
-          <div className={clsx("text-xs leading-relaxed max-w-lg mx-auto md:opacity-70", isDark ? "text-white md:text-zinc-500" : "text-zinc-600 md:text-zinc-500")}>
-            <p className="mb-1">Secure payments by Stripe. Cancel anytime.</p>
+          <div className={clsx("text-xs leading-relaxed max-w-lg mx-auto md:opacity-70 space-y-2", isDark ? "text-white md:text-zinc-500" : "text-zinc-600 md:text-zinc-500")}>
+            <p>Secure payments by Stripe. Cancel anytime.</p>
             <p>After upgrade, credits become available automatically.</p>
+            <p className={clsx("font-medium px-4 py-1 rounded-full border inline-block", isDark ? "border-zinc-800 bg-zinc-900/50 text-zinc-400" : "border-zinc-200 bg-zinc-100 text-zinc-600")}>
+              <span className="text-[#D4AF37] mr-1">●</span>
+              Note: Credits are not cumulative and will reset upon upgrade or renewal.
+            </p>
           </div>
         </div>
 
