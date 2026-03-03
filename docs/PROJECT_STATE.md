@@ -162,3 +162,29 @@ Migração de Domínio: (Aguardando sinal verde) Alterar nome na Vercel e atuali
 
 ## 💾 4. Regra de Ouro do Desenvolvimento
 - **Proteção do Desktop:** Sempre usar o prefixo md: para ajustes Mobile, garantindo que o "Big Screen Experience" do computador permaneça intacto e luxuoso.
+# Status do Projeto - HomeRenovAi
+
+## 📌 Visão Geral
+Aplicação de design de interiores baseada em IA que permite aos usuários transformar fotos de cômodos em diferentes estilos.
+- **Domínio Oficial:** https://homerenovai.com
+- **Plataforma:** Next.js + Supabase + Stripe + Vercel
+
+## 🚀 Marcos Alcançados hoje
+- **Configuração de Domínio:** O app foi migrado com sucesso para o domínio `homerenovai.com`.
+- **Catálogo Stripe:** Produtos renomeados para "HomeRenovAi Pro" e "HomeRenovAi Pro+".
+- **Correção de Webhook:** A URL de destino foi corrigida para `https://homerenovai.com/api/stripe/webhook`, resolvendo o erro 405 e habilitando o status "200 OK".
+- **Fluxo de Pagamento:** Testado e aprovado. O sistema atualiza o perfil de "Pro" para "Pro+" automaticamente após a compra de teste.
+- **Redirecionamento:** Configurado para levar o usuário de volta para `/success` após o pagamento concluído.
+
+## ⚙️ Regras de Negócio Definidas
+- **Créditos:** Ficou decidido que os créditos **não são acumulativos**. Ao renovar ou fazer upgrade, o saldo é redefinido para o valor total do novo plano.
+- **Segurança:** O `middleware.ts` está configurado para proteger rotas privadas, mantendo a rota `/api/stripe/webhook` aberta para comunicações do Stripe.
+
+## 🛠️ Próximos Passos (Amanhã)
+1. **Ajuste de UI:** Adicionar texto explicativo na página de `upgrade` informando que os créditos não são acumulativos.
+2. **E-mails:** Iniciar a configuração do **Resend** para envio de e-mails transacionais (boas-vindas, confirmação de compra, etc).
+3. **Produção:** Preparar a transição das chaves de API e links do Stripe do "Modo de Teste" para o "Modo Real".
+
+## 📝 Notas Técnicas
+- O projeto interno no VS Code ainda mantém o nome da pasta como `home-ai-web` para preservar as conexões de Deploy e Git.
+- Sempre realizar **Commit** e **Sync Changes** no VS Code para aplicar mudanças no site real.
