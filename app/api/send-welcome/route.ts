@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { getWelcomeEmailHtml } from '@/emails/WelcomeEmail';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "chave_temporaria_para_build");
 
 export async function POST(request: Request) {
     try {
