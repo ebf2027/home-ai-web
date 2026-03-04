@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         const { data, error } = await resend.emails.send({
             from: 'HomeRenovAi <hello@homerenovai.com>',
             to: [email],
-            reply_to: 'ebf2027@gmail.com', // ✅ As respostas chegarão no seu Gmail pessoal
+            replyTo: 'ebf2027@gmail.com', // ✅ As respostas chegarão no seu Gmail pessoal
             subject: 'Welcome to HomeRenovAi! ✨',
             html: emailHtml,
         });
