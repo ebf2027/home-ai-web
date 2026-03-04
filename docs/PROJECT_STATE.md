@@ -188,3 +188,42 @@ Aplicação de design de interiores baseada em IA que permite aos usuários tran
 ## 📝 Notas Técnicas
 - O projeto interno no VS Code ainda mantém o nome da pasta como `home-ai-web` para preservar as conexões de Deploy e Git.
 - Sempre realizar **Commit** e **Sync Changes** no VS Code para aplicar mudanças no site real.
+🚀 PROJECT_STATE - HomeRenovAi
+📌 1. Visão Geral & Arquitetura
+Nome do App: HomeRenovAi
+
+Versão Atual: v2.2.0 (Comunicação Ativa & Identidade Visual)
+
+Tech Stack: Next.js, Tailwind CSS, Supabase, Stripe, Resend (E-mails).
+
+Identidade Visual: Ícones brancos com detalhes dourados em 3D, fundo Dark Profundo (#0A0A0A).
+
+✅ 2. Vitórias de Hoje (3 de Março)
+🎨 Identidade Visual & PWA
+Novos Ícones: Versão branca/dourada implementada e testada com sucesso na tela inicial do iOS.
+
+UI de Upgrade: Adicionado aviso legal informando que os créditos não são acumulativos e resetam na renovação.
+
+📧 Motor de E-mails (Resend)
+Domínio Verificado: homerenovai.com 100% autenticado no Resend via registros DNS na Vercel.
+
+API de Envio: Criada a rota /api/send-welcome usando técnica de HTML estático para garantir compatibilidade com Next.js 16.
+
+Teste Manual: E-mail de boas-vindas disparado e recebido com sucesso (atualmente caindo no spam, aguardando maturação do domínio).
+
+💳 Pagamentos (Stripe)
+Estabilidade: Webhook operando em 200 OK no domínio oficial.
+
+🎯 3. Próximos Passos (Missões de Amanhã)
+🔗 A. Automação de Boas-Vindas (Supabase) - PRIORIDADE 1
+[ ] Conectar o gatilho de envio de e-mail ao processo de cadastro real do usuário.
+
+[ ] Configurar o campo "Reply-to" para que respostas de clientes cheguem ao e-mail pessoal do Gabriel.
+
+⚙️ B. Preparação para Produção (Live Mode)
+[ ] Trocar chaves de API do Stripe de "Test" para "Live".
+
+[ ] Realizar um deploy final na Vercel para limpar páginas de teste (como a /test-email).
+
+💾 4. Regra de Ouro do Desenvolvimento
+Proteção do Desktop: Manter o prefixo md: em todos os ajustes para não quebrar a experiência de tela grande enquanto refinamos o mobile.
