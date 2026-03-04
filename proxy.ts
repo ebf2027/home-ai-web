@@ -78,6 +78,7 @@ export const config = {
      * - auth (auth callbacks)
      * - api (API routes)
      */
-    "/((?!_next/static|_next/image|favicon.ico|login|auth|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|login|auth|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+export default proxy;
