@@ -2,8 +2,9 @@ import { Resend } from 'resend';
 import { getWelcomeEmailHtml } from '@/emails/WelcomeEmail';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY || "chave_temporaria_para_build");
-
+// Isso impede que o erro trave o seu site se a chave estiver vazia
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
+export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
     try {
         const { email, firstName } = await request.json();
