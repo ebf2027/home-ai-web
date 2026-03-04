@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client'; // Ajuste o caminho se necessário
+import { createClient } from '@/lib/supabase/client'; // ✅ Caminho exato baseado no seu print
 
 export function WelcomeTrigger() {
     const supabase = createClient();
@@ -23,6 +23,7 @@ export function WelcomeTrigger() {
                 try {
                     const response = await fetch('/api/send-welcome', {
                         method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             email: user.email,
                             firstName: profile.full_name?.split(' ')[0] || 'Friend',
@@ -47,5 +48,5 @@ export function WelcomeTrigger() {
         checkAndSendWelcome();
     }, [supabase]);
 
-    return null; // Ele não renderiza nada na tela, trabalha nos bastidores
+    return null;
 }
