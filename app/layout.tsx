@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import ConditionalBottomBar from "./components/ConditionalBottomBar";
 import { ReferralTracker } from "./components/ReferralTracker";
+import { WelcomeTrigger } from "./components/WelcomeTrigger";
 
 export const metadata: Metadata = {
   title: "HomeRenovAi",
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <ReferralTracker />
+          <WelcomeTrigger />
           <div className="min-h-screen pb-24">
             {children}
           </div>
