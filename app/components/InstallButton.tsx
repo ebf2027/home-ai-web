@@ -5,36 +5,36 @@ export default function InstallButton() {
     const [installPrompt, setInstallPrompt] = useState<any>(null);
     const [isIOS, setIsIOS] = useState(false);
     const [showIOSModal, setShowIOSModal] = useState(false);
-
-    // 🌟 NOVO: Inteligência para saber se já está instalado
     const [isInstalled, setIsInstalled] = useState(false);
 
     useEffect(() => {
-        // 1. Verifica se está rodando como aplicativo nativo (standalone)
+        // 1. Verifica se já está rodando como app instalado (standalone)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         const isIOSStandalone = (window.navigator as any).standalone === true;
-
         if (isStandalone || isIOSStandalone) {
-            setIsInstalled(true); // Se sim, avisa o sistema que já está instalado
+            setIsInstalled(true);
+            return;
         }
 
-        // 2. Detecta se é um iPhone/iPad
+        // 2. Detecta iOS
         const userAgent = window.navigator.userAgent.toLowerCase();
-        const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-        setIsIOS(isIosDevice);
+        setIsIOS(/iphone|ipad|ipod/.test(userAgent));
 
-        // 3. Escuta o evento nativo de instalação (para Android/PC)
+        // 3. ✅ Lê o evento que já foi capturado globalmente pelo script do layout
+        if ((window as any).__deferredInstallPrompt) {
+            setInstallPrompt((window as any).__deferredInstallPrompt);
+        }
+
+        // 4. Também escuta caso o evento ainda não tenha disparado
         const handleBeforeInstallPrompt = (e: any) => {
             e.preventDefault();
+            (window as any).__deferredInstallPrompt = e;
             setInstallPrompt(e);
         };
-
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-        // 4. Se o usuário instalar agora, esconde o botão na mesma hora!
-        const handleAppInstalled = () => {
-            setIsInstalled(true);
-        };
+        // 5. Se o usuário instalar, esconde o botão
+        const handleAppInstalled = () => setIsInstalled(true);
         window.addEventListener('appinstalled', handleAppInstalled);
 
         return () => {
@@ -51,17 +51,15 @@ export default function InstallButton() {
             const { outcome } = await installPrompt.userChoice;
             if (outcome === 'accepted') {
                 setInstallPrompt(null);
-                setIsInstalled(true); // Esconde o botão se aceitar a instalação no Android/PC
+                setIsInstalled(true);
+                (window as any).__deferredInstallPrompt = null;
             }
         } else {
-            alert('O aplicativo já está instalado ou seu navegador não suporta esta função.');
+            alert('Abra o site no Chrome e aguarde alguns segundos para o botão de instalação ficar disponível.');
         }
     };
 
-    // 🌟 A MÁGICA ACONTECE AQUI: Se estiver instalado, não renderiza nada!
-    if (isInstalled) {
-        return null;
-    }
+    if (isInstalled) return null;
 
     return (
         <>
@@ -80,22 +78,17 @@ export default function InstallButton() {
                     <div className="bg-[#0A0A0A] border border-[#D4AF37] p-6 rounded-2xl max-w-sm w-full text-center text-white shadow-2xl">
                         <h3 className="text-2xl font-bold text-[#D4AF37] mb-2">Instalar HomeRenovAi</h3>
                         <p className="mb-6 text-gray-400 text-sm">Adicione o app à sua tela inicial para uma experiência completa.</p>
-
                         <ol className="text-left space-y-4 mb-8">
                             <li className="flex items-center gap-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
                                 <span className="text-2xl font-bold text-[#D4AF37]">1.</span>
-                                <p className="text-sm">Recomendamos abrir este site no <strong>Safari</strong>. Toque no ícone de <strong>Compartilhar</strong> na barra inferior.</p>
+                                <p className="text-sm">Abra este site no <strong>Safari</strong>. Toque no ícone de <strong>Compartilhar</strong> na barra inferior.</p>
                             </li>
                             <li className="flex items-center gap-4 bg-gray-900/50 p-3 rounded-xl border border-gray-800">
                                 <span className="text-2xl font-bold text-[#D4AF37]">2.</span>
                                 <p className="text-sm">Role para baixo e escolha <strong>Adicionar à Tela de Início</strong>.</p>
                             </li>
                         </ol>
-
-                        <button
-                            onClick={() => setShowIOSModal(false)}
-                            className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl transition-colors"
-                        >
+                        <button onClick={() => setShowIOSModal(false)} className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl transition-colors">
                             Entendi
                         </button>
                     </div>

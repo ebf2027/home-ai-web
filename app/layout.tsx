@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
-import ConditionalBottomBar from "./components/ConditionalBottomBar"; // Importamos o porteiro
-import { ReferralTracker } from "./components/ReferralTracker"; // 1. Importamos o nosso Rastreador Invisível
+import ConditionalBottomBar from "./components/ConditionalBottomBar";
+import { ReferralTracker } from "./components/ReferralTracker";
 
 export const metadata: Metadata = {
   title: "HomeRenovAi",
@@ -20,15 +20,26 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* ✅ Captura o evento ANTES do React montar, guardando numa variável global */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.__deferredInstallPrompt = null;
+              window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window.__deferredInstallPrompt = e;
+              });
+            `,
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider>
-          {/* 2. Colocamos o Rastreador aqui para rodar em todas as páginas */}
           <ReferralTracker />
-
           <div className="min-h-screen pb-24">
             {children}
           </div>
-          {/* Usamos o porteiro aqui em vez do BottomTabs direto */}
           <ConditionalBottomBar />
         </ThemeProvider>
       </body>
