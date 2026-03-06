@@ -2,16 +2,16 @@ import { NextResponse } from "next/server";
 import { Buffer } from "buffer";
 import { createClient as createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { supabaseAdmin } from "@/app/lib/supabase/admin";
+import { fal } from "@fal-ai/client";
 
 export const runtime = "nodejs";
 
-// Optional: bypass credit consume for your own user id(s), comma-separated UUIDs
 const PRO_BYPASS_USER_IDS = (process.env.PRO_BYPASS_USER_IDS ?? "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const FAL_KEY = process.env.FAL_KEY;
 
 function normalizeText(v: unknown, fallback: string) {
   if (typeof v !== "string") return fallback;
@@ -24,12 +24,12 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const roomType = roomTypeRaw.trim();
 
   return [
-    `Photorealistic interior redesign of the SAME ${roomType} in a ${style} style.`,
+    `Transform this ${roomType} into a stunning ${style} style interior.`,
+    `COMPLETELY replace all furniture, decor, materials, textures, colors, and lighting with ${style} style equivalents.`,
     `Keep the exact same camera angle, perspective, room shape, walls, ceiling lines, and layout.`,
-    `DO NOT move or remove doors, windows, or openings. Keep doors clearly visible.`,
-    `Preserve architectural elements and room proportions. Do not change window/door positions.`,
-    `Keep the overall structure identical; only change finishes, decor, furniture style, and lighting to match the chosen style.`,
-    `Make it realistic, high quality, natural light, coherent shadows, no text, no watermark.`,
+    `DO NOT move or remove doors, windows, or openings. Keep doors and windows clearly visible in the same positions.`,
+    `Preserve the room architecture and proportions — only redesign the interior style, furniture, and finishes.`,
+    `Result must look like a professional ${style} interior design photo: realistic, high quality, natural light, coherent shadows, no text, no watermark.`,
   ].join(" ");
 }
 
@@ -48,7 +48,6 @@ function num(v: any) {
   return Number.isFinite(n) ? n : 0;
 }
 
-// garante row existir (para refund funcionar em usuário novo)
 async function ensureCreditsRow(userId: string) {
   await supabaseAdmin
     .from("user_credits")
@@ -81,7 +80,6 @@ async function readCreditsSnapshot(userId: string): Promise<CreditsSnapshot | nu
   };
 }
 
-// reembolsa 1 crédito (best-effort)
 async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot | null) {
   if (!before) return;
 
@@ -95,7 +93,6 @@ async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot
 
   const now: any = nowRow;
 
-  // 1. Paid
   if (num(now.paid_used) === before.paid_used + 1) {
     await supabaseAdmin
       .from("user_credits")
@@ -105,8 +102,6 @@ async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot
     return;
   }
 
-  // 2. Bonus
-  // Note: we assume column is 'bonus_used'
   if (num(now.bonus_used) === before.bonus_used + 1) {
     await supabaseAdmin
       .from("user_credits")
@@ -116,7 +111,6 @@ async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot
     return;
   }
 
-  // 3. Free
   if (num(now.free_used) === before.free_used + 1) {
     await supabaseAdmin
       .from("user_credits")
@@ -127,94 +121,76 @@ async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot
   }
 }
 
-async function callOpenAIImageEditWithRetry(args: {
+// ─── fal.ai FLUX Kontext Dev ──────────────────────────────────────────────
+async function callFalImageEdit(args: {
   imageFile: File;
   prompt: string;
-  timeoutMs?: number;
-  maxAttempts?: number;
 }) {
-  const { imageFile, prompt, timeoutMs = 60_000, maxAttempts = 3 } = args;
+  const { imageFile, prompt } = args;
 
-  if (!OPENAI_API_KEY) throw new Error("Missing OPENAI_API_KEY.");
+  console.log("[fal.ai] FAL_KEY present:", !!FAL_KEY);
+  console.log("[fal.ai] FAL_KEY prefix:", FAL_KEY?.slice(0, 8));
 
-  let lastErr: any = null;
+  if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), timeoutMs);
+  fal.config({ credentials: FAL_KEY });
 
-    try {
-      const fd = new FormData();
-      fd.append("image[]", imageFile, imageFile.name || "image.jpg");
-      fd.append("model", "gpt-image-1-mini");
-      fd.append("prompt", prompt);
-      fd.append("quality", "medium");
-      fd.append("output_format", "jpeg");
-      fd.append("size", "1024x1024");
+  console.log("[fal.ai] Converting image to base64...");
+  const rawBuffer = await imageFile.arrayBuffer();
+  const base64 = Buffer.from(rawBuffer).toString("base64");
+  const mimeType = imageFile.type || "image/jpeg";
+  const imageDataUrl = `data:${mimeType};base64,${base64}`;
+  console.log("[fal.ai] Image size (bytes):", rawBuffer.byteLength, "| mime:", mimeType);
 
-      const res = await fetch("https://api.openai.com/v1/images/edits", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-        body: fd,
-        signal: controller.signal,
-      });
+  console.log("[fal.ai] Calling fal.subscribe...");
 
-      const contentType = res.headers.get("content-type") ?? "";
-
-      if (!res.ok) {
-        let msg = `OpenAI request failed (${res.status})`;
-        try {
-          const txt = await res.text();
-          if (txt) msg = `${msg}: ${txt.slice(0, 800)}`;
-        } catch { }
-        const err = new Error(msg) as any;
-        err.status = res.status;
-        throw err;
+  const result = await fal.subscribe("fal-ai/flux-kontext/dev", {
+    input: {
+      image_url: imageDataUrl,
+      prompt,
+      num_images: 1,
+      guidance_scale: 10,
+      num_inference_steps: 35,
+      output_format: "jpeg",
+    },
+    logs: true,
+    onQueueUpdate: (update: any) => {
+      console.log(`[fal.ai] Queue status: ${update.status}`);
+      if (update.logs) {
+        update.logs.forEach((l: any) => console.log("[fal.ai log]", l.message));
       }
+    },
+  });
 
-      if (contentType.includes("application/json")) {
-        const json: any = await res.json();
-        const b64 = json?.data?.[0]?.b64_json;
-        if (!b64) throw new Error("OpenAI JSON response missing b64_json.");
+  console.log("[fal.ai] Raw result keys:", Object.keys(result ?? {}));
 
-        const outFmt = (json?.output_format as string | undefined) ?? "jpeg";
-        const mime =
-          outFmt === "png" ? "image/png" : outFmt === "webp" ? "image/webp" : "image/jpeg";
+  const imageUrl: string | undefined =
+    (result as any)?.data?.images?.[0]?.url ??
+    (result as any)?.images?.[0]?.url;
 
-        const buf = Buffer.from(b64, "base64");
-        return { buf, mime };
-      }
-
-      const arr = await res.arrayBuffer();
-      const buf = Buffer.from(arr);
-      const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
-      return { buf, mime };
-    } catch (err: any) {
-      lastErr = err;
-
-      const status = err?.status;
-      const isAbort = err?.name === "AbortError";
-      const retryable = isAbort || status === 429 || (typeof status === "number" && status >= 500);
-
-      clearTimeout(t);
-
-      if (!retryable || attempt === maxAttempts) throw err;
-
-      const base = 400 * Math.pow(2, attempt - 1);
-      const jitter = Math.floor(Math.random() * 250);
-      await sleep(base + jitter);
-    } finally {
-      clearTimeout(t);
-    }
+  if (!imageUrl) {
+    console.error("[fal.ai] Full result:", JSON.stringify(result).slice(0, 1000));
+    throw new Error("fal.ai response missing image URL.");
   }
 
-  throw lastErr || new Error("OpenAI request failed.");
+  console.log("[fal.ai] Image URL received, downloading...");
+
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) throw new Error(`Failed to download fal.ai image (${imgRes.status}).`);
+
+  const imgArr = await imgRes.arrayBuffer();
+  const buf = Buffer.from(imgArr);
+
+  console.log("[fal.ai] Done! Buffer size:", buf.byteLength);
+
+  return { buf, mime: "image/jpeg" };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient();
 
-  // 1) Auth
   const {
     data: { user },
     error: userErr,
@@ -227,7 +203,6 @@ export async function POST(req: Request) {
   const userId = user.id;
   const bypassCredits = PRO_BYPASS_USER_IDS.includes(userId);
 
-  // 2) Parse form data
   const form = await req.formData();
   const image = form.get("image");
   const styleRaw = form.get("style");
@@ -249,7 +224,6 @@ export async function POST(req: Request) {
   let consumptionType: "paid" | "bonus" | "free" | null = null;
 
   if (!bypassCredits) {
-    // 3.a) Read current state
     const { data: row, error: fetchErr } = await supabaseAdmin
       .from("user_credits")
       .select("*")
@@ -263,57 +237,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // Default values if row doesn't exist
     const r: any = row ?? {};
+    if (!row) await ensureCreditsRow(userId);
 
-    // Ensure row exists if it doesn't (though usually it should)
-    if (!row) {
-      await ensureCreditsRow(userId);
-    }
-
-    // ---- CALCULATION (Same as /api/credits) ----
     const DEFAULT_FREE_BASE = 3;
     const clamp = (n: number) => (Number.isFinite(n) ? Math.max(0, n) : 0);
 
-    // Paid
     const paidAllowance = Number(r.paid_monthly_allowance ?? 0);
     const paidUsed = Number(r.paid_used ?? 0);
     const paidRemaining = clamp(paidAllowance - paidUsed);
 
-    // Bonus
-    const bonusTotal = Number(
-      r.bonus_referrals_total ??
-      r.bonus_referral_total ??
-      r.bonus_total ??
-      r.bonus_earned ??
-      0
-    );
-    const bonusUsed = Number(
-      r.bonus_referrals_used ??
-      r.bonus_referral_used ??
-      r.bonus_used ??
-      0
-    );
+    const bonusTotal = Number(r.bonus_referrals_total ?? r.bonus_referral_total ?? r.bonus_total ?? r.bonus_earned ?? 0);
+    const bonusUsed = Number(r.bonus_referrals_used ?? r.bonus_referral_used ?? r.bonus_used ?? 0);
     const bonusRemaining = clamp(bonusTotal - bonusUsed);
 
-    // Free
-    const plan =
-      r.plan ??
-      (paidAllowance >= 300 ? "pro_plus" : paidAllowance >= 100 ? "pro" : "free");
-
+    const plan = r.plan ?? (paidAllowance >= 300 ? "pro_plus" : paidAllowance >= 100 ? "pro" : "free");
     const freeBase = Number(r.free_base ?? DEFAULT_FREE_BASE);
     const freeUsed = Number(r.free_used ?? 0);
-    // Free credits only apply if plan is free
     const freeRemaining = plan === "free" ? clamp(freeBase - freeUsed) : 0;
 
-    // Snapshot for refund
-    snapshot = {
-      free_used: freeUsed,
-      paid_used: paidUsed,
-      bonus_used: bonusUsed,
-    };
+    snapshot = { free_used: freeUsed, paid_used: paidUsed, bonus_used: bonusUsed };
 
-    // ---- DECISION: Priority Paid -> Bonus -> Free ----
     let updateData: any = null;
 
     if (paidRemaining > 0) {
@@ -321,12 +265,6 @@ export async function POST(req: Request) {
       updateData = { paid_used: paidUsed + 1, updated_at: new Date().toISOString() };
     } else if (bonusRemaining > 0) {
       consumptionType = "bonus";
-      // We need to know which column to update. The read logic checks multiple fallback names,
-      // but usually there's one canonical column for writing. 
-      // Assuming 'bonus_used' based on typical Supabase patterns or `r.bonus_used`.
-      // Let's use 'bonus_used' as the standard write column if it exists or fallback.
-      // Looking at `readCreditsSnapshot` in original code, it didn't read bonus. 
-      // I'll assume `bonus_used` is the column name.
       updateData = { bonus_used: bonusUsed + 1, updated_at: new Date().toISOString() };
     } else if (freeRemaining > 0) {
       consumptionType = "free";
@@ -338,7 +276,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3.b) Perform Update
     const { error: updateErr } = await supabaseAdmin
       .from("user_credits")
       .update(updateData)
@@ -354,14 +291,8 @@ export async function POST(req: Request) {
     creditWasConsumed = true;
   }
 
-  // 4) Call OpenAI (if fails, refund 1 credit best-effort)
   try {
-    const { buf, mime } = await callOpenAIImageEditWithRetry({
-      imageFile: image,
-      prompt,
-      timeoutMs: 60_000,
-      maxAttempts: 3,
-    });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
@@ -374,6 +305,7 @@ export async function POST(req: Request) {
       await refundOneCreditBestEffort(userId, snapshot);
     }
 
+    console.error("[/api/generate] FINAL ERROR:", err?.message ?? err);
     const msg = err?.message || "Unexpected error while generating the image.";
     return NextResponse.json({ error: msg }, { status: 500 });
   }

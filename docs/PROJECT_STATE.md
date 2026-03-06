@@ -218,7 +218,7 @@ Estabilidade: Webhook operando em 200 OK no domínio oficial.
 🔗 A. Automação de Boas-Vindas (Supabase) - PRIORIDADE 1
 [ ] Conectar o gatilho de envio de e-mail ao processo de cadastro real do usuário.
 
-[ ] Configurar o campo "Reply-to" para que respostas de clientes cheguem ao e-mail pessoal do Gabriel.
+[ ] Configurar o campo "Reply-to" para que respostas de clientes cheguem ao e-mail pessoal do Emerson.
 
 ⚙️ B. Preparação para Produção (Live Mode)
 [ ] Trocar chaves de API do Stripe de "Test" para "Live".
@@ -227,3 +227,62 @@ Estabilidade: Webhook operando em 200 OK no domínio oficial.
 
 💾 4. Regra de Ouro do Desenvolvimento
 Proteção do Desktop: Manter o prefixo md: em todos os ajustes para não quebrar a experiência de tela grande enquanto refinamos o mobile.
+🚀 PROJECT_STATE - HomeRenovAi
+📌 1. Visão Geral & Arquitetura
+Versão Atual: v2.2.5 (PWA Estável & Infra de E-mail Pronta).
+
+Tech Stack: Next.js 16.1.1 (Turbopack), Tailwind CSS, Supabase (Auth/DB), Stripe, Resend.
+
+Identidade Visual: Fundo Dark Profundo (#0A0A0A) com Acentos em Dourado Premium (#D4AF37).
+
+✅ 2. Vitórias Alcançadas (4 de Março)
+PWA Imbatível: Captura global do prompt de instalação via window no layout.tsx, resolvendo a "corrida" do navegador e permitindo instalação no Desktop e Android.
+
+Deploy Verde: Superados os erros de build relacionados ao Resend e caminhos de pastas.
+
+Segurança de Infra: Transição de middleware.ts para proxy.ts concluída e operacional no Next.js 16.
+
+Configuração de Suporte: Campo replyTo configurado para direcionar respostas de clientes ao e-mail pessoal.
+
+🛠️ 3. Status da Automação de E-mail
+Infraestrutura: Rota /api/send-welcome e componente WelcomeTrigger.tsx implementados.
+
+Ponto de Atenção: O gatilho de boas-vindas foi integrado ao layout.tsx, mas o disparo automático ainda não foi validado (o campo welcome_sent permanece FALSE no banco).
+
+🎯 4. Próximos Passos (Missão de Amanhã)
+Investigação do Gatilho: Verificar por que o WelcomeTrigger não está disparando a chamada para a API (possível necessidade de logs de erro ou ajuste na permissão da rota no proxy.ts).
+
+Teste de Fluxo: Confirmar se o link de confirmação do Supabase está redirecionando o usuário para a página correta onde o gatilho está ativo.
+
+Validação Final: Garantir que o campo welcome_sent mude para TRUE após o login de um novo usuário.
+
+💾 5. Regra de Ouro
+Proteção do Desktop: Manter o uso do prefixo md: para ajustes mobile, garantindo que o layout premium de tela grande permaneça intacto.
+# 🚀 PROJECT_STATE - HomeRenovAi
+
+## 📌 1. Visão Geral & Arquitetura
+- **Nome do App:** HomeRenovAi
+- **Versão Atual:** v2.3.0 (Migração para High-End IA)
+- **Tech Stack:** Next.js, Tailwind CSS, Supabase, Stripe, fal.ai (Novo motor de IA).
+- **Identidade Visual:** Fundo Dark Profundo (#0A0A0A) com Acentos em Dourado Premium (#D4AF37).
+
+## ✅ 2. Vitórias de Hoje (5 de Março)
+
+### 🤖 Migração de Motor de IA (fal.ai)
+- **Modelo Implementado:** `fal-ai/flux-kontext/dev` – substituição completa da OpenAI para Image-to-Image.
+- **Ajuste de Fidelidade:** Configurado `guidance_scale: 10` e `num_inference_steps: 35` para garantir que as alterações de estilo sejam profundas e realistas.
+- **Infraestrutura:** Instalação e configuração do SDK oficial `@fal-ai/client`.
+
+### 💾 Correção do Sistema de Downloads
+- **Download Direto (Home/Gallery):** Implementada a lógica de "Blob Download" que força o navegador a baixar o arquivo na pasta de downloads, eliminando a janela de compartilhamento indesejada no Desktop.
+- **Modo Cinema:** Botão de download também sincronizado dentro do visualizador ampliado da galeria.
+
+### 🛠️ Estabilidade de Código
+- **Limpeza de Arquivos:** Remoção de funções obsoletas da OpenAI no `api/generate/route.ts`, reduzindo a complexidade e eliminando erros de sintaxe (Return statements/Declarations).
+
+## 🎯 3. Próximos Passos (Missões Atuais)
+- [ ] **Otimização de Custos:** Testar o modelo `schnell` com `guidance_scale` ajustado para comparar se a economia compensa a diferença de qualidade.
+- [ ] **Automação de Boas-Vindas:** Finalizar o gatilho do Resend para novos cadastros.
+
+## 💾 4. Regra de Ouro do Desenvolvimento
+- **Proteção do Desktop:** Manter o prefixo `md:` em todos os ajustes para garantir que a "Big Screen Experience" permaneça intacta enquanto refinamos o mobile.

@@ -147,33 +147,28 @@ export default function Home() {
   async function downloadResult() {
     if (!resultUrl) return;
     try {
-      // 1. Pega a imagem real do banco
-      const res = await fetch(resultUrl);
-      const blob = await res.blob();
-
-      // 2. Tenta invocar a "Gaveta Nativa" do celular (com a imagem dentro)
-      if (navigator.share && navigator.canShare) {
-        const file = new File([blob], "homerenovai-design.jpg", { type: "image/jpeg" });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: "HomeRenovAi Design",
-          });
-          return; // Se a gaveta abrir, nosso trabalho aqui terminou
-        }
-      }
-
-      // 3. Se for PC (ou o celular não suportar a gaveta), faz o download normal
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `homerenovai-design.jpg`;
-      document.body.appendChild(a); // Essencial para navegadores chatos
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      // Último recurso de segurança caso a internet pisque
+      // 1. Baixa os dados da imagem em segundo plano
+      const response = await fetch(resultUrl);
+      const blob = await response.blob();
+      
+      // 2. Cria um link temporário "escondido" no seu navegador
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 3. Define o nome do arquivo que será salvo
+      link.download = 'homerenovai-design.jpg';
+      
+      // 4. Simula o clique para disparar o download na pasta do PC
+      document.body.appendChild(link);
+      link.click();
+      
+      // 5. Limpa a bagunça da memória
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erro ao baixar:", error);
+      // Se tudo falhar, ele tenta abrir a imagem em uma nova aba como plano B
       window.open(resultUrl, "_blank");
     }
   }

@@ -52,31 +52,27 @@ function getPublicUrl(supabase: any, path: string) {
 
 async function forceDownload(url: string, filename = "homeai-design") {
   try {
+    // 1. Baixa a imagem em segundo plano
     const res = await fetch(url);
     const blob = await res.blob();
 
-    // A mesma mágica da Gaveta Nativa para o celular
-    if (navigator.share && navigator.canShare) {
-      const file = new File([blob], `${filename}.jpg`, { type: "image/jpeg" });
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "HomeRenovAi Design",
-        });
-        return;
-      }
-    }
-
-    // O download normal para Computador
+    // 2. Cria o link de download forçado para o PC
     const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = objectUrl;
+    
+    // 3. Define o nome do arquivo que será salvo
     a.download = `${filename}.jpg`;
+    
+    // 4. Executa o download silencioso
     document.body.appendChild(a);
     a.click();
+    
+    // 5. Limpa a memória do navegador
     a.remove();
     URL.revokeObjectURL(objectUrl);
   } catch (err) {
+    // Plano B: Abre a imagem em uma nova aba se o download falhar
     window.open(url, "_blank");
   }
 }
