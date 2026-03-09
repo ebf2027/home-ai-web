@@ -154,7 +154,9 @@ async function callFalImageEdit(args: {
       image_url: imageDataUrl,
       prompt,
       num_images: 1,
-      guidance_scale: 10,
+      // --- Ajuste Cirúrgico para Força do Prompt apenas em Fachadas ---
+      guidance_scale: prompt.toLowerCase().includes("facade design") ? 13 : 10,
+      // -------------------------------------------------------------
       num_inference_steps: 35,
       output_format: "jpeg",
     },
