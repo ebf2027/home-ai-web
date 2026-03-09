@@ -101,7 +101,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
 }
 function ExampleCarousel() {
   const [index, setIndex] = useState(0);
-  const images = ["/examples/ex1.jpg", "/examples/ex2.jpg", "/examples/ex3.jpg", "/examples/ex4.jpg", "/examples/ex5.jpg", "/examples/ex6.jpg"];
+  const images = ["/examples/ex1.jpg", "/examples/ex2.jpg", "/examples/ex3.jpg", "/examples/ex4.jpg", "/examples/ex5.jpg", "/examples/ex6.jpg","/examples/ex7.jpg"];
 
   useEffect(() => {
     const timer = setInterval(() => {
