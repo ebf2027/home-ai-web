@@ -117,10 +117,9 @@ function ExampleCarousel() {
           className={clsx(
             "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
             i === index ? "opacity-60" : "opacity-0"
-          )}
+ )}
         />
-      )}
-      {/* Camada de sombra para destacar o texto */}
+      ))}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60" />
     </div>
   );
