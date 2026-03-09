@@ -116,11 +116,11 @@ function ExampleCarousel() {
           alt="Example"
           className={clsx(
             "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
-            i === index ? "opacity-60" : "opacity-0"
+            i === index ? "opacity-100" : "opacity-0"
  )}
         />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60" />
+    
     </div>
   );
 }
@@ -297,9 +297,9 @@ export default function Home() {
                     <div className="h-14 w-14 rounded-full flex items-center justify-center mb-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                       <SparklesIcon className="h-7 w-7 text-[#D4AF37]" />
                     </div>
-                    <p className="text-[11px] text-center uppercase font-black tracking-widest leading-relaxed text-white drop-shadow-2xl">
-                      Select a high-quality photo<br />of your room
-                    </p>
+                    <p className="text-[11px] text-center uppercase font-black tracking-widest leading-relaxed text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_80%)]">
+  Select a high-quality photo<br />of your room
+</p>
                   </div>
                 </>
               ) : resultUrl ? (
