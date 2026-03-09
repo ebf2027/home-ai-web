@@ -286,7 +286,11 @@ export default function Home() {
             </div>
 
             {/* ÁREA DE UPLOAD (Mais espaço lateral no mobile) */}
-            <div className={clsx("relative w-full aspect-square md:aspect-[5/4] rounded-3xl md:rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
+            <div className={clsx(
+              "relative w-full aspect-square md:aspect-[5/4] rounded-3xl md:rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300 border",
+              !previewUrl && "border-dashed border-2",
+              isDark ? "bg-[#111] border-white/10" : "bg-zinc-100 border-zinc-200"
+            )}>
               {!previewUrl ? (
                 <>
                   <ExampleCarousel />
