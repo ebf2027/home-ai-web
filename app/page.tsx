@@ -87,8 +87,11 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={beforeSrc} alt="Before" className="h-full w-full object-cover" draggable={false} />
       </div>
-      <div className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[8px] font-black uppercase text-white border border-white/10 backdrop-blur-sm">Before</div>
-      <div className="absolute right-3 top-3 z-10 rounded-full bg-[#D4AF37] px-3 py-1 text-[8px] font-black uppercase text-black shadow-lg">After</div>
+      {/* Selo Before */}
+      <div className="absolute left-5 top-5 md:left-3 md:top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[8px] font-black uppercase text-white border border-white/10 backdrop-blur-sm">Before</div>
+      
+      {/* Selo After */}
+      <div className="absolute right-5 top-5 md:right-3 md:top-3 z-10 rounded-full bg-[#D4AF37] px-3 py-1 text-[8px] font-black uppercase text-black shadow-lg">After</div>
       <div className="absolute top-0 h-full" style={{ left: `calc(${pos}% - 1px)` }}>
         <div className="h-full w-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white shadow-2xl flex items-center justify-center text-black font-bold cursor-ew-resize">‹›</div>
