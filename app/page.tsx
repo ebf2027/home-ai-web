@@ -96,7 +96,35 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
     </div>
   );
 }
+function ExampleCarousel() {
+  const [index, setIndex] = useState(0);
+  const images = ["/examples/ex1.jpg", "/examples/ex2.jpg", "/examples/ex3.jpg", "/examples/ex4.jpg", "/examples/ex5.jpg", "/examples/ex6.jpg"];
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // Troca a imagem a cada 4 segundos
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="absolute inset-0 w-full h-full bg-black">
+      {images.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt="Example"
+          className={clsx(
+            "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
+            i === index ? "opacity-60" : "opacity-0"
+          )}
+        />
+      )}
+      {/* Camada de sombra para destacar o texto */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60" />
+    </div>
+  );
+}
 const STYLES = [
   { id: "Modern", title: "MODERN" },
   { id: "Minimalist", title: "MINIMALIST" },
@@ -260,14 +288,17 @@ export default function Home() {
             {/* ÁREA DE UPLOAD (Mais espaço lateral no mobile) */}
             <div className={clsx("relative w-full aspect-square md:aspect-[5/4] rounded-3xl md:rounded-[2rem] overflow-hidden mb-6 flex flex-col items-center justify-center transition-all duration-300", !previewUrl && "border-2 border-dashed", isDark ? (!previewUrl ? "bg-[#161616] border-white/10 hover:border-[#D4AF37]/50" : "bg-[#111] border border-white/10") : (!previewUrl ? "bg-zinc-50 border-zinc-300 hover:border-[#D4AF37]/50" : "bg-zinc-100 border border-zinc-200"))}>
               {!previewUrl ? (
-                <div className="flex flex-col items-center justify-center md:text-zinc-500 px-6">
-                  <div className={clsx("h-14 w-14 rounded-full flex items-center justify-center mb-4 transition-colors", isDark ? "bg-white/5" : "bg-black/5")}>
-                    <SparklesIcon className="h-7 w-7 text-[#D4AF37] opacity-80" />
+                <>
+                  <ExampleCarousel />
+                  <div className="relative z-10 flex flex-col items-center justify-center px-6">
+                    <div className="h-14 w-14 rounded-full flex items-center justify-center mb-4 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+                      <SparklesIcon className="h-7 w-7 text-[#D4AF37]" />
+                    </div>
+                    <p className="text-[11px] text-center uppercase font-black tracking-widest leading-relaxed text-white drop-shadow-2xl">
+                      Select a high-quality photo<br />of your room
+                    </p>
                   </div>
-                  <p className="text-[10px] text-center uppercase font-black tracking-widest leading-relaxed">
-                    Select a high-quality photo<br />of your room
-                  </p>
-                </div>
+                </>
               ) : resultUrl ? (
                 <BeforeAfterSlider beforeSrc={previewUrl} afterSrc={resultUrl} />
               ) : (
