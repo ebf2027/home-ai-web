@@ -283,6 +283,7 @@ Proteção do Desktop: Manter o uso do prefixo md: para ajustes mobile, garantin
 ## 🎯 3. Próximos Passos (Missões Atuais)
 - [ ] **Otimização de Custos:** Testar o modelo `schnell` com `guidance_scale` ajustado para comparar se a economia compensa a diferença de qualidade.
 - [ ] **Automação de Boas-Vindas:** Finalizar o gatilho do Resend para novos cadastros.
-
+[ ] **🚨 DEPURAÇÃO PRODUÇÃO (PRIORIDADE MÁXIMA):** Investigar e corrigir a falha de geração de imagens na Vercel. (Bug: Funciona em localhost, mas retorna erro no domínio oficial homerenovai.com).
+- [ ] **Configuração Vercel:** Verificar se a `FAL_KEY` foi adicionada corretamente às "Environment Variables" no painel da Vercel.
 ## 💾 4. Regra de Ouro do Desenvolvimento
 - **Proteção do Desktop:** Manter o prefixo `md:` em todos os ajustes para garantir que a "Big Screen Experience" permaneça intacta enquanto refinamos o mobile.
