@@ -28,13 +28,18 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const category = isExterior ? "exterior architecture" : "interior";
   const elements = isExterior ? "facade materials, finishes, textures, and outdoor lighting" : "furniture, decor, materials, textures, colors, and lighting";
 
+  // --- AJUSTE CIRÚRGICO: Força iluminação clara de dia apenas para Fachadas ---
+  const lightingInstruction = isExterior ? "bright, clear natural daylight, natural exterior illumination" : "natural light";
+  // ----------------------------------------------------------------------------
+
   return [
     `Transform this ${roomType} into a stunning ${style} style ${category}.`,
     `COMPLETELY replace all ${elements} with ${style} style equivalents.`,
     `Keep the exact same camera angle, perspective, structure shape, walls, and layout.`,
     `DO NOT move or remove doors, windows, or openings. Keep doors and windows clearly visible in the same positions.`,
     `Preserve the architecture and proportions — only redesign the ${isExterior ? "facade" : "interior"} style and finishes.`,
-    `Result must look like a professional ${style} ${category} design photo: realistic, high quality, natural light, coherent shadows, no text, no watermark.`,
+    // Substituímos 'natural light' por nossa instrução dinâmica 'lightingInstruction'
+    `Result must look like a professional ${style} ${category} design photo: realistic, high quality, ${lightingInstruction}, coherent shadows, no text, no watermark.`,
   ].join(" ");
 }
 

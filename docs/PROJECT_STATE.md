@@ -287,3 +287,48 @@ Proteção do Desktop: Manter o uso do prefixo md: para ajustes mobile, garantin
 - [ ] **Configuração Vercel:** Verificar se a `FAL_KEY` foi adicionada corretamente às "Environment Variables" no painel da Vercel.
 ## 💾 4. Regra de Ouro do Desenvolvimento
 - **Proteção do Desktop:** Manter o prefixo `md:` em todos os ajustes para garantir que a "Big Screen Experience" permaneça intacta enquanto refinamos o mobile.
+🚀 PROJECT_STATE - HomeRenovAi
+📌 1. Visão Geral & Arquitetura
+Nome do App: HomeRenovAi
+
+Versão Atual: v2.4.0 (Visual Experience & High-End IA)
+
+Tech Stack: Next.js, Tailwind CSS, Supabase, Stripe, fal.ai, Resend.
+
+Identidade Visual: Fundo Dark Profundo (#0A0A0A) com Acentos em Dourado Premium (#D4AF37). Suporte total Light/Dark.
+
+✅ 2. Vitórias de Hoje (9 de Março)
+🤖 Motor de IA Inteligente (fal.ai)
+Ajuste de Contexto: O prompt agora detecta automaticamente se o usuário selecionou uma fachada e altera os termos de "móveis/interior" para "arquitetura/materiais de exterior".
+
+Ousadia Dinâmica: Implementada a técnica de guidance_scale variável.
+
+Interiores: Força 10 (Estabilidade).
+
+Fachadas: Força 13 (Ousadia para mudar cores e acabamentos de verdade).
+
+Produção: Chave FAL_KEY configurada na Vercel, habilitando a geração no domínio oficial.
+
+🎨 Experiência Visual Premium (Empty State)
+Carrossel Dinâmico: Implementado o componente ExampleCarousel no Workspace.
+
+Inspiração Ativa: 7 imagens de alta qualidade (ex1 a ex7) rodando em loop com efeito de fade quando o usuário não tem foto carregada.
+
+UI de Luxo: Adicionado efeito de glassmorphism no ícone de upload e text-shadow reforçado para leitura clara sobre as imagens do carrossel.
+
+📱 Refinamentos de UX/UI
+Slider Before/After: Posicionamento das etiquetas ajustado para respeitar o arredondamento das bordas em telas mobile.
+
+Limpeza de Assets: Imagens de exemplo tratadas para remover legendas fixas, deixando o visual mais limpo e profissional.
+
+🎯 3. Próximos Passos (Missões de Amanhã)
+📧 A. Automação de E-mail de Boas-Vindas - PRIORIDADE MÁXIMA
+[ ] Mover o gatilho do Resend para um local onde o disparo seja garantido após o primeiro login.
+
+[ ] Validar a mudança do campo welcome_sent para TRUE no Supabase após o envio.
+
+⚙️ B. Preparação para Modo Real (Live Mode)
+[ ] Revisão final das chaves do Stripe para transição do ambiente de testes para produção.
+
+💾 4. Regra de Ouro do Desenvolvimento
+Proteção do Desktop: Manter o uso rigoroso do prefixo md: em ajustes de layout para que a experiência de tela grande (Big Screen Experience) continue blindada e luxuosa enquanto refinamos o mobile.
