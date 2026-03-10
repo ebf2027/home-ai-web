@@ -28,17 +28,34 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const category = isExterior ? "exterior architecture" : "interior";
   const elements = isExterior ? "facade materials, finishes, textures, and outdoor lighting" : "furniture, decor, materials, textures, colors, and lighting";
 
-  // --- AJUSTE CIRÚRGICO: Força iluminação clara de dia apenas para Fachadas ---
+  // --- AJUSTE ANTERIOR: Força iluminação clara de dia para Fachadas ---
   const lightingInstruction = isExterior ? "bright, clear natural daylight, natural exterior illumination" : "natural light";
+
+  // --- NOVO AJUSTE CIRÚRGICO: Dicionário de Detalhes de Estilo apenas para Exterior ---
+  // Criamos regras específicas de materiais e arquitetura apenas se for fachada.
+  let exteriorStyleDetails = "";
+  if (isExterior) {
+    const modifiers: Record<string, string> = {
+      "Modern": "geometric lines, smooth render, large glass panels, minimalist ornamentation",
+      "Minimalist": "ultra-clean white facade, hidden window frames, smooth surfaces, extreme simplicity",
+      "Scandinavian": "vertical light wood cladding, white stucco, large simple windows, warm natural feel",
+      "Japanese": "dark wood elements, shoji-inspired screens, clean lines, integration with serene landscape",
+      "Rustic": "natural stone facade, exposed aged wood beams, textured stucco, traditional charm",
+      "Industrial": "exposed red brick or raw concrete walls, black steel window frames, factory aesthetics",
+      "Boho": "creamy stucco, textured natural materials, relaxed bohemian vibes",
+      "Super Luxury": "premium large format marble or polished stone facade, floor-to-ceiling luxury glass, integrated LED architectural lighting, executive high-end finishes",
+    };
+    // Se o estilo existe na nossa lista, pegamos a descrição detalhada e adicionamos uma ênfase
+    exteriorStyleDetails = modifiers[style] ? `, with a specific focus on highlighting ${modifiers[style]}` : "";
+  }
   // ----------------------------------------------------------------------------
 
   return [
-    `Transform this ${roomType} into a stunning ${style} style ${category}.`,
+    `Transform this ${roomType} into a stunning ${style} style ${category}${exteriorStyleDetails}.`, // Adicionamos os detalhes específicos aqui
     `COMPLETELY replace all ${elements} with ${style} style equivalents.`,
     `Keep the exact same camera angle, perspective, structure shape, walls, and layout.`,
     `DO NOT move or remove doors, windows, or openings. Keep doors and windows clearly visible in the same positions.`,
     `Preserve the architecture and proportions — only redesign the ${isExterior ? "facade" : "interior"} style and finishes.`,
-    // Substituímos 'natural light' por nossa instrução dinâmica 'lightingInstruction'
     `Result must look like a professional ${style} ${category} design photo: realistic, high quality, ${lightingInstruction}, coherent shadows, no text, no watermark.`,
   ].join(" ");
 }
