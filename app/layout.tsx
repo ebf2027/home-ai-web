@@ -1,9 +1,22 @@
 import { Metadata } from "next";
+import { Playfair_Display, Inter } from "next/font/google"; // Importando as fontes
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import ConditionalBottomBar from "./components/ConditionalBottomBar";
 import { ReferralTracker } from "./components/ReferralTracker";
 import { WelcomeTrigger } from "./components/WelcomeTrigger";
+
+// Configurando a Playfair para os títulos (Luxo)
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
+
+// Configurando a Inter para textos comuns (Leitura)
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "HomeRenovAi",
