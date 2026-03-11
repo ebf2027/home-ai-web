@@ -36,14 +36,14 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   let exteriorStyleDetails = "";
   if (isExterior) {
     const modifiers: Record<string, string> = {
-      "Modern": "geometric lines, smooth render, large glass panels, minimalist ornamentation",
-      "Minimalist": "ultra-clean white facade, hidden window frames, smooth surfaces, extreme simplicity",
-      "Scandinavian": "vertical light wood cladding, white stucco, large simple windows, warm natural feel",
-      "Japanese": "dark wood elements, shoji-inspired screens, clean lines, integration with serene landscape",
-      "Rustic": "natural stone facade, exposed aged wood beams, textured stucco, traditional charm",
-      "Industrial": "exposed red brick or raw concrete walls, black steel window frames, factory aesthetics",
-      "Boho": "creamy stucco, textured natural materials, relaxed bohemian vibes",
-      "Super Luxury": "premium large format marble or polished stone facade, floor-to-ceiling luxury glass, integrated LED architectural lighting, executive high-end finishes",
+      "Modern": "iconic contemporary architecture, cantilevered concrete structures, seamless floor-to-ceiling glass walls, ultra-sharp geometric precision, luxury villa aesthetic",
+      "Minimalist": "museum-grade architectural minimalism, monolithic pure white surfaces, shadow-gap details, hidden frames, ethereal and clean geometric form",
+      "Scandinavian": "architectural Nordic masterpiece, premium vertical light wood slats, smooth off-white stucco, oversized panoramic windows, warm hygge luxury exterior",
+      "Japanese": "contemporary Zen architecture, charred wood (Shou Sugi Ban) elements, delicate timber screening, minimalist stone integration, serene and high-end aesthetic",
+      "Rustic": "high-end Alpine-inspired luxury estate, hand-cut mountain stone walls, massive reclaimed oak beams, artisanal textured lime wash, timeless heritage prestige",
+      "Industrial": "luxury industrial loft facade, weathered steel accents, premium charcoal grey brickwork, massive black steel crittall windows, raw yet refined architectural textures",
+      "Boho": "Mediterranean luxury boho villa, hand-plastered soft cream walls, organic wooden textures, raffia and stone accents, relaxed high-end coastal atmosphere",
+      "Super Luxury": "ultra-exclusive billionaire mansion facade, book-matched marble panels, expansive seamless structural glass, integrated architectural LED linear lighting, reflecting pools, the pinnacle of prestige",
     };
     // Se o estilo existe na nossa lista, pegamos a descrição detalhada e adicionamos uma ênfase
     exteriorStyleDetails = modifiers[style] ? `, with a specific focus on highlighting ${modifiers[style]}` : "";
