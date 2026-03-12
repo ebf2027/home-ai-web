@@ -1,18 +1,16 @@
 import { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google"; // Importando as fontes
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import ConditionalBottomBar from "./components/ConditionalBottomBar";
 import { ReferralTracker } from "./components/ReferralTracker";
 import { WelcomeTrigger } from "./components/WelcomeTrigger";
 
-// Configurando a Playfair para os títulos (Luxo)
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
 });
 
-// Configurando a Inter para textos comuns (Leitura)
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -27,15 +25,18 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
+    // ✅ Adicionamos o ícone principal aqui para o Google achar
+    icon: "/icon-192x192.png", 
+    shortcut: "/icon-192x192.png",
     apple: "/apple-touch-icon.png",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // ✅ ADICIONADO: className aqui para as fontes de LUXO funcionarem no site todo
+    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
-        {/* ✅ Captura o evento ANTES do React montar, guardando numa variável global */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -48,7 +49,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>
+      {/* Aplicamos a fonte Inter como padrão no body */}
+      <body className="font-sans">
         <ThemeProvider>
           <ReferralTracker />
           <WelcomeTrigger />
