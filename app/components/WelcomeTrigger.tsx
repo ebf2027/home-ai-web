@@ -5,7 +5,6 @@ import { createClient } from '../lib/supabase/client';
 export function WelcomeTrigger() {
     useEffect(() => {
         const checkAndSendWelcome = async () => {
-            // Criamos o cliente aqui dentro para garantir estabilidade
             const supabase = createClient();
 
             // 1. Pega o usuário logado
@@ -15,10 +14,10 @@ export function WelcomeTrigger() {
                 return;
             }
 
-            // 2. Busca o perfil para ver se já enviamos o e-mail
+            // 2. Busca o perfil apenas para ver se o email já foi enviado (sem pedir o full_name que não existe)
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('full_name, welcome_sent')
+                .select('welcome_sent')
                 .eq('id', user.id)
                 .single();
 
@@ -27,9 +26,13 @@ export function WelcomeTrigger() {
                 return;
             }
 
-            // 3. Se ele não recebeu ainda (welcome_sent é false ou nulo)
+            // 3. Se o e-mail ainda não foi enviado
             if (profile && !profile.welcome_sent) {
                 console.log("Trigger: Iniciando envio do e-mail de boas-vindas...");
+                
+                // Tenta pegar o nome direto do Google (se existir) ou usa o padrão
+                const rawName = user.user_metadata?.full_name || user.user_metadata?.name || 'Premium Member';
+                const firstName = rawName.split(' ')[0];
                 
                 try {
                     const response = await fetch('/api/send-welcome', {
@@ -37,7 +40,7 @@ export function WelcomeTrigger() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             email: user.email,
-                            firstName: profile.full_name?.split(' ')[0] || 'Premium Member',
+                            firstName: firstName,
                         }),
                     });
 
@@ -62,7 +65,7 @@ export function WelcomeTrigger() {
         };
 
         checkAndSendWelcome();
-    }, []); // Array vazio garante que rode apenas uma vez ao carregar a página
+    }, []);
 
     return null;
 }
