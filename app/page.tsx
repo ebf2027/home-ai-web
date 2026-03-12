@@ -9,19 +9,20 @@ import { createClient } from "./lib/supabase/client";
 export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme();
   
-  // 1. Criamos um "estado" para guardar se o usuário está logado ou não.
-  // Começamos assumindo que não (false) para não dar spoiler.
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // 2. Usamos o useEffect para checar isso silenciosamente assim que a página carrega.
   useEffect(() => {
     const checkLoginStatus = async () => {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
       
-      // Se tiver sessão, atualizamos nosso estado para true
-      if (session) {
+      // MUDANÇA AQUI: Usamos getUser() para forçar a checagem no servidor real,
+      // ignorando "crachás fantasmas" que ficaram na memória do navegador.
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (user && !error) {
         setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
       }
     };
 
@@ -44,7 +45,6 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-6">
-          {/* Botão de Troca de Tema - Premium */}
           <button 
             onClick={toggleTheme} 
             className={clsx(
@@ -56,15 +56,11 @@ export default function LandingPage() {
           >
             {isDark ? "☀️" : "🌙"}
           </button>
-          
-          {/* 3. Aqui removemos o link "Login" estático como você pediu.
-              Apenas o botão central guiará o usuário. */}
         </div>
       </header>
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
-        {/* Luz de fundo sutil */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
         <span className="relative z-10 inline-block px-4 py-1.5 mb-8 text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5">
@@ -81,10 +77,6 @@ export default function LandingPage() {
           Transform any room or facade into a masterpiece with professional precision.
         </p>
 
-        {/* 4. O Botão Mágico!
-            Aqui nós usamos o nosso estado isLoggedIn para decidir qual texto mostrar.
-            Se for true (logado), mostra o texto curto.
-            Se for false (visitante), mostra a oferta dos 3 créditos. */}
         <Link 
           href="/workspace" 
           className="relative z-10 px-10 py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[10px] tracking-[0.2em] mb-24"
@@ -117,7 +109,6 @@ export default function LandingPage() {
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Scandinavian */}
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-[4/5]">
                 <img src="/showcase-scandinavian.jpg" alt="Scandinavian style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -128,7 +119,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Modern */}
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-[4/5]">
                 <img src="/showcase-modern.jpg" alt="Modern style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -139,7 +129,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Industrial */}
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-[4/5]">
                 <img src="/showcase-industrial.jpg" alt="Industrial style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
