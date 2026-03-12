@@ -83,7 +83,7 @@ export function BottomTabs() {
   }, []);
 
   const tabs = [
-    { href: "/", label: "Home", icon: HomeIcon, match: (p: string) => p === "/" },
+    { href: "/workspace", label: "Home", icon: HomeIcon, match: (p: string) => p.startsWith("/workspace") },
     { href: "/gallery", label: "Gallery", icon: GalleryIcon, match: (p: string) => p.startsWith("/gallery") },
     { href: "/upgrade", label: "Upgrade", icon: StarIcon, match: (p: string) => p.startsWith("/upgrade") },
     { href: "/profile", label: "Profile", icon: UserIcon, match: (p: string) => p.startsWith("/profile") },

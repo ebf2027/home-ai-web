@@ -448,7 +448,7 @@ export default function ProfilePage() {
           "w-[90%] md:w-auto",
           isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
         )}>
-          <Link href="/" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
+          <Link href="/workspace" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
             <HomeIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
             <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>Home</span>
           </Link>
