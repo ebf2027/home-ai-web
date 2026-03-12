@@ -3,9 +3,30 @@
 import Link from "next/link";
 import { useTheme } from "./components/ThemeProvider";
 import clsx from "clsx";
+import { useEffect, useState } from "react";
+import { createClient } from "./lib/supabase/client";
 
 export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme();
+  
+  // 1. Criamos um "estado" para guardar se o usuário está logado ou não.
+  // Começamos assumindo que não (false) para não dar spoiler.
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 2. Usamos o useEffect para checar isso silenciosamente assim que a página carrega.
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Se tiver sessão, atualizamos nosso estado para true
+      if (session) {
+        setIsLoggedIn(true);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   return (
     <main className={clsx(
@@ -36,9 +57,8 @@ export default function LandingPage() {
             {isDark ? "☀️" : "🌙"}
           </button>
           
-          <Link href="/login" className="text-xs font-bold uppercase tracking-widest hover:text-[#D4AF37] transition-colors">
-            Login
-          </Link>
+          {/* 3. Aqui removemos o link "Login" estático como você pediu.
+              Apenas o botão central guiará o usuário. */}
         </div>
       </header>
 
@@ -61,11 +81,17 @@ export default function LandingPage() {
           Transform any room or facade into a masterpiece with professional precision.
         </p>
 
+        {/* 4. O Botão Mágico!
+            Aqui nós usamos o nosso estado isLoggedIn para decidir qual texto mostrar.
+            Se for true (logado), mostra o texto curto.
+            Se for false (visitante), mostra a oferta dos 3 créditos. */}
         <Link 
           href="/workspace" 
           className="relative z-10 px-10 py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[10px] tracking-[0.2em] mb-24"
         >
-          Start Your Transformation — 3 Free Credits
+          {isLoggedIn 
+            ? "Start Your Transformation" 
+            : "Start Your Transformation — 3 Free Credits"}
         </Link>
 
         {/* Imagem Principal Divina (Luxury) */}
