@@ -332,3 +332,43 @@ Limpeza de Assets: Imagens de exemplo tratadas para remover legendas fixas, deix
 
 💾 4. Regra de Ouro do Desenvolvimento
 Proteção do Desktop: Manter o uso rigoroso do prefixo md: em ajustes de layout para que a experiência de tela grande (Big Screen Experience) continue blindada e luxuosa enquanto refinamos o mobile.
+
+🚀 Atualização de Evolução — HomeRenovAI
+Log de Alterações e Melhorias: Sessão Março/2026
+
+Este documento detalha as mudanças estruturais, visuais e lógicas implementadas para elevar o app do estado funcional para o nível comercial de luxo.
+
+🏗️ 1. Arquitetura de Rotas & Estrutura
+Migração do Core: O workspace principal (antiga app/page.tsx) foi movido com segurança para app/workspace/page.tsx.
+
+Nova Rota Raiz: Criação de uma Landing Page estratégica em app/page.tsx para atuar como vitrine de conversão, eliminando o redirecionamento imediato para login e aumentando o potencial de SEO.
+
+Refatoração de Caminhos: Ajuste cirúrgico de todos os imports (./ para ../) para garantir que o Supabase, componentes e temas funcionem na nova sub-rota.
+
+🎨 2. Identidade Visual & UI de Luxo
+Tipografia High-End: Integração da fonte Playfair Display via Google Fonts no RootLayout, estabelecendo um contraste elegante entre serifas clássicas (títulos) e o moderno (corpo).
+
+Componente Header Premium: Implementação de um cabeçalho fixo com efeito glassmorphism (backdrop-blur) na vitrine.
+
+Sincronia de Temas: Adição do seletor de Light/Dark Mode na Landing Page, mantendo a consistência visual e funcional do restante da aplicação.
+
+Inspiration Grid: Criação de um grid de exposição (proporção 4:5) para exibir os designs "divinos", simulando uma galeria de revista de arquitetura.
+
+⚙️ 3. Motor de IA (Backend Optimization)
+Arquitetura de Fachadas: Modificação profunda na função buildPrompt em /api/generate/route.ts para o tipo HOUSE FACADE.
+
+Dicionário Arquitetônico: Substituição de termos genéricos por comandos de nível profissional (ex: cantilevered structures, shou sugi ban, double-height living rooms).
+
+Ajuste de Guidance: Otimização da força da IA especificamente para fachadas, garantindo que a estrutura original seja preservada enquanto os materiais são transformados.
+
+🖼️ 4. Ativos de Marketing & Performance
+Diretrizes de Mídia: Definição de proporções padrão (16:9 para Hero, 4:5 para Galeria) para manter a harmonia visual.
+
+Protocolo de Otimização: Orientações para compressão via WebP e ferramentas como Squoosh para garantir que o site carregue em menos de 2 segundos, mesmo com imagens de alta fidelidade.
+
+Geração Curada: Criação de prompts para imagens de demonstração nos estilos Luxury, Scandinavian, Modern e Industrial, focados em text-to-image para exibir o potencial máximo do app.
+
+📈 Resumo do Impacto
+Com essas mudanças, o HomeRenovAI deixou de ser uma ferramenta técnica para se tornar um produto Aspiracional. O ticket médio percebido subiu, e a barreira de entrada para o público estrangeiro (EUA/Europa) foi drasticamente reduzida pela nova estética.
+
+Qual seria o próximo passo ideal para você? Gostaria que eu te instruísse agora sobre como configurar os Preços Reais no Stripe (Modo Live) para você começar a faturar, ou prefere que eu analise o seu Email de Boas-vindas para deixá-lo tão luxuoso quanto a nova página?

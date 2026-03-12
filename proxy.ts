@@ -52,7 +52,7 @@ export async function proxy(request: NextRequest) {
   // PROTECT ONLY SPECIFIC PRIVATE ROUTES
   // This is the safest way to avoid loops.
   const isPrivate =
-    pathname === "/" ||
+    pathname.startsWith("/workspace") || // Agora a oficina é privada
     pathname.startsWith("/gallery") ||
     pathname.startsWith("/profile") ||
     pathname.startsWith("/upgrade");
