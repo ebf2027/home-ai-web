@@ -9,12 +9,12 @@ export default function LandingPage() {
 
   return (
     <main className={clsx(
-      "min-h-screen transition-colors duration-500 font-sans", 
+      "min-h-screen transition-colors duration-500 font-sans overflow-x-hidden", 
       isDark ? "bg-[#0A0A0A] text-white" : "bg-[#F4F4F5] text-zinc-900"
     )}>
       
       {/* HEADER DA VITRINE */}
-      <header className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+      <header className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5 bg-black/10">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-black tracking-tighter font-serif">
             <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
@@ -23,7 +23,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-6">
-          {/* Botão de Troca de Tema - Igual ao Workspace */}
+          {/* Botão de Troca de Tema - Premium */}
           <button 
             onClick={toggleTheme} 
             className={clsx(
@@ -42,31 +42,95 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* --- CONTEÚDO DA HERO --- */}
+      {/* --- HERO SECTION --- */}
       <section className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
-        {/* Título com a Fonte Playfair Display (font-serif) */}
-        <h1 className="text-5xl md:text-8xl font-serif mb-8 tracking-tight leading-[1.1]">
+        {/* Luz de fundo sutil */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
+
+        <span className="relative z-10 inline-block px-4 py-1.5 mb-8 text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5">
+          The New Standard of Interior Design
+        </span>
+
+        <h1 className="relative z-10 text-5xl md:text-8xl font-serif mb-8 tracking-tight leading-[1.1]">
           Your Dream Home, <br />
           <span className="italic text-[#D4AF37]">Reimagined</span> in Seconds.
         </h1>
         
-        <p className="max-w-2xl mx-auto text-lg md:text-xl font-light leading-relaxed mb-12 opacity-80">
+        <p className="relative z-10 max-w-2xl mx-auto text-lg md:text-xl font-light leading-relaxed mb-12 opacity-80">
           Experience the pinnacle of AI-driven interior design. 
-          Transform any vision into a breathtaking reality with professional precision.
+          Transform any room or facade into a masterpiece with professional precision.
         </p>
 
         <Link 
           href="/workspace" 
-          className="px-10 py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-xl hover:scale-105 uppercase text-[10px] tracking-[0.2em]"
+          className="relative z-10 px-10 py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[10px] tracking-[0.2em] mb-24"
         >
           Start Your Transformation — 3 Free Credits
         </Link>
 
-        {/* Espaço para a sua Imagem Divina (Text-to-image) */}
-        <div className="mt-20 w-full max-w-5xl aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 flex items-center justify-center">
-           <p className="text-zinc-600 italic">Insert your breathtaking AI render here</p>
+        {/* Imagem Principal Divina (Luxury) */}
+        <div className="relative w-full max-w-6xl aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
+           <img 
+             src="/hero-luxury.jpg" 
+             alt="Luxury AI Interior Design" 
+             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+           />
+           <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
+             <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Style</p>
+             <p className="text-white font-serif text-lg">Super Luxury</p>
+           </div>
         </div>
       </section>
+
+      {/* --- INSPIRATION GRID (As outras 3 imagens) --- */}
+      <section className="py-24 px-6 border-t border-white/5 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <header className="text-center mb-16">
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#D4AF37] mb-3">Unlimited Possibilities</p>
+            <h2 className="text-4xl md:text-5xl font-serif tracking-tight text-white">Explore Breathtaking Aesthetics</h2>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Scandinavian */}
+            <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
+              <div className="aspect-[4/5]">
+                <img src="/showcase-scandinavian.jpg" alt="Scandinavian style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <p className="font-serif text-xl text-white">Scandinavian</p>
+                <p className="text-sm text-zinc-400 font-light">Serene, bright, and minimalist Nordic spaces.</p>
+              </div>
+            </div>
+
+            {/* Modern */}
+            <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
+              <div className="aspect-[4/5]">
+                <img src="/showcase-modern.jpg" alt="Modern style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <p className="font-serif text-xl text-white">Modern Designer</p>
+                <p className="text-sm text-zinc-400 font-light">Sleek lines, integrated lighting, high-end materials.</p>
+              </div>
+            </div>
+
+            {/* Industrial */}
+            <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
+              <div className="aspect-[4/5]">
+                <img src="/showcase-industrial.jpg" alt="Industrial style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div className="p-6">
+                <p className="font-serif text-xl text-white">Luxury Industrial</p>
+                <p className="text-sm text-zinc-400 font-light">Raw textures, moody lighting, sophisticated loft aesthetic.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER SIMPLES --- */}
+      <footer className="py-12 px-6 border-t border-white/5 text-center text-zinc-600 text-xs tracking-widest uppercase">
+        © 2026 HomeRenovAi. The pinnacle of AI design.
+      </footer>
 
     </main>
   );
