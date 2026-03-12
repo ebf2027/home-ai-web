@@ -60,7 +60,7 @@ export default function LandingPage() {
       </header>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
+      <section className="relative **pt-28 md:pt-40** pb-20 px-6 flex flex-col items-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
         <span className="relative z-10 inline-block px-4 py-1.5 mb-8 text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5">
@@ -87,7 +87,7 @@ export default function LandingPage() {
         </Link>
 
         {/* Imagem Principal Divina (Luxury) */}
-        <div className="relative w-full max-w-6xl aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
+        <div className="relative w-full max-w-6xl **aspect-square md:aspect-video** rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
            <img 
              src="/hero-luxury.jpg" 
              alt="Luxury AI Interior Design" 
