@@ -350,7 +350,8 @@ export default function GalleryPage() {
               className="max-w-full max-h-full object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
             />
 
-            <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 flex gap-4">
+            {/* Ajuste Cirúrgico: bottom-6 puxa o botão pra cima no celular, md:bottom-[-40px] mantém intacto no desktop */}
+            <div className="absolute bottom-6 md:bottom-[-40px] left-1/2 -translate-x-1/2 flex gap-4 z-50">
               <button
                 onClick={() => forceDownload(selectedImage.imageUrl)}
                 className="px-6 py-2 bg-[#D4AF37] text-black rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-transform"
