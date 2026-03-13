@@ -7,7 +7,8 @@ export default function ConditionalBottomBar() {
     const pathname = usePathname();
 
     // Lista de páginas onde a barra NÃO deve aparecer
-    const hiddenPaths = ["/login", "/signup", "/forgot-password"];
+    // Adicionamos o "/" para esconder a barra na Landing Page (Vitrine)
+    const hiddenPaths = ["/", "/login", "/signup", "/forgot-password"];
 
     // Se a página atual estiver na lista, não mostra nada (null)
     if (hiddenPaths.includes(pathname)) {
