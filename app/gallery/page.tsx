@@ -351,7 +351,7 @@ export default function GalleryPage() {
             />
 
             {/* Ajuste Cirúrgico: bottom-6 puxa o botão pra cima no celular, md:bottom-[-40px] mantém intacto no desktop */}
-            <div className="absolute bottom-6 md:bottom-[-40px] left-1/2 -translate-x-1/2 flex gap-4 z-50">
+            <div className="absolute bottom-6 md:bottom-[-17px] left-1/2 -translate-x-1/2 flex gap-4 z-50">
               <button
                 onClick={() => forceDownload(selectedImage.imageUrl)}
                 className="px-6 py-2 bg-[#D4AF37] text-black rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-transform"
