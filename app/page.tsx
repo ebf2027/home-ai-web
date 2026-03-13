@@ -60,10 +60,10 @@ export default function LandingPage() {
       </header>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative **pt-28 md:pt-40** pb-20 px-6 flex flex-col items-center text-center">
+      <section className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
-        <span className="relative z-10 inline-block px-4 py-1.5 mb-8 text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5">
+        <span className="relative z-10 inline-block px-3 md:px-4 py-1.5 mb-6 md:mb-8 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5 text-center">
           The New Standard of Interior Design
         </span>
 
@@ -79,7 +79,7 @@ export default function LandingPage() {
 
         <Link 
           href="/workspace" 
-          className="relative z-10 px-10 py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[10px] tracking-[0.2em] mb-24"
+          className="relative z-10 px-6 md:px-10 py-4 md:py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[9px] md:text-[10px] tracking-[0.2em] mb-12 md:mb-24 text-center max-w-[90vw]"
         >
           {isLoggedIn 
             ? "Start Your Transformation" 
@@ -87,7 +87,7 @@ export default function LandingPage() {
         </Link>
 
         {/* Imagem Principal Divina (Luxury) */}
-        <div className="relative w-full max-w-6xl **aspect-square md:aspect-video** rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
+        <div className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
            <img 
              src="/hero-luxury.jpg" 
              alt="Luxury AI Interior Design" 
@@ -101,7 +101,7 @@ export default function LandingPage() {
       </section>
 
       {/* --- INSPIRATION GRID (As outras 3 imagens) --- */}
-      <section className="py-24 px-6 border-t border-white/5 bg-black/20">
+      <section className="py-12 md:py-24 px-6 border-t border-white/5 bg-black/20">
         <div className="max-w-6xl mx-auto">
           <header className="text-center mb-16">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#D4AF37] mb-3">Unlimited Possibilities</p>

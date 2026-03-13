@@ -334,7 +334,7 @@ Limpeza de Assets: Imagens de exemplo tratadas para remover legendas fixas, deix
 Proteção do Desktop: Manter o uso rigoroso do prefixo md: em ajustes de layout para que a experiência de tela grande (Big Screen Experience) continue blindada e luxuosa enquanto refinamos o mobile.
 
 🚀 Atualização de Evolução — HomeRenovAI
-Log de Alterações e Melhorias: Sessão Março/2026
+Log de Alterações e Melhorias: Sessão 11 de Março/2026
 
 Este documento detalha as mudanças estruturais, visuais e lógicas implementadas para elevar o app do estado funcional para o nível comercial de luxo.
 
@@ -372,3 +372,32 @@ Geração Curada: Criação de prompts para imagens de demonstração nos estilo
 Com essas mudanças, o HomeRenovAI deixou de ser uma ferramenta técnica para se tornar um produto Aspiracional. O ticket médio percebido subiu, e a barreira de entrada para o público estrangeiro (EUA/Europa) foi drasticamente reduzida pela nova estética.
 
 Qual seria o próximo passo ideal para você? Gostaria que eu te instruísse agora sobre como configurar os Preços Reais no Stripe (Modo Live) para você começar a faturar, ou prefere que eu analise o seu Email de Boas-vindas para deixá-lo tão luxuoso quanto a nova página?
+
+🚀 Atualização de Evolução — Sessão 12 de Março de 2026
+Foco da Sessão: Refinamento da Experiência do Usuário (UX), Correção de Fluxos de E-mail e Ajustes de Navegação Pós-Migração.
+
+⚙️ 1. Correção e Estilização de E-mails (Onboarding)
+
+E-mail de Confirmação (Supabase): O template padrão em texto simples foi substituído por um HTML personalizado de luxo. Implementada a identidade visual (Dark Mode) com o texto da logomarca estilizado em dourado e azul (HomeRenovAi ✨) e todo o conteúdo traduzido para o inglês, visando o mercado internacional.
+
+Gatilho do E-mail de Boas-Vindas (WelcomeTrigger.tsx): Correção de um erro silencioso que impedia o disparo via Resend. A instância do cliente Supabase foi isolada corretamente dentro da função, e o código foi ajustado para parar de buscar a coluna inexistente full_name na tabela profiles, garantindo o envio do e-mail premium com sucesso.
+
+🧠 2. Lógica Inteligente na Landing Page (app/page.tsx)
+
+Estado de Autenticação Real-Time: Implementação de verificação de sessão direta no servidor (supabase.auth.getUser()) ao carregar a página, evitando falsos positivos causados por "crachás fantasmas" (cookies antigos) no navegador.
+
+Botão Dinâmico (Call to Action): O botão principal da vitrine agora é responsivo ao status do usuário:
+
+Visitantes (Não logados): Exibe a oferta "Start Your Transformation — 3 Free Credits".
+
+Usuários Logados: Exibe de forma limpa "Start Your Transformation".
+
+Limpeza Visual: O link estático "Login" foi removido do cabeçalho, centralizando a ação do usuário no botão principal.
+
+🧭 3. Sincronização de Navegação (Mobile & Desktop)
+
+Recalibragem de Rotas: Após a migração do workspace principal da raiz (/) para a sub-rota (/workspace), os menus de navegação ficaram desatualizados.
+
+Correção Mobile (BottomTabs.tsx): O destino do botão "Home" foi alterado de / para /workspace, corrigindo o redirecionamento acidental para a Landing Page.
+
+Correção Desktop (Dock Flutuante): A mesma recalibragem cirúrgica do ícone "Home" foi replicada nos arquivos app/gallery/page.tsx, app/profile/page.tsx e app/upgrade/page.tsx, garantindo uma navegação consistente em todas as telas.
