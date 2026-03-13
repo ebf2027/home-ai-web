@@ -121,7 +121,7 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-video md:aspect-[4/5]">
+              <div className="aspect-square md:aspect-[4/5]">
                 <img src="/showcase-modern.jpg" alt="Modern style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
@@ -131,7 +131,7 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-video md:aspect-[4/5]">
+              <div className="aspect-square md:aspect-[4/5]">
                 <img src="/showcase-industrial.jpg" alt="Industrial style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
