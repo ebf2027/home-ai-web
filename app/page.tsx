@@ -15,8 +15,6 @@ export default function LandingPage() {
     const checkLoginStatus = async () => {
       const supabase = createClient();
       
-      // MUDANÇA AQUI: Usamos getUser() para forçar a checagem no servidor real,
-      // ignorando "crachás fantasmas" que ficaram na memória do navegador.
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (user && !error) {
@@ -60,7 +58,8 @@ export default function LandingPage() {
       </header>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
+      {/* Ajuste do topo: pt-24 no mobile, pt-40 no desktop */}
+      <section className="relative pt-24 md:pt-40 pb-20 px-6 flex flex-col items-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
         <span className="relative z-10 inline-block px-3 md:px-4 py-1.5 mb-6 md:mb-8 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5 text-center">
@@ -87,7 +86,8 @@ export default function LandingPage() {
         </Link>
 
         {/* Imagem Principal Divina (Luxury) */}
-        <div className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
+        {/* Ajuste: aspect-[4/5] no mobile para ficar alta, aspect-video no desktop */}
+        <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
            <img 
              src="/hero-luxury.jpg" 
              alt="Luxury AI Interior Design" 
@@ -110,7 +110,8 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-[4/5]">
+              {/* Ajuste: aspect-video no mobile para ficar deitada, aspect-[4/5] no desktop */}
+              <div className="aspect-video md:aspect-[4/5]">
                 <img src="/showcase-scandinavian.jpg" alt="Scandinavian style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
@@ -120,7 +121,7 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-[4/5]">
+              <div className="aspect-video md:aspect-[4/5]">
                 <img src="/showcase-modern.jpg" alt="Modern style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
@@ -130,7 +131,7 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-[4/5]">
+              <div className="aspect-video md:aspect-[4/5]">
                 <img src="/showcase-industrial.jpg" alt="Industrial style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
