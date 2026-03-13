@@ -111,7 +111,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               {/* Ajuste: aspect-video no mobile para ficar deitada, aspect-[4/5] no desktop */}
-              <div className="aspect-video md:aspect-[4/5]">
+              <div className="aspect-[3/2] md:aspect-[4/5]">
                 <img src="/showcase-scandinavian.jpg" alt="Scandinavian style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
