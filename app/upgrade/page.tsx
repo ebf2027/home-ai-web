@@ -5,37 +5,14 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../components/ThemeProvider";
 import clsx from "clsx";
 import type React from "react";
+import { SparklesIcon, CheckIcon, HomeIcon, GalleryIcon, StarIcon, UserIcon } from "../components/icons";
+import FloatingDock from "../components/FloatingDock";
 
 // --- Tipos ---
 type Plan = "pro" | "pro_plus";
 type Busy = null | "checkout_pro" | "checkout_pro_plus" | "portal";
 
-// --- Ícones Gerais ---
-function SparklesIcon({ className = "" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 3L14.5 9L21 10L16 14.5L17.5 21L12 18L6.5 21L8 14.5L3 10L9.5 9L12 3Z" fill="#3B82F6" />
-      <path d="M19 3L20 5.5L22.5 6.5L20 7.5L19 10L18 7.5L15.5 6.5L18 5.5L19 3Z" fill="#60A5FA" />
-    </svg>
-  );
-}
-function CheckIcon({ className = "", style }: { className?: string, style?: React.CSSProperties }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M20 6 9 17l-5-5" /></svg>;
-}
 
-// --- Menu Icons (Unificados) ---
-function HomeIcon({ className = "" }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>;
-}
-function GalleryIcon({ className = "" }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>;
-}
-function StarIcon({ className = "" }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
-}
-function UserIcon({ className = "" }) {
-  return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
-}
 
 // --- Função Auxiliar do Stripe (Lógica Intacta) ---
 async function postForRedirectUrl(endpoint: string, body?: any) {
@@ -279,45 +256,7 @@ export default function UpgradePage() {
 
       </div>
 
-      {/* --- MENU FLUTUANTE (DOCK) --- */}
-      <div className="hidden md:flex fixed bottom-6 md:bottom-2 left-0 right-0 z-[100] justify-center pointer-events-none">
-        <nav className={clsx(
-          "pointer-events-auto flex items-center justify-around gap-6 md:gap-10 px-6 py-4 shadow-2xl backdrop-blur-xl border border-white/10 transition-all",
-          "rounded-[2rem]",
-          "w-[90%] md:w-auto",
-          isDark ? "bg-black/80" : "bg-white/90 border-zinc-200"
-        )}>
-
-          <Link href="/workspace" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-            <HomeIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-              Home
-            </span>
-          </Link>
-
-          <Link href="/gallery" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-            <GalleryIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-              Gallery
-            </span>
-          </Link>
-
-          <Link href="/upgrade" className="flex flex-col items-center justify-center gap-1 min-w-[50px] transition-all hover:-translate-y-1">
-            <StarIcon className="h-6 w-6 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] block">
-              Upgrade
-            </span>
-            <div className="h-1 w-1 bg-[#D4AF37] rounded-full absolute -bottom-1" />
-          </Link>
-
-          <Link href="/profile" className="flex flex-col items-center justify-center gap-1 min-w-[50px] group transition-all hover:-translate-y-1">
-            <UserIcon className={clsx("h-6 w-6 transition-colors", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")} />
-            <span className={clsx("text-[10px] font-bold uppercase tracking-widest block", isDark ? "text-zinc-500 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900")}>
-              Profile
-            </span>
-          </Link>
-        </nav>
-      </div>
+      <FloatingDock activePage="upgrade" />
 
     </main>
   );

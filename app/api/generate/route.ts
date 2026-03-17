@@ -23,16 +23,12 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const style = styleRaw.trim();
   const roomType = roomTypeRaw.trim();
 
-  // Detecta se é uma Fachada para ajustar os termos do prompt
   const isExterior = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
   const category = isExterior ? "exterior architecture" : "interior";
   const elements = isExterior ? "facade materials, finishes, textures, and outdoor lighting" : "furniture, decor, materials, textures, colors, and lighting";
 
-  // --- AJUSTE ANTERIOR: Força iluminação clara de dia para Fachadas ---
-  const lightingInstruction = isExterior ? "bright, clear natural daylight, natural exterior illumination" : "natural light";
+  const lightingInstruction = isExterior ? "bright, clear natural daylight, natural exterior illumination" : "warm, soft natural light flooding the room";
 
-  // --- NOVO AJUSTE CIRÚRGICO: Dicionário de Detalhes de Estilo apenas para Exterior ---
-  // Criamos regras específicas de materiais e arquitetura apenas se for fachada.
   let exteriorStyleDetails = "";
   if (isExterior) {
     const modifiers: Record<string, string> = {
@@ -45,18 +41,33 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
       "Boho": "Mediterranean luxury boho villa, hand-plastered soft cream walls, organic wooden textures, raffia and stone accents, relaxed high-end coastal atmosphere",
       "Super Luxury": "ultra-exclusive billionaire mansion facade, book-matched marble panels, expansive seamless structural glass, integrated architectural LED linear lighting, reflecting pools, the pinnacle of prestige",
     };
-    // Se o estilo existe na nossa lista, pegamos a descrição detalhada e adicionamos uma ênfase
     exteriorStyleDetails = modifiers[style] ? `, with a specific focus on highlighting ${modifiers[style]}` : "";
   }
-  // ----------------------------------------------------------------------------
+
+  let interiorStyleDetails = "";
+  if (!isExterior) {
+    const interiorModifiers: Record<string, string> = {
+      "Modern": "sleek low-profile furniture in neutral tones, high-gloss lacquered or matte surfaces, bold geometric shapes, integrated LED strip lighting, large-format polished porcelain or concrete floors, monochromatic palette with a single bold accent color, statement abstract art on walls",
+      "Minimalist": "only essential furniture with immaculate lines, pure white or warm ivory walls, floor-to-ceiling seamless storage with invisible handles, uncluttered empty surfaces, simple organic linen or cotton textiles, a single sculptural focal-point object",
+      "Scandinavian": "light natural birch or ash wood furniture, soft hygge-inspired textiles in muted sage green or dusty blue, white smooth-plaster walls, cozy layered wool and sheepskin rugs, warm pendant lighting with simple shapes, potted greenery and dried botanicals",
+      "Japanese": "ultra-low platform bed or floor seating with futon-style cushions, shoji-inspired translucent sliding panels, warm natural bamboo and pale oak wood, stone and gravel decorative elements, muted wabi-sabi earth tones and deep moss green, serene and uncluttered zen composition",
+      "Rustic": "solid reclaimed wood furniture with visible grain and knots, hand-forged black iron hardware and fixtures, exposed dark wood ceiling beams, warm amber Edison bulb pendant lighting, layered linen and leather and wool textiles, terracotta pottery and stone accents",
+      "Industrial": "raw exposed brick accent wall, steel-pipe open shelving and metal-frame furniture, dark charcoal and gunmetal gray color palette, cage-style Edison filament pendant lights, dark distressed leather upholstery, riveted metal details and factory-style windows",
+      "Boho": "macramé wall hangings and woven rattan headboard, layered colorful Persian and kilim rugs, curved rattan and wicker furniture, abundant hanging plants and trailing greenery, warm terracotta and mustard and burnt orange color palette, eclectic global textiles and embroidered cushions",
+      "Super Luxury": "bespoke book-matched marble feature wall and floors, custom Italian millwork with brushed gold brass hardware, hand-stitched deep velvet upholstery in emerald or champagne, grand crystal chandelier or dramatic oversized designer sculptural light, statement oversized designer furniture, fresh flowers and museum-quality art",
+    };
+    interiorStyleDetails = interiorModifiers[style] ? `, featuring ${interiorModifiers[style]}` : "";
+  }
+
+  const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
   return [
-    `Transform this ${roomType} into a stunning ${style} style ${category}${exteriorStyleDetails}.`, // Adicionamos os detalhes específicos aqui
-    `COMPLETELY replace all ${elements} with ${style} style equivalents.`,
-    `Keep the exact same camera angle, perspective, structure shape, walls, and layout.`,
+    `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
+    `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
+    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
     `DO NOT move or remove doors, windows, or openings. Keep doors and windows clearly visible in the same positions.`,
-    `Preserve the architecture and proportions — only redesign the ${isExterior ? "facade" : "interior"} style and finishes.`,
-    `Result must look like a professional ${style} ${category} design photo: realistic, high quality, ${lightingInstruction}, coherent shadows, no text, no watermark.`,
+    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
+    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
   ].join(" ");
 }
 
@@ -87,24 +98,6 @@ async function ensureCreditsRow(userId: string) {
       } as any,
       { onConflict: "user_id" }
     );
-}
-
-async function readCreditsSnapshot(userId: string): Promise<CreditsSnapshot | null> {
-  await ensureCreditsRow(userId);
-
-  const { data, error } = await supabaseAdmin
-    .from("user_credits")
-    .select("free_used,paid_used,bonus_used")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error || !data) return null;
-
-  return {
-    free_used: num((data as any).free_used),
-    paid_used: num((data as any).paid_used),
-    bonus_used: num((data as any).bonus_used),
-  };
 }
 
 async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot | null) {
@@ -148,61 +141,44 @@ async function refundOneCreditBestEffort(userId: string, before: CreditsSnapshot
   }
 }
 
-// ─── fal.ai FLUX Kontext Dev ──────────────────────────────────────────────
 async function callFalImageEdit(args: {
   imageFile: File;
   prompt: string;
+  guidanceScale?: number;
 }) {
-  const { imageFile, prompt } = args;
-
-  console.log("[fal.ai] FAL_KEY present:", !!FAL_KEY);
-  console.log("[fal.ai] FAL_KEY prefix:", FAL_KEY?.slice(0, 8));
+  const { imageFile, prompt, guidanceScale = 12 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
   fal.config({ credentials: FAL_KEY });
 
-  console.log("[fal.ai] Converting image to base64...");
   const rawBuffer = await imageFile.arrayBuffer();
   const base64 = Buffer.from(rawBuffer).toString("base64");
   const mimeType = imageFile.type || "image/jpeg";
   const imageDataUrl = `data:${mimeType};base64,${base64}`;
-  console.log("[fal.ai] Image size (bytes):", rawBuffer.byteLength, "| mime:", mimeType);
-
-  console.log("[fal.ai] Calling fal.subscribe...");
 
   const result = await fal.subscribe("fal-ai/flux-kontext/dev", {
     input: {
       image_url: imageDataUrl,
       prompt,
       num_images: 1,
-      // --- Ajuste Cirúrgico para Força do Prompt apenas em Fachadas ---
-      guidance_scale: prompt.toLowerCase().includes("facade design") ? 13 : 10,
-      // -------------------------------------------------------------
+      guidance_scale: guidanceScale,
       num_inference_steps: 35,
       output_format: "jpeg",
     },
     logs: true,
     onQueueUpdate: (update: any) => {
       console.log(`[fal.ai] Queue status: ${update.status}`);
-      if (update.logs) {
-        update.logs.forEach((l: any) => console.log("[fal.ai log]", l.message));
-      }
     },
   });
-
-  console.log("[fal.ai] Raw result keys:", Object.keys(result ?? {}));
 
   const imageUrl: string | undefined =
     (result as any)?.data?.images?.[0]?.url ??
     (result as any)?.images?.[0]?.url;
 
   if (!imageUrl) {
-    console.error("[fal.ai] Full result:", JSON.stringify(result).slice(0, 1000));
     throw new Error("fal.ai response missing image URL.");
   }
-
-  console.log("[fal.ai] Image URL received, downloading...");
 
   const imgRes = await fetch(imageUrl);
   if (!imgRes.ok) throw new Error(`Failed to download fal.ai image (${imgRes.status}).`);
@@ -210,12 +186,8 @@ async function callFalImageEdit(args: {
   const imgArr = await imgRes.arrayBuffer();
   const buf = Buffer.from(imgArr);
 
-  console.log("[fal.ai] Done! Buffer size:", buf.byteLength);
-
   return { buf, mime: "image/jpeg" };
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -238,10 +210,7 @@ export async function POST(req: Request) {
   const roomTypeRaw = form.get("roomType");
 
   if (!(image instanceof File)) {
-    return NextResponse.json(
-      { error: "Missing image file (field name: image)." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing image file." }, { status: 400 });
   }
 
   const style = normalizeText(styleRaw, "Modern");
@@ -250,7 +219,6 @@ export async function POST(req: Request) {
 
   let creditWasConsumed = false;
   let snapshot: CreditsSnapshot | null = null;
-  let consumptionType: "paid" | "bonus" | "free" | null = null;
 
   if (!bypassCredits) {
     const { data: row, error: fetchErr } = await supabaseAdmin
@@ -260,10 +228,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (fetchErr) {
-      return NextResponse.json(
-        { error: `Credits check failed: ${fetchErr.message}` },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: `Credits check failed: ${fetchErr.message}` }, { status: 500 });
     }
 
     const r: any = row ?? {};
@@ -290,19 +255,13 @@ export async function POST(req: Request) {
     let updateData: any = null;
 
     if (paidRemaining > 0) {
-      consumptionType = "paid";
       updateData = { paid_used: paidUsed + 1, updated_at: new Date().toISOString() };
     } else if (bonusRemaining > 0) {
-      consumptionType = "bonus";
       updateData = { bonus_used: bonusUsed + 1, updated_at: new Date().toISOString() };
     } else if (freeRemaining > 0) {
-      consumptionType = "free";
       updateData = { free_used: freeUsed + 1, updated_at: new Date().toISOString() };
     } else {
-      return NextResponse.json(
-        { error: "No credits remaining. Please upgrade to continue." },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: "No credits remaining." }, { status: 429 });
     }
 
     const { error: updateErr } = await supabaseAdmin
@@ -311,17 +270,15 @@ export async function POST(req: Request) {
       .eq("user_id", userId);
 
     if (updateErr) {
-      return NextResponse.json(
-        { error: `Failed to consume credit: ${updateErr.message}` },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: `Failed to consume credit: ${updateErr.message}` }, { status: 500 });
     }
 
     creditWasConsumed = true;
   }
 
   try {
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt });
+    const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 12 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
@@ -333,9 +290,7 @@ export async function POST(req: Request) {
     if (!bypassCredits && creditWasConsumed) {
       await refundOneCreditBestEffort(userId, snapshot);
     }
-
     console.error("[/api/generate] FINAL ERROR:", err?.message ?? err);
-    const msg = err?.message || "Unexpected error while generating the image.";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: err?.message || "Unexpected error." }, { status: 500 });
   }
 }

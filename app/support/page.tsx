@@ -1,21 +1,18 @@
-export default function SupportPage() {
+﻿export default function SupportPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-3xl font-semibold">Support</h1>
-      <p className="mt-3 text-zinc-700">
-        Need help with HomeRenovAi? Contact us and we’ll get back to you as soon as possible.
-      </p>
-
-      <div className="mt-6 space-y-2">
-        <p className="text-zinc-700">
-          Email:{" "}
-          <a className="underline" href="mailto:greatbuy.on@gmail.com">
-            greatbuy.on@gmail.com
+    <main className="min-h-screen bg-[#0A0A0A] px-4 py-10">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="text-3xl font-semibold text-white">Support</h1>
+        <p className="mt-3 text-zinc-400">
+          Need help with HomeRenovAi? Contact us and we will get back to you as soon as possible.
+        </p>
+        <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+          <p className="text-zinc-300">Send us an email and we will respond within 24 hours:</p>
+          <a href="mailto:ebf2027@gmail.com" className="inline-block rounded-full bg-[#D4AF37] px-6 py-3 text-black font-semibold hover:opacity-90 transition">
+            ebf2027@gmail.com
           </a>
-        </p>
-        <p className="text-zinc-700">
-          Subject suggestion: “HomeRenovAi — Billing/Subscription” or “HomeRenovAi — Technical Support”
-        </p>
+          <p className="text-zinc-500 text-sm">Suggested subject: HomeRenovAi Billing or HomeRenovAi Technical Support</p>
+        </div>
       </div>
     </main>
   );

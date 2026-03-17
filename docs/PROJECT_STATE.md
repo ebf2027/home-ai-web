@@ -401,3 +401,80 @@ Recalibragem de Rotas: Após a migração do workspace principal da raiz (/) par
 Correção Mobile (BottomTabs.tsx): O destino do botão "Home" foi alterado de / para /workspace, corrigindo o redirecionamento acidental para a Landing Page.
 
 Correção Desktop (Dock Flutuante): A mesma recalibragem cirúrgica do ícone "Home" foi replicada nos arquivos app/gallery/page.tsx, app/profile/page.tsx e app/upgrade/page.tsx, garantindo uma navegação consistente em todas as telas.
+
+# Status do Projeto - HomeRenovAi
+
+## 📅 Última Atualização: 16 de Março de 2026
+
+## 🛠️ O que foi feito hoje
+1.  **Limpeza Técnica de Dependências:**
+    * Remoção cirúrgica do pacote `openai` do `package.json`. 
+    * Verificação de integridade confirmada: o app continua funcionando perfeitamente apenas com as APIs atuais (Fal.ai/Gemini), reduzindo o peso do projeto.
+2.  **Otimização da Lógica de Geração (Interiores vs. Fachadas):**
+    * **Blindagem das Fachadas:** A lógica de renderização de exteriores foi isolada para garantir que nenhum ajuste de interiores afete o trabalho de meses feito no design de fachadas.
+    * **Dicionário de Estilos para Interiores:** Implementação de um dicionário rico no arquivo `app/api/generate/route.ts` para os estilos Modern, Industrial, Minimalist e Rustic em ambientes internos.
+    * **Ajuste de Força (Strength):** Configuração de `strength: 0.75` aplicada **exclusivamente** para interiores, permitindo que a IA remova bagunças (clutter) e reorganize o espaço, mantendo a fachada com as configurações originais.
+
+## 📌 Estado Atual do Código
+* **Localização da Lógica:** `app/api/generate/route.ts`.
+* **Parâmetros de IA:** Diferenciados por tipo de cômodo para evitar que a IA fique "travada" na foto original em quartos/salas bagunçados.
+* **Dependências:** Limpas e focadas no que é essencial para o funcionamento atual.
+
+## 🚀 Próximos Passos
+* Monitorar o custo e a qualidade das gerações de interiores com o novo dicionário.
+* Decidir o momento de migrar o Stripe para o **Modo Live** (Produção) para início das operações comerciais.
+# Status do Projeto - HomeRenovAi
+
+## 📅 Última Atualização: 16 de Março de 2026
+
+## 🛠️ O que foi feito hoje
+
+### 1. Migração do Stripe para Modo LIVE (Produção)
+- Identificado que as chaves live já existiam no arquivo de backup `.env.live.local`
+- Confirmado que o Webhook no Stripe já estava configurado e ativo com a URL
+  `https://home-ai-web-2.vercel.app/api/stripe/webhook` (equivalente ao domínio
+  principal — ambos apontam para o mesmo app)
+- Confirmado que o `STRIPE_WEBHOOK_SECRET` do Stripe era o mesmo já salvo
+  no `.env.live.local`
+- Corrigido o `STRIPE_WEBHOOK_SECRET` na Vercel que ainda estava com a versão test
+- Atualizadas as seguintes variáveis de ambiente no painel da Vercel para produção:
+  - `STRIPE_SECRET_KEY` → chave live (`sk_live_...`)
+  - `STRIPE_PRICE_ID_PRO` → Price ID live do plano Pro
+  - `STRIPE_PRICE_ID_PRO_PLUS` → Price ID live do plano Pro+
+  - `STRIPE_WEBHOOK_SECRET` → Secret live (`whsec_...`)
+  - `APP_URL` → `https://homerenovai.com`
+- Redeploy realizado na Vercel com sucesso após as alterações
+
+### 2. Correção do stripe_customer_id no Supabase
+- Durante o teste de pagamento, identificado erro:
+  `"No such customer: cus_xxx; a similar object exists in test mode"`
+- Causa: o perfil do usuário proprietário tinha um `stripe_customer_id` de teste
+  salvo da fase de desenvolvimento
+- Solução: campo `stripe_customer_id` zerado (NULL) na tabela `profiles` via
+  Table Editor do Supabase — o app cria automaticamente um novo cliente live
+  na próxima tentativa de checkout
+
+### 3. Teste de Pagamento
+- Fluxo de checkout testado e funcionando para usuários com cartão internacional
+- Identificado que cartões de débito brasileiros sem função internacional
+  retornam erro "Seu cartão não aceita essa moeda" — comportamento esperado,
+  pois o app cobra em USD para o público-alvo americano
+- Decisão: manter cobrança em USD conforme estratégia de mercado
+
+### 4. Atualização da Página de Suporte (`app/support/page.tsx`)
+- E-mail de suporte atualizado de `greatbuy.on@gmail.com` para `ebf2027@gmail.com`
+- Visual da página atualizado para seguir a identidade do app:
+  fundo dark (`#0A0A0A`), botão dourado (`#D4AF37`), tipografia consistente
+
+## 📌 Estado Atual
+- **Stripe:** Modo LIVE ativo — app pronto para receber pagamentos reais
+- **Webhook:** Configurado e ativo
+- **Suporte:** E-mail correto configurado na página de suporte
+- **APP_URL:** Apontando para `https://homerenovai.com`
+
+## 🚀 Próximos Passos
+- Realizar teste de pagamento completo com cartão internacional (crédito)
+  para confirmar fluxo end-to-end em produção
+- Iniciar estratégia de aquisição de usuários (TikTok/Reels, Pinterest,
+  Product Hunt)
+- Avaliar momento ideal para criar landing page otimizada para SEO
