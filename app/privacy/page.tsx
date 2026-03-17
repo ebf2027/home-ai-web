@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 
           <h2>3. Artificial Intelligence and Your Images</h2>
           <p>
-            <strong>HomeRenovAi</strong> uses advanced generative AI models (powered by fal.ai FLUX). We want to be absolutely clear about how your images are handled in this process:
+            <strong>HomeRenovAi</strong> uses advanced generative AI models.
           </p>
           <div className="bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 my-6">
             <ul className="list-none space-y-3 m-0 p-0 text-zinc-600 dark:text-zinc-300">
