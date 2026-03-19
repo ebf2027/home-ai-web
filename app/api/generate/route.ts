@@ -65,7 +65,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
     `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
     `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
     `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-    `DO NOT move or remove doors, windows, or openings. Keep doors and windows clearly visible in the same positions.`,
+    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
     `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
     `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
   ].join(" ");
