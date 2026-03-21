@@ -59,25 +59,16 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
     interiorStyleDetails = interiorModifiers[style] ? `, featuring ${interiorModifiers[style]}` : "";
   }
 
-  // LÓGICA PRESERVADA PARA FACHADAS/EXTERIORES (Não alterado para evitar quebras)
-  if (isExterior) {
-    return [
-      `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${exteriorStyleDetails}.`,
-      `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
-      `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-      `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
-      `Preserve all architectural proportions and spatial structure — only redesign the facade, furniture, materials, and finishes.`,
-      `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
-    ].join(" ");
-  }
+  const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
+const structuralIntegrity = "Preserve the exact original architectural structure: do not move walls, windows, or doors. Maintain the perspective and camera angle of the original photo.";
 
-  // NOVA LÓGICA OTIMIZADA PARA INTERIORES
   return [
-    `CRITICAL STRUCTURAL PRESERVATION: Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout. DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Preserve the exact window and door configuration from the original photo perfectly.`,
-    `TASK: Completely redesign this specific ${roomType.toUpperCase()} into a stunning high-end ${style} style interior. The resulting image MUST clearly function and look exactly like a ${roomType.toUpperCase()}.`,
-    `STYLE DETAILS: ${interiorStyleDetails}. Ensure all furniture and decor strictly match the function of a ${roomType.toUpperCase()}.`,
-    `ACTION: REMOVE all existing ${elements} and REPLACE them with luxurious ${style} style equivalents.`,
-    `QUALITY: Award-winning Architectural Visualization (ArchViz), 8k resolution, ultra-realistic textures, photorealistic, ${lightingInstruction}, coherent natural soft shadows, premium luxury aesthetic, no text, no watermark.`
+    `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
+    `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
+    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
+    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
+    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
+    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
   ].join(" ");
 }
 
