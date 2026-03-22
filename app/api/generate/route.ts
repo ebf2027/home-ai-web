@@ -49,7 +49,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
     const interiorModifiers: Record<string, string> = {
       "Modern": "sleek low-profile furniture with clean geometric lines in matte charcoal or warm taupe, high-gloss lacquered accent wall or textured 3D wall panels, bold geometric shapes with brass or black metal hardware, recessed LED perimeter lighting with warm white temperature, large-format polished porcelain tiles or seamless resin floors in concrete grey, monochromatic palette (grey, black, white) with a single bold jewel-tone accent (emerald, sapphire, or burnt orange), oversized abstract canvas art with gold leaf details, sculptural designer pendant light, floor-to-ceiling blackout curtains with motorized track, integrated hidden storage with push-to-open mechanisms",
       "Minimalist": "only essential furniture with razor-sharp immaculate lines and weightless visual presence, pure white smooth matte walls with invisible baseboards, floor-to-ceiling seamless hidden storage with push-to-open mechanisms (no visible handles), completely uncluttered empty surfaces with strategic negative space, simple organic linen or cotton textiles in monochrome white or soft grey, a single museum-quality sculptural focal-point object (stone sphere, ceramic vessel, or bonsai), invisible recessed lighting in ceiling coves, low-profile furniture with integrated surfaces, polished concrete or pale wide-plank oak floors",
-      "Scandinavian": "Install wide-plank light oak hardwood floors. Add a low-profile natural wood bed frame with crisp white linen bedding and beige knit throw. Place a round natural wood nightstand with a small ceramic lamp. Add a curved bouclé ivory armchair in corner. Hang sheer linen curtains in warm sand alongside existing windows. Include a tall olive tree in terracotta pot. Add one minimalist line-art print in thin oak frame on wall. Open wood shelving unit with neatly folded white linens. Palette: white, warm beige, natural oak, sand.",
+      "Scandinavian": "light natural oak or birch wood furniture with clean Scandinavian lines, soft upholstered pieces in linen or bouclé fabric in warm beige or ivory tones, flowing sheer linen curtains filtering soft natural light, white smooth matte walls, cozy layered neutral wool area rugs and chunky knit throws, warm ceramic lamps with organic sculptural shapes, tall architectural plants like olive tree or pampas grass in textured ceramic planters, minimalist line-art wall prints in natural wood frames, subtle earth-toned accents in sand and warm grey, natural wood shelving and storage",
       "Japanese": "ultra-low minimalist furniture with clean horizontal lines and no visible hardware, shoji-inspired translucent sliding panels with black wooden frames dividing spaces, warm natural bamboo accent wall or woven tatami mat flooring, river stone and white gravel zen garden elements in ceramic trays, muted wabi-sabi earth tones (sand, clay, charcoal) with deep moss green and forest accents, low lacquered black wooden furniture pieces, traditional paper lantern pendant lights (akari-style), serene uncluttered zen composition with single ikebana flower arrangement, sliding fusuma doors with subtle nature prints, floor cushions (zabuton) for seating",
       "Rustic": "massive solid reclaimed barn wood furniture with visible grain, knots, and natural weathering, hand-forged wrought iron hardware and vintage metal fixtures, exposed rough-hewn dark wood ceiling beams with visible saw marks, warm amber Edison filament bulb chandeliers on black iron chains, layered natural textiles (chunky cable-knit wool throws, distressed leather seating, linen fabrics in oatmeal), artisanal terracotta pottery and raw stone accents on open shelving, whitewashed brick or stone accent wall, vintage woven jute area rugs, antique wooden ladders repurposed as decorative elements, wrought iron candelabra wall sconces, farmhouse-style wooden dining or console tables",
       "Industrial": "raw exposed red brick accent wall with visible mortar texture and aged patina, black steel-pipe open shelving with reclaimed wood planks and welded metal-frame furniture with rivet details, dark charcoal and gunmetal grey color palette with rust orange accents, oversized cage-style Edison filament pendant lights on fabric-wrapped cords, dark distressed cognac leather tufted seating or wingback chairs, riveted metal furniture pieces with visible weld seams, factory-style black steel crittall windows or room dividers, polished concrete floors with visible aggregate, vintage industrial fan, exposed ductwork and conduit piping on ceiling, metal locker-style storage units, reclaimed factory carts repurposed as furniture",
@@ -60,15 +60,16 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   }
 
   const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
-const structuralIntegrity = "Preserve the exact original architectural structure: do not move walls, windows, or doors. Maintain the perspective and camera angle of the original photo.";
 
-return [
-    `STRUCTURAL PRESERVATION REQUIRED: Keep ALL windows exactly as in the original photo — same position, size, quantity, and frame color. Preserve ceiling height, room corners, all walls, and floor layout completely unchanged. Do NOT alter any architectural element.`,
-    `Now redesign the interior of this ${roomType} into a stunning high-end ${style} style.`,
-    `REMOVE all existing ${elements} and REPLACE with luxurious ${style} equivalents: ${styleDetails}.`,
-    `Keep the exact same camera angle and perspective.`,
-    `Result must look like a professional ${style} interior photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
-].join(" ");}
+  return [
+    `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
+    `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
+    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
+    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
+    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
+    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
+  ].join(" ");
+}
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -162,8 +163,12 @@ async function callFalImageEdit(args: {
       prompt,
       num_images: 1,
       guidance_scale: guidanceScale,
-      num_inference_steps: 40,
+      num_inference_steps: 35,
       output_format: "jpeg",
+    },
+    logs: true,
+    onQueueUpdate: (update: any) => {
+      console.log(`[fal.ai] Queue status: ${update.status}`);
     },
   });
 
@@ -273,7 +278,7 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 14 });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 12 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
