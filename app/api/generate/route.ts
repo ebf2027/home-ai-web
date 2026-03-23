@@ -62,13 +62,12 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
   return [
-    `Transform this space into a stunning high-end ${style} style ${category}${styleDetails}.`,
-    `Furnish and decorate the space appropriately for a ${roomType}, but YOU MUST adapt the interior design to fit the existing architectural geometry.`,
-    `UNIVERSAL SPATIAL RULE: Place all functional elements (like cabinetry, islands, beds, or large furniture) logically against solid walls or in clear areas. NEVER block doors, windows, natural light paths, or thoroughfares.`,
     `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows.`,
-    `Preserve all architectural proportions. The existing structural envelope is immutable.`,
-    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`
+    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
+    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
+    `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
+    `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
+    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
   ].join(" ");
 }
 
@@ -147,7 +146,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 12 } = args;
+  const { imageFile, prompt, guidanceScale = 5.5 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
@@ -164,7 +163,7 @@ async function callFalImageEdit(args: {
       prompt,
       num_images: 1,
       guidance_scale: guidanceScale,
-      num_inference_steps: 35,
+      num_inference_steps: 30,
       output_format: "jpeg",
     },
     logs: true,
@@ -279,7 +278,7 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 12 });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 9 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
