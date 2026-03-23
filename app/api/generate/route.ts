@@ -293,4 +293,4 @@ export async function POST(req: Request) {
     console.error("[/api/generate] FINAL ERROR:", err?.message ?? err);
     return NextResponse.json({ error: err?.message || "Unexpected error." }, { status: 500 });
   }
-}
+} 
