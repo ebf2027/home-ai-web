@@ -146,7 +146,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 7 } = args;
+  const { imageFile, prompt, guidanceScale = 13 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
