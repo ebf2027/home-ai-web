@@ -24,13 +24,13 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const roomType = roomTypeRaw.trim();
 
   const isExterior = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-  
-  // SE FOR EXTERIOR - mantém o código original
-  if (isExterior) {
-    const category = "exterior architecture";
-    const elements = "facade materials, finishes, textures, and outdoor lighting";
-    const lightingInstruction = "bright, clear natural daylight, natural exterior illumination";
+  const category = isExterior ? "exterior architecture" : "interior";
+  const elements = isExterior ? "facade materials, finishes, textures, and outdoor lighting" : "furniture, decor, materials, textures, colors, and lighting";
 
+  const lightingInstruction = isExterior ? "bright, clear natural daylight, natural exterior illumination" : "warm, soft natural light flooding the room";
+
+  let exteriorStyleDetails = "";
+  if (isExterior) {
     const modifiers: Record<string, string> = {
       "Modern": "iconic contemporary architecture, cantilevered concrete structures, seamless floor-to-ceiling glass walls, ultra-sharp geometric precision, luxury villa aesthetic",
       "Minimalist": "museum-grade architectural minimalism, monolithic pure white surfaces, shadow-gap details, hidden frames, ethereal and clean geometric form",
@@ -41,41 +41,33 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
       "Boho": "Mediterranean luxury boho villa, hand-plastered soft cream walls, organic wooden textures, raffia and stone accents, relaxed high-end coastal atmosphere",
       "Super Luxury": "ultra-exclusive billionaire mansion facade, book-matched marble panels, expansive seamless structural glass, integrated architectural LED linear lighting, reflecting pools, the pinnacle of prestige",
     };
-    
-    const exteriorStyleDetails = modifiers[style] ? `, with a specific focus on highlighting ${modifiers[style]}` : "";
-
-    return [
-      `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${exteriorStyleDetails}.`,
-      `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
-      `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-      `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity.`,
-      `Preserve all architectural proportions and spatial structure — only redesign the facade, materials, and finishes.`,
-      `Result must look like a professional ${style} exterior architecture photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
-    ].join(" ");
+    exteriorStyleDetails = modifiers[style] ? `, with a specific focus on highlighting ${modifiers[style]}` : "";
   }
 
-  // SE FOR INTERIOR - novo prompt
-  const styleDescriptions: Record<string, string> = {
-    "Modern": "sleek modern furniture with clean lines, matte charcoal or warm taupe tones, bold geometric shapes with brass or black metal accents, recessed LED lighting, large-format polished tiles or seamless floors in concrete grey, monochromatic palette with a single bold accent color",
-    "Minimalist": "minimal essential furniture with clean lines, pure white smooth walls, hidden storage with no visible handles, simple organic textiles in monochrome white or soft grey, single sculptural focal object, invisible recessed lighting",
-    "Scandinavian": "light wood furniture with clean simple lines, white and light gray color palette, natural wood tones, indoor plants, cozy textiles in whites and beiges, soft natural lighting, functional minimalist pieces",
-    "Japanese": "low minimalist furniture with clean horizontal lines, warm natural bamboo or wood accents, muted earth tones (sand, clay, charcoal, moss green), paper lantern lights, zen composition with minimal elements",
-    "Rustic": "reclaimed wood furniture with natural grain, hand-forged iron hardware, warm amber Edison lighting, natural textiles (wool, leather, linen in oatmeal tones), terracotta pottery, vintage wooden elements",
-    "Industrial": "raw exposed brick accent wall, steel and metal furniture, dark charcoal gray palette, cage-style Edison lights, dark leather upholstery, metal details",
-    "Boho": "macramé wall hangings, layered colorful vintage rugs, rattan and wicker furniture, abundant hanging plants, warm earthy colors (terracotta, mustard, burnt orange, sage), eclectic global textiles, floor cushions",
-    "Super Luxury": "book-matched marble feature wall, custom wall paneling in soft greige, channel-tufted velvet furniture in champagne or dove grey, grand crystal chandelier, handwoven silk rugs, designer furniture pieces, floor-to-ceiling silk drapes",
-  };
+  let interiorStyleDetails = "";
+  if (!isExterior) {
+    const interiorModifiers: Record<string, string> = {
+      "Modern": "sleek low-profile furniture with clean geometric lines in matte charcoal or warm taupe, high-gloss lacquered accent wall or textured 3D wall panels, bold geometric shapes with brass or black metal hardware, recessed LED perimeter lighting with warm white temperature, large-format polished porcelain tiles or seamless resin floors in concrete grey, monochromatic palette (grey, black, white) with a single bold jewel-tone accent (emerald, sapphire, or burnt orange), oversized abstract canvas art with gold leaf details, sculptural designer pendant light, floor-to-ceiling blackout curtains with motorized track, integrated hidden storage with push-to-open mechanisms",
+      "Minimalist": "only essential furniture with razor-sharp immaculate lines and weightless visual presence, pure white smooth matte walls with invisible baseboards, floor-to-ceiling seamless hidden storage with push-to-open mechanisms (no visible handles), completely uncluttered empty surfaces with strategic negative space, simple organic linen or cotton textiles in monochrome white or soft grey, a single museum-quality sculptural focal-point object (stone sphere, ceramic vessel, or bonsai), invisible recessed lighting in ceiling coves, low-profile furniture with integrated surfaces, polished concrete or pale wide-plank oak floors",
+      "Scandinavian": "light wood floors, white and light gray walls, minimal furniture with clean lines, natural textures, indoor plants, soft natural lighting, cozy textiles in whites and beiges, and functional minimalist decor",
+      "Japanese": "ultra-low minimalist furniture with clean horizontal lines and no visible hardware, shoji-inspired translucent sliding panels with black wooden frames dividing spaces, warm natural bamboo accent wall or woven tatami mat flooring, river stone and white gravel zen garden elements in ceramic trays, muted wabi-sabi earth tones (sand, clay, charcoal) with deep moss green and forest accents, low lacquered black wooden furniture pieces, traditional paper lantern pendant lights (akari-style), serene uncluttered zen composition with single ikebana flower arrangement, sliding fusuma doors with subtle nature prints, floor cushions (zabuton) for seating",
+      "Rustic": "massive solid reclaimed barn wood furniture with visible grain, knots, and natural weathering, hand-forged wrought iron hardware and vintage metal fixtures, exposed rough-hewn dark wood ceiling beams with visible saw marks, warm amber Edison filament bulb chandeliers on black iron chains, layered natural textiles (chunky cable-knit wool throws, distressed leather seating, linen fabrics in oatmeal), artisanal terracotta pottery and raw stone accents on open shelving, whitewashed brick or stone accent wall, vintage woven jute area rugs, antique wooden ladders repurposed as decorative elements, wrought iron candelabra wall sconces, farmhouse-style wooden dining or console tables",
+      "Industrial": "raw exposed brick accent wall, steel-pipe open shelving and metal-frame furniture, dark charcoal and gunmetal gray color palette, cage-style Edison filament pendant lights, dark distressed leather upholstery, riveted metal details and factory-style windows",
+      "Boho": "oversized macramé wall hangings as focal statement pieces or large woven rattan furniture, layered colorful vintage Persian and Turkish kilim rugs in jewel tones (ruby, sapphire, emerald), curved rattan and wicker furniture with natural texture and low wooden elements, abundant hanging potted plants (pothos, string-of-pearls) and tall fiddle-leaf fig trees, warm earthy color palette (terracotta, mustard yellow, burnt orange, sage green), eclectic global textiles (suzani embroidered cushions, Moroccan wedding blankets, Indian block-print throws), rattan pendant lights with tassels, distressed wooden trunks and vintage furniture pieces, floor cushions and moroccan leather poufs, dreamcatcher and beaded garlands, carved wooden screens and room dividers",
+      "Super Luxury": "bespoke book-matched Calacatta Gold marble feature wall with dramatic gold and grey veining in high-gloss finish, custom Italian boiserie wall paneling in soft greige or warm taupe with fluted vertical channels and aged brass inlay trim, hand-stitched deep channel-tufted velvet upholstered furniture in sophisticated neutrals (champagne, soft dove grey, or warm sand beige), grand multi-tier crystal chandelier with cascading faceted prisms in aged brass frame, plush handwoven silk and wool area rug in ivory or taupe covering most of floor with subtle geometric pattern, statement designer furniture pieces (curved velvet seating, sculptural leather lounge chairs, smoked glass surfaces with brass legs), floor-to-ceiling silk drapes in champagne or greige with hidden motorized track and blackout lining, herringbone or chevron wide-plank white oak floors in satin finish, museum-quality large-scale black-and-white photography or abstract oil painting in ornate aged brass frames, fresh white orchid arrangements in crystal vases, integrated smart lighting with warm LED strips in crown molding, floating linear fireplace with backlit white onyx or alabaster surround, architectural crown molding and coffered ceiling details, leather-wrapped decorative trays with coffee table books, cashmere throws draped artfully",
+    };
+    interiorStyleDetails = interiorModifiers[style] ? `, featuring ${interiorModifiers[style]}` : "";
+  }
 
-  const styleDesc = styleDescriptions[style] || "modern elegant furniture and decor";
+  const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
   return [
-    `CRITICAL INSTRUCTION: This is a REDECORATION task, NOT a renovation. You must preserve 100% of the architectural structure.`,
-    `PRESERVE EXACTLY: All walls in their exact positions, all windows (size, position, quantity, frames), all doors, ceiling height and design, floor area and shape, built-in architectural elements, room proportions, camera angle and perspective.`,
-    `DO NOT: Move walls, remove walls, add walls, resize windows, add windows, remove windows, change window positions, alter doors, modify ceiling structure, change room dimensions, add or remove architectural openings.`,
-    `ONLY CHANGE: Furniture, decorative objects, textiles, lighting fixtures (lamps and pendants only, not recessed ceiling lights if they alter structure), rugs, plants, artwork, and surface finishes (paint colors, flooring materials).`,
-    `STYLE: Redecorate this ${roomType} in ${style} style using: ${styleDesc}.`,
-    `If the room has existing furniture (tables, chairs, sofas, beds, cabinets), REPLACE them with ${style} style equivalents in similar positions. Keep functional layouts logical.`,
-    `QUALITY: Professional interior design photography, photorealistic, magazine-quality, warm soft natural light, coherent shadows, no text, no watermarks.`,
+    `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
+    `Add ${style} style ${elements} while keeping all existing architectural elements.`,
+    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
+    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
+    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
+    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
   ].join(" ");
 }
 
