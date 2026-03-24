@@ -61,14 +61,18 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
 
   const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
+  let structuralRules = `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout. CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Preserve the exact window configuration.`;
+
+  if (roomType.toLowerCase().includes("kitchen")) {
+    structuralRules += ` Place kitchen cabinets, counters, and appliances ONLY against solid walls. NEVER place tall cabinets, refrigerators, or solid furniture in front of or blocking any windows or glass doors. Let the natural light flow.`;
+  }
+
   return [
      `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
     `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
-    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
+    structuralRules,
     `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
     `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
-
   ].join(" ");
 }
 
@@ -279,7 +283,18 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 12 });
+    
+    // Configuração do guidanceScale baseada no tipo de ambiente
+    let dynamicGuidance = isExteriorRoom ? 12 : 8;
+    if (roomType.toLowerCase().includes("kitchen")) {
+        dynamicGuidance = 7; 
+    }
+
+    const { buf, mime } = await callFalImageEdit({ 
+        imageFile: image, 
+        prompt, 
+        guidanceScale: dynamicGuidance 
+    });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
