@@ -164,7 +164,7 @@ async function callFalImageEdit(args: {
       prompt,
       num_images: 1,
       guidance_scale: guidanceScale,
-      num_inference_steps: 35,
+      num_inference_steps: 30,
       output_format: "jpeg",
     },
     logs: true,
