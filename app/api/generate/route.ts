@@ -62,16 +62,11 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
   return [
-    
-     `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
-    `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
-    `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
-    `CRITICAL: DO NOT move, remove, resize, or alter doors, windows, or any architectural openings. Keep ALL existing windows and doors EXACTLY as they appear in the original photo — same size, same position, same quantity. Do not convert windows into doors or doors into windows. Preserve the exact window configuration.`,
-    `WINDOWS AND DOORS PROTECTION: All existing windows, glass panes, and doors MUST remain 100% visible, unobstructed, and in their exact original positions. DO NOT place any furniture, cabinets, or walls in front of glass areas.`,
-    `Preserve all architectural proportions and spatial structure — only redesign the ${isExterior ? "facade" : "interior design"}, furniture, materials, and finishes.`,
-    `Result must look like a professional ${style} ${category} photo shoot published in Architectural Digest: photorealistic, magazine-quality, ${lightingInstruction}, coherent natural shadows, no text, no watermark.`,
-
-  ].join(" ");
+  `Architectural Blueprint Protocol: Maintain 100% original room geometry, walls, windows, and doors in their exact positions.`,
+  `Update ceiling to a luxury recessed tray design with integrated lighting.`,
+  `Completely redesign this ${roomType} into a stunning high-end ${style} style using ${styleDetails}.`,
+  `Result must look like a professional ${style} photography shoot, magazine-quality, photorealistic, Architectural Digest style.`
+].join(" ");
 }
 
 function sleep(ms: number) {
