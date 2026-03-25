@@ -62,6 +62,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   const styleDetails = isExterior ? exteriorStyleDetails : interiorStyleDetails;
 
   return [
+    
      `Completely redesign this ${roomType} into a stunning high-end ${style} style ${category}${styleDetails}.`,
     `REMOVE all existing ${elements} entirely and REPLACE them with luxurious ${style} style equivalents.`,
     `Keep the exact same camera angle, perspective, room structure, walls, ceiling height, and floor layout.`,
@@ -148,7 +149,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 7 } = args;
+  const { imageFile, prompt, guidanceScale = 6 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
@@ -165,7 +166,7 @@ async function callFalImageEdit(args: {
       prompt,
       num_images: 1,
       guidance_scale: guidanceScale,
-      num_inference_steps: 30,
+      num_inference_steps: 40,
       output_format: "jpeg",
     },
     logs: true,
@@ -280,7 +281,7 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 13 : 12 });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 6 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
