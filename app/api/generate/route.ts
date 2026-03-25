@@ -49,7 +49,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
     const interiorModifiers: Record<string, string> = {
       "Modern": "sleek low-profile furniture with clean geometric lines in matte charcoal or warm taupe, high-gloss lacquered accent wall or textured 3D wall panels, bold geometric shapes with brass or black metal hardware, recessed LED perimeter lighting with warm white temperature, large-format polished porcelain tiles or seamless resin floors in concrete grey, monochromatic palette (grey, black, white) with a single bold jewel-tone accent (emerald, sapphire, or burnt orange), oversized abstract canvas art with gold leaf details, sculptural designer pendant light, floor-to-ceiling blackout curtains with motorized track, integrated hidden storage with push-to-open mechanisms",
       "Minimalist": "only essential furniture with razor-sharp immaculate lines and weightless visual presence, pure white smooth matte walls with invisible baseboards, floor-to-ceiling seamless hidden storage with push-to-open mechanisms (no visible handles), completely uncluttered empty surfaces with strategic negative space, simple organic linen or cotton textiles in monochrome white or soft grey, a single museum-quality sculptural focal-point object (stone sphere, ceramic vessel, or bonsai), invisible recessed lighting in ceiling coves, low-profile furniture with integrated surfaces, polished concrete or pale wide-plank oak floors",
-      "Scandinavian": "Architectural preservation: maintain original walls, windows, and doors. Add a modern recessed tray ceiling. Style: Minimalist Scandinavian. White walls, light wood textures, functional furniture, cozy hygge atmosphere. High-end interior photography",
+      "Scandinavian": "minimalist aesthetic with natural materials. Warm wide-plank light wood floors, sleek off-white furniture, functional designs with organic lines, cozy layered textiles, hygge atmosphere, natural and organic decor accents",
       "Japanese": "ultra-low minimalist furniture with clean horizontal lines and no visible hardware, shoji-inspired translucent sliding panels with black wooden frames dividing spaces, warm natural bamboo accent wall or woven tatami mat flooring, river stone and white gravel zen garden elements in ceramic trays, muted wabi-sabi earth tones (sand, clay, charcoal) with deep moss green and forest accents, low lacquered black wooden furniture pieces, traditional paper lantern pendant lights (akari-style), serene uncluttered zen composition with single ikebana flower arrangement, sliding fusuma doors with subtle nature prints, floor cushions (zabuton) for seating",
       "Rustic": "massive solid reclaimed barn wood furniture with visible grain, knots, and natural weathering, hand-forged wrought iron hardware and vintage metal fixtures, exposed rough-hewn dark wood ceiling beams with visible saw marks, warm amber Edison filament bulb chandeliers on black iron chains, layered natural textiles (chunky cable-knit wool throws, distressed leather seating, linen fabrics in oatmeal), artisanal terracotta pottery and raw stone accents on open shelving, whitewashed brick or stone accent wall, vintage woven jute area rugs, antique wooden ladders repurposed as decorative elements, wrought iron candelabra wall sconces, farmhouse-style wooden dining or console tables",
       "Industrial": "raw exposed brick accent wall, steel-pipe open shelving and metal-frame furniture, dark charcoal and gunmetal gray color palette, cage-style Edison filament pendant lights, dark distressed leather upholstery, riveted metal details and factory-style windows",
@@ -144,7 +144,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 6 } = args;
+  const { imageFile, prompt, guidanceScale = 4.5 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
@@ -276,7 +276,7 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 6 });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 4.5 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
