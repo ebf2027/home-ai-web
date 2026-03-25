@@ -144,7 +144,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 4.5 } = args;
+  const { imageFile, prompt, guidanceScale = 4 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
@@ -276,7 +276,7 @@ export async function POST(req: Request) {
 
   try {
     const isExteriorRoom = roomType.toLowerCase().includes("facade") || roomType.toLowerCase().includes("exterior");
-    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 4.5 });
+    const { buf, mime } = await callFalImageEdit({ imageFile: image, prompt, guidanceScale: isExteriorRoom ? 10 : 4 });
 
     const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 
