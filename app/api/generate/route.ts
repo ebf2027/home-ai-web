@@ -64,7 +64,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   return [
   `Architectural Blueprint Protocol: Maintain 100% original room geometry, walls, windows, and doors in their exact positions.`,
   `Update ceiling to a luxury recessed tray design with integrated lighting.`,
-  `Fill the space with appropriate high-end ${elements} that match the ${style} aesthetic.`,
+  `Completely redesign this ${roomType} into a stunning high-end ${style} style using ${styleDetails}.`,
   `Result must look like a professional ${style} photography shoot, magazine-quality, photorealistic, Architectural Digest style.`
 ].join(" ");
 }
