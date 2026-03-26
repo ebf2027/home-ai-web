@@ -47,21 +47,14 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   let interiorStyleDetails = "";
   if (!isExterior) {
     const interiorModifiers: Record<string, string> = {
-      "Modern": "contemporary aesthetic with clean geometric lines. Polished large-format tiles or seamless resin floors, sleek low-profile furniture in neutral tones, bold jewel-tone accent pieces, warm LED perimeter lighting, sophisticated and elegant atmosphere, minimalist abstract art decor",
-      
-      "Minimalist": "pure and serene aesthetic with intentional negative space. Pale wide-plank oak or polished concrete floors, essential low-profile furniture with clean sharp lines, soft monochromatic textiles in white and grey, tranquil atmosphere, a single sculptural focal-point decor piece",
-      
+      "Modern": "sleek low-profile furniture with clean geometric lines in matte charcoal or warm taupe, high-gloss lacquered accent wall or textured 3D wall panels, bold geometric shapes with brass or black metal hardware, recessed LED perimeter lighting with warm white temperature, large-format polished porcelain tiles or seamless resin floors in concrete grey, monochromatic palette (grey, black, white) with a single bold jewel-tone accent (emerald, sapphire, or burnt orange), oversized abstract canvas art with gold leaf details, sculptural designer pendant light, floor-to-ceiling blackout curtains with motorized track, integrated hidden storage with push-to-open mechanisms",
+      "Minimalist": "essential furniture with sharp clean lines, pure white walls, hidden storage with no handles, polished concrete or pale oak floors, monochrome palette, single sculptural decor piece, recessed lighting, uncluttered surfaces",
       "Scandinavian": "minimalist aesthetic with natural materials. Warm wide-plank light wood floors, sleek off-white furniture, functional designs with organic lines, cozy layered textiles, hygge atmosphere, natural and organic decor accents",
-      
-      "Japanese": "serene wabi-sabi aesthetic with natural elements. Woven tatami mat or warm bamboo floors, ultra-low minimalist wooden furniture, muted earth tones with deep moss green accents, calm zen atmosphere, traditional paper lantern lighting and subtle ikebana decor",
-      
-      "Rustic": "warm heritage aesthetic with raw natural textures. Wide-plank distressed wood floors, solid reclaimed wood furniture with visible grain, layered natural textiles and distressed leather seating, cozy cabin atmosphere, wrought iron fixtures and artisanal terracotta decor",
-      
-      "Industrial": "refined urban loft aesthetic with raw materials. Polished concrete or dark wood floors, metal-frame furniture with dark distressed leather upholstery, moody charcoal and gunmetal palette, edgy atmospheric lighting, cage-style pendant lights and riveted metal decor",
-      
-      "Boho": "relaxed eclectic aesthetic with rich global textures. Natural wood floors, curved rattan and wicker furniture, layered vintage kilim rugs in jewel tones, warm earthy atmosphere, abundant indoor plants and macramé or woven decor accents",
-      
-      "Super Luxury": "ultra-premium bespoke aesthetic with exquisite materials. Satin finish herringbone wood or marble floors, deep channel-tufted velvet upholstered furniture, warm elegant neutral tones with brass accents, sophisticated grand atmosphere, multi-tier crystal lighting and museum-quality decor",
+      "Japanese": "ultra-low minimalist furniture with clean horizontal lines and no visible hardware, shoji-inspired translucent sliding panels with black wooden frames dividing spaces, warm natural bamboo accent wall or woven tatami mat flooring, river stone and white gravel zen garden elements in ceramic trays, muted wabi-sabi earth tones (sand, clay, charcoal) with deep moss green and forest accents, low lacquered black wooden furniture pieces, traditional paper lantern pendant lights (akari-style), serene uncluttered zen composition with single ikebana flower arrangement, sliding fusuma doors with subtle nature prints, floor cushions (zabuton) for seating",
+      "Rustic": "massive solid reclaimed barn wood furniture with visible grain, knots, and natural weathering, hand-forged wrought iron hardware and vintage metal fixtures, exposed rough-hewn dark wood ceiling beams with visible saw marks, warm amber Edison filament bulb chandeliers on black iron chains, layered natural textiles (chunky cable-knit wool throws, distressed leather seating, linen fabrics in oatmeal), artisanal terracotta pottery and raw stone accents on open shelving, whitewashed brick or stone accent wall, vintage woven jute area rugs, antique wooden ladders repurposed as decorative elements, wrought iron candelabra wall sconces, farmhouse-style wooden dining or console tables",
+      "Industrial": "raw exposed brick accent wall, steel-pipe open shelving and metal-frame furniture, dark charcoal and gunmetal gray color palette, cage-style Edison filament pendant lights, dark distressed leather upholstery, riveted metal details and factory-style windows",
+      "Boho": "oversized macramé wall hangings as focal statement pieces or large woven rattan furniture, layered colorful vintage Persian and Turkish kilim rugs in jewel tones (ruby, sapphire, emerald), curved rattan and wicker furniture with natural texture and low wooden elements, abundant hanging potted plants (pothos, string-of-pearls) and tall fiddle-leaf fig trees, warm earthy color palette (terracotta, mustard yellow, burnt orange, sage green), eclectic global textiles (suzani embroidered cushions, Moroccan wedding blankets, Indian block-print throws), rattan pendant lights with tassels, distressed wooden trunks and vintage furniture pieces, floor cushions and moroccan leather poufs, dreamcatcher and beaded garlands, carved wooden screens and room dividers",
+      "Super Luxury": "bespoke book-matched Calacatta Gold marble feature wall with dramatic gold and grey veining in high-gloss finish, custom Italian boiserie wall paneling in soft greige or warm taupe with fluted vertical channels and aged brass inlay trim, hand-stitched deep channel-tufted velvet upholstered furniture in sophisticated neutrals (champagne, soft dove grey, or warm sand beige), grand multi-tier crystal chandelier with cascading faceted prisms in aged brass frame, plush handwoven silk and wool area rug in ivory or taupe covering most of floor with subtle geometric pattern, statement designer furniture pieces (curved velvet seating, sculptural leather lounge chairs, smoked glass surfaces with brass legs), floor-to-ceiling silk drapes in champagne or greige with hidden motorized track and blackout lining, herringbone or chevron wide-plank white oak floors in satin finish, museum-quality large-scale black-and-white photography or abstract oil painting in ornate aged brass frames, fresh white orchid arrangements in crystal vases, integrated smart lighting with warm LED strips in crown molding, floating linear fireplace with backlit white onyx or alabaster surround, architectural crown molding and coffered ceiling details, leather-wrapped decorative trays with coffee table books, cashmere throws draped artfully",
     };
     interiorStyleDetails = interiorModifiers[style] ? `, featuring ${interiorModifiers[style]}` : "";
   }
@@ -71,8 +64,7 @@ function buildPrompt(styleRaw: string, roomTypeRaw: string) {
   return [
   `Architectural Blueprint Protocol: Maintain 100% original room geometry, walls, windows, and doors in their exact positions.`,
   `Update ceiling to a luxury recessed tray design with integrated lighting.`,
-  `KEEP THE EXACT WINDOW PLACEMENT AND VIEW TO THE OUTSIDE.`,
-  `Completely redesign this ${roomType} into a stunning high-end ${style} style using ${styleDetails}.`,
+  `Fill the space with appropriate high-end ${elements} that match the ${style} aesthetic.`,
   `Result must look like a professional ${style} photography shoot, magazine-quality, photorealistic, Architectural Digest style.`
 ].join(" ");
 }
@@ -152,7 +144,7 @@ async function callFalImageEdit(args: {
   prompt: string;
   guidanceScale?: number;
 }) {
-  const { imageFile, prompt, guidanceScale = 3.5 } = args;
+  const { imageFile, prompt, guidanceScale = 4 } = args;
 
   if (!FAL_KEY) throw new Error("Missing FAL_KEY in environment variables.");
 
