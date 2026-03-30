@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             If you have any questions, concerns, or requests regarding this Privacy Policy or how your data is handled, please reach out to us at:
           </p>
           <p className="font-medium text-black dark:text-white mt-4">
-            💌 support@homerenovai.com
+            💌 hello@homerenovai.com
           </p>
         </div>
       </div>
