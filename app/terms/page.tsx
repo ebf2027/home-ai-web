@@ -60,8 +60,7 @@ export default function TermsPage() {
             <li>Ensuring that the information provided during registration is accurate and up to date.</li>
           </ul>
           <p>
-            We reserve the right to suspend or terminate accounts that violate these Terms, exhibit fraudulent behavior, or remain
-            inactive for an extended period, at our sole discretion.
+            We reserve the right to suspend or terminate accounts that violate these Terms and exhibit fraudulent behavior at our sole discretion.
           </p>
 
           <h2>4. Credits, Subscriptions, and Payments</h2>
