@@ -371,7 +371,7 @@ export default function ProfilePage() {
                 Need assistance with your premium account or have questions about generating designs? We are here for you.
               </p>
               <a
-                href="mailto:suporte@homerenovai.com?subject=Support%20Request%20-%20HomeRenovAi"
+                href="mailto:hello@homerenovai.com?subject=Support%20Request%20-%20HomeRenovAi"
                 className={clsx("w-full py-3 px-4 border rounded-xl transition-all duration-300 flex justify-between items-center group cursor-pointer",
                   isDark ? "bg-[#161616] hover:bg-[#222] border-zinc-800 text-zinc-300 hover:text-white" : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700 hover:text-zinc-900")}
               >
