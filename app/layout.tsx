@@ -25,7 +25,6 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
-    // ✅ Adicionamos o ícone principal aqui para o Google achar
     icon: "/icon-192x192.png", 
     shortcut: "/icon-192x192.png",
     apple: "/apple-touch-icon.png",
@@ -34,9 +33,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // ✅ ADICIONADO: className aqui para as fontes de LUXO funcionarem no site todo
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
+        {/* Google Tag (gtag.js) - Monitoramento HomeRenovAi */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-9VPVJCNYHH');
+            `,
+          }}
+        />
+        
+        {/* Script existente do PWA */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -49,7 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      {/* Aplicamos a fonte Inter como padrão no body */}
       <body className="font-sans">
         <ThemeProvider>
           <ReferralTracker />
