@@ -33,6 +33,21 @@ export default function LandingPage() {
       "min-h-screen transition-colors duration-500 font-sans overflow-x-hidden", 
       isDark ? "bg-[#0A0A0A] text-white" : "bg-[#F4F4F5] text-zinc-900"
     )}>
+      {/* Schema.org VideoObject Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": "HomeRenovAi In Action",
+            "description": "Watch how our AI transforms old spaces into breathtaking luxury designs in seconds.",
+            "thumbnailUrl": "https://homerenovai.com/OG_1200x630_.jpg",
+            "uploadDate": "2026-04-09",
+            "contentUrl": "https://homerenovai.com/16X9_HomeRenovAi_720P.mp4"
+          })
+        }}
+      />
       
       {/* HEADER DA VITRINE */}
       <header className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5 bg-black/10">

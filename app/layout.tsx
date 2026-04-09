@@ -95,6 +95,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
+        
+        {/* Schema.org WebApplication Markup */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": ["WebApplication", "SoftwareApplication"],
+              "name": "HomeRenovAi",
+              "url": "https://homerenovai.com",
+              "image": "https://homerenovai.com/OG_1200x630_.jpg",
+              "description": "Transform any room or facade into a stunning design in seconds with AI.",
+              "applicationCategory": "DesignApplication",
+              "operatingSystem": "All",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            })
+          }}
+        />
       </head>
       <body className="font-sans">
         <ThemeProvider>

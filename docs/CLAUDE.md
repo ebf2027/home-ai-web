@@ -2,10 +2,11 @@
 > **Projeto:** HomeRenovAi  
 > **Domínio:** https://homerenovai.com  
 > **Hospedagem:** Vercel  
-> **Última atualização:** Abril 2026  
+> **Última atualização:** Abril 2026 (Fase 1 totalmente concluída!)  
 ---
 ## 1. Objetivo Atual
-O app está **100% funcional e estável**. A fase atual é de **divulgação orgânica e monetização**, focando em SEO para aumentar a visibilidade nos mecanismos de busca.
+O app está **100% funcional e estável**. Finalizamos com total sucesso a Fase 1 inteira estrutural de SEO (Sitemaps, Otimização de Imagens para WebP com Next/Image, e Schema.org). O próximo foco é dar andamento à **Fase 2 de Consolidação**.
+
 ### Plano SEO em Andamento (9 Passos)
 | # | Passo | Status |
 |---|-------|--------|
@@ -14,8 +15,8 @@ O app está **100% funcional e estável**. A fase atual é de **divulgação org
 | 3 | Sitemap.xml e Robots.txt | ✅ Concluído |
 | 4 | Google Search Console (ação manual) | ✅ Concluído |
 | 5 | Otimizar Imagens (WebP + Lazy Loading) | ✅ Concluído |
-| 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Imagem aprovada |
-| 7 | Schema.org Markup (JSON-LD) | ⏳ Pendente |
+| 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Concluído |
+| 7 | Schema.org Markup (JSON-LD) | ✅ Concluído |
 | 8 | Bing Webmaster Tools (ação manual) | ⏳ Pendente |
 | 9 | Lighthouse Score 90+ | ⏳ Pendente |
 ---
@@ -153,7 +154,12 @@ home-ai-web/
 ### 2.4 Arquivos Criados/Modificados na Fase SEO
 | Arquivo | Ação | O que faz |
 |---------|------|-----------|
-| `app/layout.tsx` | MODIFICADO | Metadata expandido com title, description, keywords, OG (imagem + vídeo), Twitter cards |
+| `app/layout.tsx` | MODIFICADO | Metadata expandido e Schema.org (`WebApplication` JSON-LD) adicionado globalmente. |
+| `app/page.tsx` | MODIFICADO | Inserido `<Image>` nativo; Adicionado blocos de Schema `VideoObject` e Vídeo principal antes do Hero. |
+| `app/workspace/page.tsx` | MODIFICADO | Vitrines e painéis transformados em `<Image>` para suporte a WebP e Lazy Load absoluto. |
+| `app/support/page.tsx` | MODIFICADO | Endereço de e-mail de suporte alterado definitivamente para `hello@homerenovai.com` |
+| `public/sitemap.xml` | CRIADO | Mapa do site gerado mapeando as páginas abertas |
+| `public/robots.txt` | CRIADO | Trava de indexador para as urls privadas |
 | `app/workspace/layout.tsx` | CRIADO | SEO metadata para `/workspace` (Server Component wrapper) |
 | `app/login/layout.tsx` | CRIADO | SEO metadata para `/login` |
 | `app/gallery/layout.tsx` | CRIADO | SEO metadata para `/gallery` |
@@ -161,8 +167,6 @@ home-ai-web/
 | `app/upgrade/layout.tsx` | CRIADO | SEO metadata para `/upgrade` |
 | `app/privacy/page.tsx` | MODIFICADO | Metadata expandido com description, keywords, OG, Twitter |
 | `app/terms/page.tsx` | MODIFICADO | Metadata expandido com description, keywords, OG, Twitter |
-| `app/support/page.tsx` | MODIFICADO | Metadata SEO completo adicionado (não existia) |
-| `app/page.tsx` | MODIFICADO | Seção de vídeo adicionada antes do Hero |
 | `public/16X9_HomeRenovAi_720P.mp4` | RENOMEADO | De `16X9 HomeRenovAi 720P.mp4` (remover espaços) |
 ---
 ## 3. Próximos Passos (To-Do)
@@ -184,8 +188,8 @@ home-ai-web/
   - Componente Next Image adotado em `app/page.tsx` e `app/workspace/page.tsx`.
   - ⚠️ NÃO tocar nas imagens do Supabase Storage (geradas pelo usuário) - [Mantido]
 ### 🔵 Fase 2: Consolidação
-- [ ] **Passo 6 — Imagem OG** (já adicionada, avaliar se precisa melhoria)
-- [ ] **Passo 7 — Schema.org Markup** (JSON-LD: WebApplication, SoftwareApplication, VideoObject)
+- [x] **Passo 6 — Imagem OG** (Verificado e Validado: Padrões perfeitos e em conformidade)
+- [x] **Passo 7 — Schema.org Markup** (JSON-LD: WebApplication, SoftwareApplication, VideoObject)
 - [ ] **Passo 8 — Bing Webmaster Tools** (Manual)
 - [ ] **Passo 9 — Lighthouse Score 90+** (Performance, SEO, Accessibility)
 ---
@@ -244,4 +248,8 @@ home-ai-web/
 8. **PWA**: O app é instalável como PWA. O manifest está em `/public/manifest.json`, ícones em `/public/icon-*.png`.
 9. **Suporte a e-mail**: A página `/support` exibe agora o endereço atualizado `hello@homerenovai.com`. (✅ Concluído)
 ---
-> **Para continuar o projeto**: Leia este arquivo, rode `npm run dev` para iniciar na porta 3000, e siga os próximos passos listados na seção 3. Use `npm run build` após cada mudança para verificar integridade.
+> **Atenção Próximo Agente IA (Hand-off):** 
+> * Leia todas as anotações. A Fase 1 de impacto estrutural está 100% concluída (todas as melhorias lógicas invisíveis e substituição global por Next `Image`).
+> * As rotinas do front-end são altamente sofisticadas e não devem ser alteradas na essência.
+> * O seu próximo objetivo lógico, ditado pela prioridade técnica de amanhã será começar de imediato o **Passo 8 (Bing Webmaster Tools)** e depois aferir a pontuação (Passo 9).
+> * Rode localmente `npm run dev` marcando no final o checkbox como concluído à medida que completa as vitórias! Bom trabalho.
