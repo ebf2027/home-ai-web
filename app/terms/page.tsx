@@ -1,5 +1,34 @@
-export const metadata = {
-  title: "Terms of Service — HomeRenovAi",
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | HomeRenovAi",
+  description:
+    "Read the Terms of Service for using HomeRenovAi's AI-powered interior and exterior design platform.",
+  keywords:
+    "HomeRenovAi terms, terms of service, user agreement, AI design terms, service conditions",
+  openGraph: {
+    title: "Terms of Service | HomeRenovAi",
+    description:
+      "Read the Terms of Service for using HomeRenovAi's AI-powered interior and exterior design platform.",
+    url: "https://homerenovai.com/terms",
+    siteName: "HomeRenovAi",
+    images: [
+      {
+        url: "https://homerenovai.com/OG_1200x630_.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service | HomeRenovAi",
+    description:
+      "Read the Terms of Service for using HomeRenovAi's AI-powered interior and exterior design platform.",
+    images: ["https://homerenovai.com/OG_1200x630_.jpg"],
+  },
 };
 
 export default function TermsPage() {

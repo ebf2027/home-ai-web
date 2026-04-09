@@ -17,17 +17,52 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HomeRenovAi",
-  description: "Transform your home with AI",
+  title: "HomeRenovAi — AI Interior & Exterior Design Tool",
+  description:
+    "Transform any room or facade into a stunning design in seconds. Upload a photo, choose a style, and let AI reimagine your space with professional precision.",
+  keywords:
+    "AI interior design, home renovation, room design AI, interior decorator, AI architecture, home makeover, virtual staging, AI room transformer, facade design, scandinavian design, modern interior, luxury interior design",
   manifest: "/manifest.json",
   appleWebApp: {
     title: "HomeRenovAi",
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: "/icon-192x192.png", 
+    icon: "/icon-192x192.png",
     shortcut: "/icon-192x192.png",
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "HomeRenovAi — AI Interior & Exterior Design Tool",
+    description:
+      "Transform any room or facade into a stunning design in seconds. Upload a photo, choose a style, and let AI reimagine your space.",
+    url: "https://homerenovai.com",
+    siteName: "HomeRenovAi",
+    images: [
+      {
+        url: "https://homerenovai.com/OG_1200x630_.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HomeRenovAi — AI-Powered Interior Design",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+    videos: [
+      {
+        url: "https://homerenovai.com/16X9_HomeRenovAi_720P.mp4",
+        width: 1280,
+        height: 720,
+        type: "video/mp4",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HomeRenovAi — AI Interior & Exterior Design Tool",
+    description:
+      "Transform any room or facade into a stunning design in seconds. Upload a photo, choose a style, and let AI reimagine your space.",
+    images: ["https://homerenovai.com/OG_1200x630_.jpg"],
   },
 };
 

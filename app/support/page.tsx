@@ -1,4 +1,37 @@
-﻿export default function SupportPage() {
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Support | HomeRenovAi",
+  description:
+    "Need help with HomeRenovAi? Contact our support team for assistance with your account, billing, or design generation.",
+  keywords:
+    "HomeRenovAi support, help, contact, customer service, billing support, technical support",
+  openGraph: {
+    title: "Support | HomeRenovAi",
+    description:
+      "Need help with HomeRenovAi? Contact our support team for assistance with your account, billing, or design generation.",
+    url: "https://homerenovai.com/support",
+    siteName: "HomeRenovAi",
+    images: [
+      {
+        url: "https://homerenovai.com/OG_1200x630_.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Support | HomeRenovAi",
+    description:
+      "Need help with HomeRenovAi? Contact our support team for assistance with your account, billing, or design generation.",
+    images: ["https://homerenovai.com/OG_1200x630_.jpg"],
+  },
+};
+
+export default function SupportPage() {
   return (
     <main className="min-h-screen bg-[#0A0A0A] px-4 py-10">
       <div className="mx-auto max-w-2xl">

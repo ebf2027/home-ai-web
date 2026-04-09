@@ -1,5 +1,34 @@
-export const metadata = {
-  title: "Privacy Policy — HomeRenovAi",
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | HomeRenovAi",
+  description:
+    "Learn how HomeRenovAi protects your data, images, and personal information. Your privacy is our priority.",
+  keywords:
+    "HomeRenovAi privacy policy, data protection, AI image privacy, user data security, GDPR",
+  openGraph: {
+    title: "Privacy Policy | HomeRenovAi",
+    description:
+      "Learn how HomeRenovAi protects your data, images, and personal information. Your privacy is our priority.",
+    url: "https://homerenovai.com/privacy",
+    siteName: "HomeRenovAi",
+    images: [
+      {
+        url: "https://homerenovai.com/OG_1200x630_.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy | HomeRenovAi",
+    description:
+      "Learn how HomeRenovAi protects your data, images, and personal information. Your privacy is our priority.",
+    images: ["https://homerenovai.com/OG_1200x630_.jpg"],
+  },
 };
 
 export default function PrivacyPage() {

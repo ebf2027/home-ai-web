@@ -57,9 +57,29 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* --- VIDEO SHOWCASE (Primeiro impacto visual) --- */}
+      <section className="relative pt-24 md:pt-40 px-6 pb-0 flex flex-col items-center">
+        <div className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/OG_1200x630_.jpg"
+          >
+            <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
+          </video>
+          {/* Badge sobre o vídeo */}
+          <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
+            <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Watch</p>
+            <p className="text-white font-serif text-sm md:text-lg">See the Magic in Action</p>
+          </div>
+        </div>
+      </section>
+
       {/* --- HERO SECTION --- */}
-      {/* Ajuste do topo: pt-24 no mobile, pt-40 no desktop */}
-      <section className="relative pt-24 md:pt-40 pb-20 px-6 flex flex-col items-center text-center">
+      <section className="relative pt-12 md:pt-24 pb-20 px-6 flex flex-col items-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
         <span className="relative z-10 inline-block px-3 md:px-4 py-1.5 mb-6 md:mb-8 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5 text-center">
