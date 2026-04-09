@@ -13,7 +13,7 @@ O app está **100% funcional e estável**. A fase atual é de **divulgação org
 | 2 | Open Graph Tags + Vídeo na Landing Page | ✅ Concluído |
 | 3 | Sitemap.xml e Robots.txt | ✅ Concluído |
 | 4 | Google Search Console (ação manual) | ✅ Concluído |
-| 5 | Otimizar Imagens (WebP + Lazy Loading) | ⏳ Pendente |
+| 5 | Otimizar Imagens (WebP + Lazy Loading) | ✅ Concluído |
 | 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Imagem aprovada |
 | 7 | Schema.org Markup (JSON-LD) | ⏳ Pendente |
 | 8 | Bing Webmaster Tools (ação manual) | ⏳ Pendente |
@@ -177,11 +177,12 @@ home-ai-web/
   - Verificar via DNS (Vercel) ou meta tag
   - Submeter `sitemap.xml`
   - Solicitar indexação das páginas principais
-- [ ] **Passo 5 — Otimizar Imagens**
-  - Converter JPEG → WebP (hero-luxury, showcase-*, styles/*, examples/*)
-  - Adicionar `loading="lazy"` nas imagens below-the-fold
-  - Usar `next/image` onde possível
-  - ⚠️ NÃO tocar nas imagens do Supabase Storage (geradas pelo usuário)
+- [x] **Passo 5 — Otimizar Imagens**
+  - Implementado o `<Image>` do Next.js nativamente para otimização automática para WebP in-browser e scale-down.
+  - Implementado o atributo `fill` e `priority` em LCP.
+  - Adicionado `loading="lazy"` nas demais imagens below-the-fold (ex: grids e styles).
+  - Componente Next Image adotado em `app/page.tsx` e `app/workspace/page.tsx`.
+  - ⚠️ NÃO tocar nas imagens do Supabase Storage (geradas pelo usuário) - [Mantido]
 ### 🔵 Fase 2: Consolidação
 - [ ] **Passo 6 — Imagem OG** (já adicionada, avaliar se precisa melhoria)
 - [ ] **Passo 7 — Schema.org Markup** (JSON-LD: WebApplication, SoftwareApplication, VideoObject)

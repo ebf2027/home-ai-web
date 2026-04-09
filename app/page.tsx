@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTheme } from "./components/ThemeProvider";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
@@ -108,10 +109,12 @@ export default function LandingPage() {
         {/* Imagem Principal Divina (Luxury) */}
         {/* Ajuste: aspect-[4/5] no mobile para ficar alta, aspect-video no desktop */}
         <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
-           <img 
+           <Image 
              src="/hero-luxury.jpg" 
              alt="Luxury AI Interior Design" 
-             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+             fill
+             priority
+             className="object-cover transition-transform duration-700 group-hover:scale-105"
            />
            <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
              <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Style</p>
@@ -131,8 +134,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               {/* Ajuste: aspect-video no mobile para ficar deitada, aspect-[4/5] no desktop */}
-              <div className="aspect-square md:aspect-[4/5]">
-                <img src="/showcase-scandinavian.jpg" alt="Scandinavian style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="aspect-square md:aspect-[4/5] relative">
+                <Image src="/showcase-scandinavian.jpg" alt="Scandinavian style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Scandinavian</p>
@@ -141,8 +144,8 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-square md:aspect-[4/5]">
-                <img src="/showcase-modern.jpg" alt="Modern style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="aspect-square md:aspect-[4/5] relative">
+                <Image src="/showcase-modern.jpg" alt="Modern style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Modern Designer</p>
@@ -151,8 +154,8 @@ export default function LandingPage() {
             </div>
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
-              <div className="aspect-square md:aspect-[4/5]">
-                <img src="/showcase-industrial.jpg" alt="Industrial style" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="aspect-square md:aspect-[4/5] relative">
+                <Image src="/showcase-industrial.jpg" alt="Industrial style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Luxury Industrial</p>

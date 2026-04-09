@@ -5,6 +5,7 @@ import CreditsBadge from "../components/CreditsBadge";
 import { useRouter } from "next/navigation"; // <-- ADICIONE ESTA LINHA EXATAMENTE AQUI
 import type React from "react";
 import { useRef, useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { useTheme } from "../components/ThemeProvider";
 import Link from "next/link";
 import clsx from "clsx";
@@ -85,12 +86,14 @@ function ExampleCarousel() {
   return (
     <div className="absolute inset-0 w-full h-full bg-black">
       {images.map((src, i) => (
-        <img
+        <Image
           key={src}
           src={src}
           alt="Example"
+          fill
+          loading="lazy"
           className={clsx(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
+            "object-cover transition-opacity duration-1000",
             i === index ? "opacity-100" : "opacity-0"
  )}
         />
@@ -344,7 +347,7 @@ export default function Home() {
                         "relative w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all duration-300",
                         isSel ? "border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.3)] scale-105" : "border-transparent hover:border-white/20 hover:scale-105"
                       )}>
-                        <img src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
+                        <Image src={`/styles/${s.id.toLowerCase().replace(" ", "-")}.jpg`} fill loading="lazy" className="object-cover transition-transform duration-700 group-hover:scale-110" alt={s.title} />
                       </div>
                       <span className={clsx("w-full truncate text-[7.5px] md:text-[9px] font-black text-center tracking-wider md:tracking-widest uppercase transition-colors", isSel ? "text-[#D4AF37]" : "md:text-zinc-500 group-hover:text-zinc-300")}>
                         {s.title}
