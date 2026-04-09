@@ -41,8 +41,8 @@ export default function SupportPage() {
         </p>
         <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 space-y-4">
           <p className="text-zinc-300">Send us an email and we will respond within 24 hours:</p>
-          <a href="mailto:ebf2027@gmail.com" className="inline-block rounded-full bg-[#D4AF37] px-6 py-3 text-black font-semibold hover:opacity-90 transition">
-            ebf2027@gmail.com
+          <a href="mailto:hello@homerenovai.com" className="inline-block rounded-full bg-[#D4AF37] px-6 py-3 text-black font-semibold hover:opacity-90 transition">
+            hello@homerenovai.com
           </a>
           <p className="text-zinc-500 text-sm">Suggested subject: HomeRenovAi Billing or HomeRenovAi Technical Support</p>
         </div>

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Bloquear áreas privadas ou de API
+Disallow: /api/
+Disallow: /workspace/
+Disallow: /profile/
+Disallow: /gallery/
+Disallow: /upgrade/
+
+Sitemap: https://homerenovai.com/sitemap.xml
