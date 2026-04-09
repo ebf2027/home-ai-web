@@ -12,7 +12,7 @@ O app está **100% funcional e estável**. A fase atual é de **divulgação org
 | 1 | Meta Tags customizadas em todas as páginas | ✅ Concluído |
 | 2 | Open Graph Tags + Vídeo na Landing Page | ✅ Concluído |
 | 3 | Sitemap.xml e Robots.txt | ✅ Concluído |
-| 4 | Google Search Console (ação manual) | ⏳ Pendente |
+| 4 | Google Search Console (ação manual) | ✅ Concluído |
 | 5 | Otimizar Imagens (WebP + Lazy Loading) | ⏳ Pendente |
 | 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Imagem aprovada |
 | 7 | Schema.org Markup (JSON-LD) | ⏳ Pendente |
@@ -172,7 +172,7 @@ home-ai-web/
   - Criar `public/robots.txt` permitindo crawlers, apontando para sitemap
   - Páginas públicas: `/`, `/login`, `/privacy`, `/terms`, `/support`
   - Usar `lastmod: 2026-04-08`
-- [ ] **Passo 4 — Google Search Console** (Manual)
+- [x] **Passo 4 — Google Search Console** (Manual)
   - Adicionar propriedade `homerenovai.com`
   - Verificar via DNS (Vercel) ou meta tag
   - Submeter `sitemap.xml`
