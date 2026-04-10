@@ -128,6 +128,7 @@ export default function LandingPage() {
              src="/hero-luxury.jpg" 
              alt="Luxury AI Interior Design" 
              fill
+             sizes="(max-width: 768px) 100vw, 1200px"
              priority
              className="object-cover transition-transform duration-700 group-hover:scale-105"
            />
@@ -150,7 +151,7 @@ export default function LandingPage() {
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               {/* Ajuste: aspect-video no mobile para ficar deitada, aspect-[4/5] no desktop */}
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-scandinavian.jpg" alt="Scandinavian style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-scandinavian.jpg" alt="Scandinavian style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Scandinavian</p>
@@ -160,7 +161,7 @@ export default function LandingPage() {
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-modern.jpg" alt="Modern style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-modern.jpg" alt="Modern style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Modern Designer</p>
@@ -170,7 +171,7 @@ export default function LandingPage() {
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-industrial.jpg" alt="Industrial style" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-industrial.jpg" alt="Industrial style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Luxury Industrial</p>

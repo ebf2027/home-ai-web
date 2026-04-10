@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import ConditionalBottomBar from "./components/ConditionalBottomBar";
@@ -71,30 +72,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
         {/* Google Tag (gtag.js) - Monitoramento HomeRenovAi */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-9VPVJCNYHH');
-            `,
-          }}
+        <Script 
+          src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH" 
+          strategy="afterInteractive" 
         />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9VPVJCNYHH');
+          `}
+        </Script>
         
         {/* Script existente do PWA */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.__deferredInstallPrompt = null;
-              window.addEventListener('beforeinstallprompt', function(e) {
-                e.preventDefault();
-                window.__deferredInstallPrompt = e;
-              });
-            `,
-          }}
-        />
+        <Script id="pwa-install-prompt" strategy="lazyOnload">
+          {`
+            window.__deferredInstallPrompt = null;
+            window.addEventListener('beforeinstallprompt', function(e) {
+              e.preventDefault();
+              window.__deferredInstallPrompt = e;
+            });
+          `}
+        </Script>
         
         {/* Schema.org WebApplication Markup */}
         <script

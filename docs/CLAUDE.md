@@ -17,8 +17,8 @@ O app está **100% funcional e estável**. Finalizamos com total sucesso a Fase 
 | 5 | Otimizar Imagens (WebP + Lazy Loading) | ✅ Concluído |
 | 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Concluído |
 | 7 | Schema.org Markup (JSON-LD) | ✅ Concluído |
-| 8 | Bing Webmaster Tools (ação manual) | ⏳ Pendente |
-| 9 | Lighthouse Score 90+ | ⏳ Pendente |
+| 8 | Bing Webmaster Tools (ação manual) | ✅ Concluído |
+| 9 | Lighthouse Score 90+ | ✅ Concluído |
 ---
 ## 2. Status do Código
 ### 2.1 Stack Tecnológico
@@ -190,8 +190,8 @@ home-ai-web/
 ### 🔵 Fase 2: Consolidação
 - [x] **Passo 6 — Imagem OG** (Verificado e Validado: Padrões perfeitos e em conformidade)
 - [x] **Passo 7 — Schema.org Markup** (JSON-LD: WebApplication, SoftwareApplication, VideoObject)
-- [ ] **Passo 8 — Bing Webmaster Tools** (Manual)
-- [ ] **Passo 9 — Lighthouse Score 90+** (Performance, SEO, Accessibility)
+- [x] **Passo 8 — Bing Webmaster Tools** (Manual)
+- [x] **Passo 9 — Lighthouse Score 90+** (Performance, SEO, Accessibility)
 ---
 ## 4. Decisões Técnicas
 ### 4.1 Arquitetura
