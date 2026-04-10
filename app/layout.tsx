@@ -71,31 +71,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
-        {/* Google Tag (gtag.js) - Monitoramento HomeRenovAi */}
-        <Script 
-          src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH" 
-          strategy="afterInteractive" 
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-9VPVJCNYHH');
-          `}
-        </Script>
-        
-        {/* Script existente do PWA */}
-        <Script id="pwa-install-prompt" strategy="lazyOnload">
-          {`
-            window.__deferredInstallPrompt = null;
-            window.addEventListener('beforeinstallprompt', function(e) {
-              e.preventDefault();
-              window.__deferredInstallPrompt = e;
-            });
-          `}
-        </Script>
-        
         {/* Schema.org WebApplication Markup */}
         <script
           type="application/ld+json"
@@ -119,6 +94,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans">
+        {/* Google Tag (gtag.js) - Movido para body para obedecer o padrão Next */}
+        <Script 
+          src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH" 
+          strategy="afterInteractive" 
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9VPVJCNYHH');
+          `}
+        </Script>
+
+        {/* Script existente do PWA */}
+        <Script id="pwa-install-prompt" strategy="lazyOnload">
+          {`
+            window.__deferredInstallPrompt = null;
+            window.addEventListener('beforeinstallprompt', function(e) {
+              e.preventDefault();
+              window.__deferredInstallPrompt = e;
+            });
+          `}
+        </Script>
+
         <ThemeProvider>
           <ReferralTracker />
           <WelcomeTrigger />

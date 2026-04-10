@@ -11,6 +11,7 @@ export default function LandingPage() {
   const { isDark, toggleTheme } = useTheme();
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -26,6 +27,10 @@ export default function LandingPage() {
     };
 
     checkLoginStatus();
+    
+    // Libera a renderização do vídeo levemente após a tintura inicial para melhorar o Lighthouse Mobile
+    const timer = setTimeout(() => setVideoReady(true), 200);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -84,7 +89,7 @@ export default function LandingPage() {
             playsInline
             poster="/OG_1200x630_.jpg"
           >
-            <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
+            {videoReady && <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />}
           </video>
           {/* Badge sobre o vídeo */}
           <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
