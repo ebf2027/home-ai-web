@@ -28,8 +28,8 @@ export default function LandingPage() {
 
     checkLoginStatus();
     
-    // Libera a renderização do vídeo apenas após a hidratação total (2.5s) para o Lighthouse de Mobile não penalizar o "Time to Interactive"
-    const timer = setTimeout(() => setVideoReady(true), 2500);
+    // Libera a renderização do vídeo levemente após a tintura inicial para melhorar o Lighthouse Mobile
+    const timer = setTimeout(() => setVideoReady(true), 200);
     return () => clearTimeout(timer);
   }, []);
 
