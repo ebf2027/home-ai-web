@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTheme } from "./components/ThemeProvider";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import { preload } from "react-dom";
 import { createClient } from "./lib/supabase/client";
 
 export default function LandingPage() {
@@ -12,6 +13,9 @@ export default function LandingPage() {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+
+  // Preload da imagem LCP (poster do vídeo) crucial para o Lighthouse Mobile
+  preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
 
   useEffect(() => {
     const checkLoginStatus = async () => {
