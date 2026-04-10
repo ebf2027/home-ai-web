@@ -28,8 +28,8 @@ export default function LandingPage() {
 
     checkLoginStatus();
     
-    // Libera a renderização do vídeo levemente após a tintura inicial para melhorar o Lighthouse Mobile
-    const timer = setTimeout(() => setVideoReady(true), 200);
+    // Libera a renderização do vídeo levemente após a pintura inicial para melhorar o Lighthouse Mobile
+    const timer = setTimeout(() => setVideoReady(true), 400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -87,9 +87,14 @@ export default function LandingPage() {
             muted
             loop
             playsInline
-            poster="/OG_1200x630_.jpg"
+            poster="/OG_1200x630_.webp"
           >
-            {videoReady && <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />}
+            {videoReady && (
+              <>
+                <source src="/16X9_HomeRenovAi_720P.webm" type="video/webm" />
+                <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
+              </>
+            )}
           </video>
           {/* Badge sobre o vídeo */}
           <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
@@ -130,7 +135,7 @@ export default function LandingPage() {
         {/* Ajuste: aspect-[4/5] no mobile para ficar alta, aspect-video no desktop */}
         <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 group">
            <Image 
-             src="/hero-luxury.jpg" 
+             src="/hero-luxury.webp" 
              alt="Luxury AI Interior Design" 
              fill
              sizes="(max-width: 768px) 100vw, 1200px"
@@ -156,7 +161,7 @@ export default function LandingPage() {
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               {/* Ajuste: aspect-video no mobile para ficar deitada, aspect-[4/5] no desktop */}
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-scandinavian.jpg" alt="Scandinavian style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-scandinavian.webp" alt="Scandinavian style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Scandinavian</p>
@@ -166,7 +171,7 @@ export default function LandingPage() {
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-modern.jpg" alt="Modern style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-modern.webp" alt="Modern style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Modern Designer</p>
@@ -176,7 +181,7 @@ export default function LandingPage() {
 
             <div className="rounded-3xl overflow-hidden border border-white/5 group bg-zinc-900">
               <div className="aspect-square md:aspect-[4/5] relative">
-                <Image src="/showcase-industrial.jpg" alt="Industrial style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src="/showcase-industrial.webp" alt="Industrial style" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <p className="font-serif text-xl text-white">Luxury Industrial</p>
