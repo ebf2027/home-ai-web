@@ -154,7 +154,7 @@ home-ai-web/
 ### 2.4 Arquivos Criados/Modificados na Fase SEO
 | Arquivo | Ação | O que faz |
 |---------|------|-----------|
-| `app/layout.tsx` | MODIFICADO | Metadata expandido e Schema.org (`WebApplication` JSON-LD) adicionado globalmente. |
+| `app/layout.tsx` | MODIFICADO | Metadata expandido e Schema.org (`WebApplication` JSON-LD). Scripts movidos para o `<body>` com a tag oficial `<Script>` do NextJS para pontuação 100 de Best Practices. |
 | `app/page.tsx` | MODIFICADO | Inserido `<Image>` nativo; Adicionado blocos de Schema `VideoObject` e Vídeo principal antes do Hero. |
 | `app/workspace/page.tsx` | MODIFICADO | Vitrines e painéis transformados em `<Image>` para suporte a WebP e Lazy Load absoluto. |
 | `app/support/page.tsx` | MODIFICADO | Endereço de e-mail de suporte alterado definitivamente para `hello@homerenovai.com` |
@@ -251,5 +251,6 @@ home-ai-web/
 > **Atenção Próximo Agente IA (Hand-off):** 
 > * Leia todas as anotações. A Fase 1 de impacto estrutural está 100% concluída (todas as melhorias lógicas invisíveis e substituição global por Next `Image`).
 > * As rotinas do front-end são altamente sofisticadas e não devem ser alteradas na essência.
-> * O seu próximo objetivo lógico, ditado pela prioridade técnica de amanhã será começar de imediato o **Passo 8 (Bing Webmaster Tools)** e depois aferir a pontuação (Passo 9).
+> * As etapas Otimização e Lighthouse foram finalizadas (Desempenho Estável: 80 Performance Mobile | 100 Best Practices | 100 SEO). Seu objetivo agora é aguardar as coordenadas do usuário sobre a PRÓXIMA bateria criativa de desenvolvimento (Fase 3).
+> * Não quebre as vitrines e os delays de vídeos implementados (Eles mantêm o nosso teto de performance do celular cravado em 80).
 > * Rode localmente `npm run dev` marcando no final o checkbox como concluído à medida que completa as vitórias! Bom trabalho.
