@@ -139,7 +139,7 @@ export default function LandingPage() {
 
         <Link 
           href="/workspace" 
-          className="relative z-10 px-6 md:px-10 py-4 md:py-5 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[9px] md:text-[10px] tracking-[0.2em] mb-12 md:mb-24 text-center max-w-[90vw]"
+          className="relative z-10 px-6 md:px-12 py-4 md:py-6 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[9px] md:text-xs tracking-[0.2em] mb-12 md:mb-24 text-center max-w-[90vw]"
         >
           {isLoggedIn 
             ? "Start Your Transformation" 
@@ -168,7 +168,7 @@ export default function LandingPage() {
       <section className="py-12 md:py-24 px-6 border-t border-white/5 bg-black/20">
         <div className="max-w-6xl mx-auto">
           <header className="text-center mb-16">
-            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#D4AF37] mb-3">Unlimited Possibilities</p>
+            <p className="text-[11px] md:text-xs font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-3">Unlimited Possibilities</p>
             <h2 className="text-4xl md:text-5xl font-serif tracking-tight text-white">Explore Breathtaking Aesthetics</h2>
           </header>
 
@@ -204,6 +204,22 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* --- FINAL CALL TO ACTION --- */}
+      <section className="py-20 md:py-32 px-6 text-center border-t border-white/5">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-serif mb-8 text-white">Ready to Create Your Masterpiece?</h2>
+          <p className="text-lg md:text-xl font-light opacity-80 mb-12">
+            Join thousands of homeowners and designers using AI to redefine luxury.
+          </p>
+          <Link 
+            href="/workspace" 
+            className="inline-block px-10 md:px-14 py-4 md:py-6 bg-[#D4AF37] text-black font-bold rounded-full transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(212,175,55,0.5)] hover:scale-105 uppercase text-[9px] md:text-xs tracking-[0.2em]"
+          >
+            Transform Your Space Now
+          </Link>
         </div>
       </section>
 
