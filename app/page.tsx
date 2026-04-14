@@ -123,7 +123,7 @@ export default function LandingPage() {
       <section className="relative pt-12 md:pt-24 pb-20 px-6 flex flex-col items-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(circle_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)] pointer-events-none" />
 
-        <span className="relative z-10 inline-block px-3 md:px-4 py-1.5 mb-6 md:mb-8 text-[8px] md:text-[10px] font-bold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/30 rounded-full bg-[#D4AF37]/5 text-center">
+        <span className="relative z-10 inline-block px-4 md:px-5 py-2 mb-6 md:mb-8 text-[10px] md:text-xs font-extrabold tracking-[0.3em] uppercase text-[#D4AF37] border border-[#D4AF37]/50 rounded-full bg-[#D4AF37]/10 text-center shadow-sm">
           The New Standard of Interior Design
         </span>
 
@@ -210,9 +210,9 @@ export default function LandingPage() {
       {/* --- FINAL CALL TO ACTION --- */}
       <section className="py-20 md:py-32 px-6 text-center border-t border-white/5">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-serif mb-8 text-white">Ready to Create Your Masterpiece?</h2>
+          <h2 className="text-3xl md:text-5xl font-serif mb-8">Ready to Create Your Masterpiece?</h2>
           <p className="text-lg md:text-xl font-light opacity-80 mb-12">
-            Join thousands of homeowners and designers using AI to redefine luxury.
+            Experience the next generation of interior design and visualize the home you've always dreamed of.
           </p>
           <Link 
             href="/workspace" 
