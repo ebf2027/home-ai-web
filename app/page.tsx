@@ -13,6 +13,7 @@ export default function LandingPage() {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   // Preload da imagem LCP (poster do vídeo) crucial para o Lighthouse Mobile
   preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
@@ -92,6 +93,7 @@ export default function LandingPage() {
             loop
             playsInline
             poster="/OG_1200x630_.webp"
+            onPlaying={() => setVideoPlaying(true)}
           >
             {videoReady && (
               <>
@@ -104,6 +106,11 @@ export default function LandingPage() {
               </>
             )}
           </video>
+          {/* Cortina preta mobile: esconde o poster 16:9 cortado no container 4:5, desaparece suavemente quando o vídeo começa */}
+          <div className={clsx(
+            "absolute inset-0 bg-black md:hidden transition-opacity duration-700 pointer-events-none",
+            videoPlaying ? "opacity-0" : "opacity-100"
+          )} />
           {/* Badge sobre o vídeo */}
           <div className="hidden md:block absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
             <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Watch</p>
