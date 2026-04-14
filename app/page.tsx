@@ -13,6 +13,7 @@ export default function LandingPage() {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Preload da imagem LCP (poster do vídeo) crucial para o Lighthouse Mobile
   preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
@@ -32,9 +33,20 @@ export default function LandingPage() {
 
     checkLoginStatus();
     
+    // Detecção de mobile para troca de vídeo
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
     // Libera a renderização do vídeo levemente após a pintura inicial para melhorar o Lighthouse Mobile
     const timer = setTimeout(() => setVideoReady(true), 400);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
@@ -84,7 +96,7 @@ export default function LandingPage() {
 
       {/* --- VIDEO SHOWCASE (Primeiro impacto visual) --- */}
       <section className="relative pt-24 md:pt-40 px-6 pb-0 flex flex-col items-center">
-        <div className="relative w-full max-w-6xl aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
+        <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-video rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-black">
           <video
             className="w-full h-full object-cover"
             autoPlay
@@ -92,16 +104,26 @@ export default function LandingPage() {
             loop
             playsInline
             poster="/OG_1200x630_.webp"
+            key={isMobile ? 'mobile' : 'desktop'}
           >
             {videoReady && (
               <>
-                <source src="/16X9_HomeRenovAi_720P.webm" type="video/webm" />
-                <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
+                {isMobile ? (
+                  <>
+                    <source src="/MOBILE_HomeRenovAi.webm" type="video/webm" />
+                    <source src="/MOBILE_HomeRenovAi.mp4" type="video/mp4" />
+                  </>
+                ) : (
+                  <>
+                    <source src="/16X9_HomeRenovAi_720P.webm" type="video/webm" />
+                    <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
+                  </>
+                )}
               </>
             )}
           </video>
           {/* Badge sobre o vídeo */}
-          <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
+          <div className="hidden md:block absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-left">
             <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold">Watch</p>
             <p className="text-white font-serif text-sm md:text-lg">See the Magic in Action</p>
           </div>
