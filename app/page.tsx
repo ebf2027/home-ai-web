@@ -13,7 +13,6 @@ export default function LandingPage() {
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Preload da imagem LCP (poster do vídeo) crucial para o Lighthouse Mobile
   preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
@@ -33,20 +32,9 @@ export default function LandingPage() {
 
     checkLoginStatus();
     
-    // Detecção de mobile para troca de vídeo
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
     // Libera a renderização do vídeo levemente após a pintura inicial para melhorar o Lighthouse Mobile
     const timer = setTimeout(() => setVideoReady(true), 400);
-    
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -104,21 +92,15 @@ export default function LandingPage() {
             loop
             playsInline
             poster="/OG_1200x630_.webp"
-            key={isMobile ? 'mobile' : 'desktop'}
           >
             {videoReady && (
               <>
-                {isMobile ? (
-                  <>
-                    <source src="/MOBILE_HomeRenovAi.webm" type="video/webm" />
-                    <source src="/MOBILE_HomeRenovAi.mp4" type="video/mp4" />
-                  </>
-                ) : (
-                  <>
-                    <source src="/16X9_HomeRenovAi_720P.webm" type="video/webm" />
-                    <source src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
-                  </>
-                )}
+                {/* Mobile: vídeo vertical 4:5 (1080x1350) */}
+                <source media="(max-width: 767px)" src="/MOBILE_HomeRenovAi.webm" type="video/webm" />
+                <source media="(max-width: 767px)" src="/MOBILE_HomeRenovAi.mp4" type="video/mp4" />
+                {/* Desktop: vídeo horizontal 16:9 (1920x1080) */}
+                <source media="(min-width: 768px)" src="/16X9_HomeRenovAi_720P.webm" type="video/webm" />
+                <source media="(min-width: 768px)" src="/16X9_HomeRenovAi_720P.mp4" type="video/mp4" />
               </>
             )}
           </video>
