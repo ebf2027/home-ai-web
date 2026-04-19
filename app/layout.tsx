@@ -65,6 +65,11 @@ export const metadata: Metadata = {
       "Transform any room or facade into a stunning design in seconds. Upload a photo, choose a style, and let AI reimagine your space.",
     images: ["https://homerenovai.com/OG_1200x630_.jpg"],
   },
+  verification: {
+    other: {
+      "p:domain_verify": ["5edc10c3a6d21d30e55274f573dbe52a"],
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

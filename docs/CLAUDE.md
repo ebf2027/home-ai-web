@@ -1,369 +1,139 @@
-# CLAUDE.md — Resumo Técnico para Continuidade do Projeto
+# CLAUDE.md — Resumo Técnico Detalhado (Documentação Interna)
+
 > **Projeto:** HomeRenovAi  
 > **Domínio:** https://homerenovai.com  
 > **Hospedagem:** Vercel  
-> **Última atualização:** Abril 2026 (Fase 1 totalmente concluída!)  
----
-## 1. Objetivo Atual
-O app está **100% funcional e estável**. Finalizamos com total sucesso a Fase 1 inteira estrutural de SEO (Sitemaps, Otimização de Imagens para WebP com Next/Image, e Schema.org). O próximo foco é dar andamento à **Fase 2 de Consolidação**.
+> **Última atualização:** 19 de Abril de 2026  
+> **Status:** ✅ App 100% funcional. Todas as fases SEO concluídas. Monetização ativa.
 
-### Plano SEO em Andamento (9 Passos)
-| # | Passo | Status |
-|---|-------|--------|
-| 1 | Meta Tags customizadas em todas as páginas | ✅ Concluído |
-| 2 | Open Graph Tags + Vídeo na Landing Page | ✅ Concluído |
-| 3 | Sitemap.xml e Robots.txt | ✅ Concluído |
-| 4 | Google Search Console (ação manual) | ✅ Concluído |
-| 5 | Otimizar Imagens (WebP + Lazy Loading) | ✅ Concluído |
-| 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Concluído |
-| 7 | Schema.org Markup (JSON-LD) | ✅ Concluído |
-| 8 | Bing Webmaster Tools (ação manual) | ✅ Concluído |
-| 9 | Lighthouse Score 90+ | ✅ Concluído (Score 88 Mobile) |
 ---
-## 2. Status do Código
-### 2.1 Stack Tecnológico
+
+## 1. Resumo do Estado Atual
+
+O HomeRenovAi é um **SaaS de design de interiores/exteriores com IA** totalmente funcional e em produção. O app permite que usuários façam upload de fotos de cômodos ou fachadas e recebam redesigns fotorrealistas em 8 estilos diferentes.
+
+### Marcos Concluídos
+- ✅ Todas as features core (upload, geração IA, galeria, créditos, pagamentos)
+- ✅ Stripe em Modo LIVE (pagamentos reais em USD)
+- ✅ 9/9 passos de SEO concluídos
+- ✅ Lighthouse: 88 Performance | 100 Best Practices | 100 SEO | 95 Accessibility
+- ✅ Landing Page de alta conversão com vídeo showcase
+- ✅ PWA instalável
+- ✅ Emails transacionais (Resend)
+
+### Fase Atual: Aquisição de Usuários & Monetização
+O plano detalhado está documentado em `docs/PLANO_MONETIZACAO.md`.
+
+---
+
+## 2. Stack Tecnológico
+
 | Tecnologia | Versão | Uso |
 |------------|--------|-----|
-| Next.js | 16.1.1 | Framework principal (App Router, NÃO Pages Router) |
+| Next.js | 16.1.1 | Framework principal (App Router) |
 | React | 19.2.3 | UI |
 | TypeScript | ^5 | Linguagem |
-| Tailwind CSS | ^4 | Estilização (usa `md:` para responsividade) |
-| Supabase | ^2.93.1 | Auth, Database, Storage |
-| Stripe | ^20.3.0 | Pagamentos / Assinaturas |
-| fal.ai | ^1.9.4 | Geração de imagens IA (SDXL image-to-image) |
-| Resend | ^6.9.3 | Envio de emails transacionais |
-| clsx | ^2.1.1 | Utilitário de classNames condicionais |
-### 2.2 Estrutura de Arquivos
-```
-home-ai-web/
-├── app/
-│   ├── layout.tsx              ← Root Layout (Server Component) — metadata SEO global, 
-│   │                             fontes (Playfair Display + Inter), ThemeProvider,
-│   │                             Google Analytics (G-9VPVJCNYHH), PWA script
-│   ├── page.tsx                ← Landing Page ("use client") — Vitrine pública com
-│   │                             vídeo showcase, hero, inspiration grid
-│   ├── globals.css             ← CSS global (Tailwind + variáveis de tema)
-│   ├── favicon.ico
-│   │
-│   ├── workspace/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata (Server Component)
-│   │   └── page.tsx            ← Workspace de geração ("use client") — upload,
-│   │                             seleção de estilo, geração IA, before/after slider
-│   ├── login/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Login ("use client") — Google OAuth + Email/Password
-│   │
-│   ├── gallery/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Galeria pessoal ("use client") — grid de designs,
-│   │                             modo cinema, favoritos, download, share, delete
-│   ├── profile/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Perfil ("use client") — avatar, créditos, stats,
-│   │                             referral, plano, install PWA, sign out
-│   ├── upgrade/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Planos ("use client") — Free / Pro $9.99 / Pro+ $19.99,
-│   │                             checkout Stripe, billing portal
-│   ├── privacy/
-│   │   └── page.tsx            ← Política de Privacidade (Server Component)
-│   │                             [MODIFICADO] metadata SEO expandido
-│   ├── terms/
-│   │   └── page.tsx            ← Termos de Serviço (Server Component)
-│   │                             [MODIFICADO] metadata SEO expandido
-│   ├── support/
-│   │   └── page.tsx            ← Suporte (Server Component)
-│   │                             [MODIFICADO] metadata SEO adicionado
-│   ├── auth/
-│   │   └── callback/route.ts   ← Callback OAuth do Supabase
-│   │
-│   ├── api/
-│   │   ├── credits/route.ts    ← GET: retorna créditos + plano do usuário
-│   │   ├── generate/route.ts   ← POST: geração de imagem via fal.ai (SDXL i2i)
-│   │   ├── referral/route.ts   ← POST: sistema de indicação (+1 crédito)
-│   │   ├── send-welcome/route.ts ← POST: email de boas-vindas via Resend
-│   │   ├── storage/cleanup/    ← Limpeza de storage
-│   │   └── stripe/
-│   │       ├── checkout/route.ts ← POST: cria sessão Stripe Checkout
-│   │       ├── portal/route.ts   ← POST: abre portal de billing
-│   │       └── webhook/route.ts  ← POST: webhook Stripe (eventos de pagamento)
-│   │
-│   ├── components/
-│   │   ├── ThemeProvider.tsx    ← Context de tema Light/Dark (localStorage)
-│   │   ├── BottomTabs.tsx      ← Navegação inferior mobile
-│   │   ├── ConditionalBottomBar.tsx ← Renderização condicional do BottomTabs
-│   │   ├── FloatingDock.tsx    ← Dock flutuante desktop (reutilizável)
-│   │   ├── CreditsBadge.tsx    ← Badge de créditos no workspace
-│   │   ├── InstallButton.tsx   ← Botão de instalação PWA
-│   │   ├── ReferralTracker.tsx ← Rastreia código de indicação
-│   │   ├── WelcomeTrigger.tsx  ← Dispara email de boas-vindas (1x por usuário)
-│   │   ├── icons.tsx           ← Biblioteca de ícones SVG do app
-│   │   └── gallery/            ← Componentes auxiliares da galeria
-│   │
-│   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts       ← Cliente Supabase (browser)
-│   │   │   ├── server.ts       ← Cliente Supabase (server/API routes)
-│   │   │   └── admin.ts        ← Cliente Supabase (admin/service role)
-│   │   ├── stripe.ts           ← Inicialização do Stripe
-│   │   ├── galleryDb.ts        ← Queries da galeria
-│   │   ├── galleryStorage.ts   ← Lógica de storage da galeria
-│   │   ├── resolveImageSrc.ts  ← Resolução de URLs de imagens
-│   │   └── storageImages.ts    ← Utilitários de imagem
-# CLAUDE.md — Resumo Técnico para Continuidade do Projeto
-> **Projeto:** HomeRenovAi  
-> **Domínio:** https://homerenovai.com  
-> **Hospedagem:** Vercel  
-> **Última atualização:** Abril 2026 (Fase 1 totalmente concluída!)  
----
-## 1. Objetivo Atual
-O app está **100% funcional e estável**. Finalizamos com total sucesso a Fase 1 inteira estrutural de SEO (Sitemaps, Otimização de Imagens para WebP com Next/Image, e Schema.org). O próximo foco é dar andamento à **Fase 2 de Consolidação**.
+| Tailwind CSS | ^4 | Estilização (mobile-first, `md:` breakpoint) |
+| Supabase | ^2.93.1 | Auth, Database (PostgreSQL), Storage |
+| Stripe | ^20.3.0 | Pagamentos/Assinaturas (Modo LIVE) |
+| fal.ai | ^1.9.4 | Motor de IA (Flux Kontext image-to-image) |
+| Resend | ^6.9.3 | Emails transacionais |
+| clsx | ^2.1.1 | ClassNames condicionais |
 
-### Plano SEO em Andamento (9 Passos)
-| # | Passo | Status |
-|---|-------|--------|
-| 1 | Meta Tags customizadas em todas as páginas | ✅ Concluído |
-| 2 | Open Graph Tags + Vídeo na Landing Page | ✅ Concluído |
-| 3 | Sitemap.xml e Robots.txt | ✅ Concluído |
-| 4 | Google Search Console (ação manual) | ✅ Concluído |
-| 5 | Otimizar Imagens (WebP + Lazy Loading) | ✅ Concluído |
-| 6 | Imagem OG Profissional (já adicionada em `/public/`) | ✅ Concluído |
-| 7 | Schema.org Markup (JSON-LD) | ✅ Concluído |
-| 8 | Bing Webmaster Tools (ação manual) | ✅ Concluído |
-| 9 | Lighthouse Score 90+ | ✅ Concluído (Score 88 Mobile) |
 ---
-## 2. Status do Código
-### 2.1 Stack Tecnológico
-| Tecnologia | Versão | Uso |
-|------------|--------|-----|
-| Next.js | 16.1.1 | Framework principal (App Router, NÃO Pages Router) |
-| React | 19.2.3 | UI |
-| TypeScript | ^5 | Linguagem |
-| Tailwind CSS | ^4 | Estilização (usa `md:` para responsividade) |
-| Supabase | ^2.93.1 | Auth, Database, Storage |
-| Stripe | ^20.3.0 | Pagamentos / Assinaturas |
-| fal.ai | ^1.9.4 | Geração de imagens IA (SDXL image-to-image) |
-| Resend | ^6.9.3 | Envio de emails transacionais |
-| clsx | ^2.1.1 | Utilitário de classNames condicionais |
-### 2.2 Estrutura de Arquivos
-```
-home-ai-web/
-├── app/
-│   ├── layout.tsx              ← Root Layout (Server Component) — metadata SEO global, 
-│   │                             fontes (Playfair Display + Inter), ThemeProvider,
-│   │                             Google Analytics (G-9VPVJCNYHH), PWA script
-│   ├── page.tsx                ← Landing Page ("use client") — Vitrine pública com
-│   │                             vídeo showcase, hero, inspiration grid
-│   ├── globals.css             ← CSS global (Tailwind + variáveis de tema)
-│   ├── favicon.ico
-│   │
-│   ├── workspace/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata (Server Component)
-│   │   └── page.tsx            ← Workspace de geração ("use client") — upload,
-│   │                             seleção de estilo, geração IA, before/after slider
-│   ├── login/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Login ("use client") — Google OAuth + Email/Password
-│   │
-│   ├── gallery/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Galeria pessoal ("use client") — grid de designs,
-│   │                             modo cinema, favoritos, download, share, delete
-│   ├── profile/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Perfil ("use client") — avatar, créditos, stats,
-│   │                             referral, plano, install PWA, sign out
-│   ├── upgrade/
-│   │   ├── layout.tsx          ← [NOVO] SEO metadata
-│   │   └── page.tsx            ← Planos ("use client") — Free / Pro $9.99 / Pro+ $19.99,
-│   │                             checkout Stripe, billing portal
-│   ├── privacy/
-│   │   └── page.tsx            ← Política de Privacidade (Server Component)
-│   │                             [MODIFICADO] metadata SEO expandido
-│   ├── terms/
-│   │   └── page.tsx            ← Termos de Serviço (Server Component)
-│   │                             [MODIFICADO] metadata SEO expandido
-│   ├── support/
-│   │   └── page.tsx            ← Suporte (Server Component)
-│   │                             [MODIFICADO] metadata SEO adicionado
-│   ├── auth/
-│   │   └── callback/route.ts   ← Callback OAuth do Supabase
-│   │
-│   ├── api/
-│   │   ├── credits/route.ts    ← GET: retorna créditos + plano do usuário
-│   │   ├── generate/route.ts   ← POST: geração de imagem via fal.ai (SDXL i2i)
-│   │   ├── referral/route.ts   ← POST: sistema de indicação (+1 crédito)
-│   │   ├── send-welcome/route.ts ← POST: email de boas-vindas via Resend
-│   │   ├── storage/cleanup/    ← Limpeza de storage
-│   │   └── stripe/
-│   │       ├── checkout/route.ts ← POST: cria sessão Stripe Checkout
-│   │       ├── portal/route.ts   ← POST: abre portal de billing
-│   │       └── webhook/route.ts  ← POST: webhook Stripe (eventos de pagamento)
-│   │
-│   ├── components/
-│   │   ├── ThemeProvider.tsx    ← Context de tema Light/Dark (localStorage)
-│   │   ├── BottomTabs.tsx      ← Navegação inferior mobile
-│   │   ├── ConditionalBottomBar.tsx ← Renderização condicional do BottomTabs
-│   │   ├── FloatingDock.tsx    ← Dock flutuante desktop (reutilizável)
-│   │   ├── CreditsBadge.tsx    ← Badge de créditos no workspace
-│   │   ├── InstallButton.tsx   ← Botão de instalação PWA
-│   │   ├── ReferralTracker.tsx ← Rastreia código de indicação
-│   │   ├── WelcomeTrigger.tsx  ← Dispara email de boas-vindas (1x por usuário)
-│   │   ├── icons.tsx           ← Biblioteca de ícones SVG do app
-│   │   └── gallery/            ← Componentes auxiliares da galeria
-│   │
-│   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts       ← Cliente Supabase (browser)
-│   │   │   ├── server.ts       ← Cliente Supabase (server/API routes)
-│   │   │   └── admin.ts        ← Cliente Supabase (admin/service role)
-│   │   ├── stripe.ts           ← Inicialização do Stripe
-│   │   ├── galleryDb.ts        ← Queries da galeria
-│   │   ├── galleryStorage.ts   ← Lógica de storage da galeria
-│   │   ├── resolveImageSrc.ts  ← Resolução de URLs de imagens
-│   │   └── storageImages.ts    ← Utilitários de imagem
-│   │
-│   └── types/                  ← Tipos TypeScript
-│
-├── emails/
-│   └── WelcomeEmail.tsx        ← Template de email React (Resend)
-│
-├── public/
-│   ├── 16X9_HomeRenovAi_720P.mp4  ← Vídeo showcase fallback (9.6 MB)
-│   ├── 16X9_HomeRenovAi_720P.webm ← Vídeo showcase otimizado (5.6 MB)
-│   ├── OG_1200x630_.jpg           ← Imagem OG para redes sociais e Schema HD
-│   ├── OG_1200x630_.webp          ← Poster altamente otimizado do vídeo (LCP)
-│   ├── hero-luxury.webp           ← Imagem hero da landing page (WebP puro)
-│   ├── showcase-*.webp            ← Grids de inspiração (Modern, Scandi, Ind - WebP puros)
-│   ├── examples/ex1-7.jpg         ← Carrossel do workspace (7 imagens)
-│   ├── styles/*.jpg               ← 8 estilos (modern, minimalist, scandinavian,
-│   │                                japanese, rustic, industrial, boho, super-luxury)
-│   ├── icon-192x192.png           ← PWA icon
-│   ├── icon-512x512.png           ← PWA icon
-│   ├── apple-touch-icon.png       ← iOS icon
-│   └── manifest.json              ← PWA manifest
-│
-├── proxy.ts                    ← Middleware de autenticação (protege rotas privadas)
-├── next.config.ts              ← Configuração Next.js (vazia/default)
-├── tsconfig.json               ← TypeScript config (paths: @/* → ./*)
-├── postcss.config.mjs          ← PostCSS (Tailwind)
-├── eslint.config.mjs           ← ESLint config
-├── .env.local                  ← Variáveis de ambiente (Supabase, Stripe, fal.ai, Resend)
-└── docs/                       ← Documentação interna do projeto
-```
-### 2.3 Rotas do App
+
+## 3. Arquitetura & Rotas
+
+### Rotas do App
+
 | Rota | Tipo | Acesso | Descrição |
 |------|------|--------|-----------|
-| `/` | Client Component | 🌐 Público | Landing page (vitrine + vídeo) |
+| `/` | Client Component | 🌐 Público | Landing page (vídeo + hero + grid + CTAs) |
 | `/workspace` | Client Component | 🔒 Privado | Workspace de geração IA |
-| `/login` | Client Component | 🌐 Público | Login (Google + Email) |
-| `/gallery` | Client Component | 🔒 Privado | Galeria pessoal |
-| `/profile` | Client Component | 🔒 Privado | Perfil + settings |
-| `/upgrade` | Client Component | 🔒 Privado | Planos e pricing |
+| `/login` | Client Component | 🌐 Público | Login (Google OAuth + Email/Password) |
+| `/gallery` | Client Component | 🔒 Privado | Galeria pessoal (cinema, favoritos, share) |
+| `/profile` | Client Component | 🔒 Privado | Perfil + stats + referral |
+| `/upgrade` | Client Component | 🔒 Privado | Planos (Free / Pro $9.99 / Pro+ $19.99) |
 | `/privacy` | Server Component | 🌐 Público | Política de privacidade |
 | `/terms` | Server Component | 🌐 Público | Termos de serviço |
-| `/support` | Server Component | 🌐 Público | Suporte |
-### 2.4 Arquivos Criados/Modificados na Fase SEO
-| Arquivo | Ação | O que faz |
-|---------|------|-----------|
-| `app/layout.tsx` | MODIFICADO | Metadata expandido e Schema.org (`WebApplication` JSON-LD). Scripts movidos p/ body; *Google Analytics Tag alterado para strategy="lazyOnload"* zerando o Total Blocking Time (TBT). |
-| `app/page.tsx` | MODIFICADO | Vitrines p/ Next `<Image>` usando formato nativo `.webp`; Vídeo com Progressive Enhancement (`.webm` primário + `.mp4` fallback); Hooks `preload()` do `react-dom` injetados dinamicamente no poster do vídeo para sanar "LCP discovery"; Aumento estratégico do `setTimeout` do vídeo de 200ms para 400ms para liberação de thread. |
-| `app/workspace/page.tsx` | MODIFICADO | Vitrines e painéis transformados em `<Image>` para suporte a WebP e Lazy Load absoluto. |
-| `app/support/page.tsx` | MODIFICADO | Endereço de e-mail de suporte alterado definitivamente para `hello@homerenovai.com` |
-| `public/sitemap.xml` | CRIADO | Mapa do site gerado mapeando as páginas abertas |
-| `public/robots.txt` | CRIADO | Trava de indexador para as urls privadas |
-| `app/workspace/layout.tsx` | CRIADO | SEO metadata para `/workspace` (Server Component wrapper) |
-| `app/login/layout.tsx` | CRIADO | SEO metadata para `/login` |
-| `app/gallery/layout.tsx` | CRIADO | SEO metadata para `/gallery` |
-| `app/profile/layout.tsx` | CRIADO | SEO metadata para `/profile` |
-| `app/upgrade/layout.tsx` | CRIADO | SEO metadata para `/upgrade` |
-| `app/privacy/page.tsx` | MODIFICADO | Metadata expandido com description, keywords, OG, Twitter |
-| `app/terms/page.tsx` | MODIFICADO | Metadata expandido com description, keywords, OG, Twitter |
-| `public/16X9_HomeRenovAi_720P.mp4` | RENOMEADO | De `16X9 HomeRenovAi 720P.mp4` (remover espaços) |
+| `/support` | Server Component | 🌐 Público | Suporte (hello@homerenovai.com) |
+
+### API Routes
+
+| Rota | Método | Função |
+|------|--------|--------|
+| `/api/credits` | GET | Retorna créditos + plano do usuário |
+| `/api/generate` | POST | Geração de imagem via fal.ai (Flux Kontext) |
+| `/api/referral` | POST | Sistema de indicação (+1 crédito) |
+| `/api/send-welcome` | POST | Email de boas-vindas via Resend |
+| `/api/stripe/checkout` | POST | Cria sessão Stripe Checkout |
+| `/api/stripe/portal` | POST | Abre portal de billing |
+| `/api/stripe/webhook` | POST | Webhook Stripe (eventos de pagamento) |
+| `/api/storage/cleanup` | — | Limpeza de storage |
+
 ---
-## 3. Próximos Passos (To-Do)
-### 🟡 Fase 1: SEO Máximo Impacto (Continuar)
-- [x] **Passo 3 — Sitemap.xml + Robots.txt**
-  - Criar `public/sitemap.xml` listando todas as páginas públicas
-  - Criar `public/robots.txt` permitindo crawlers, apontando para sitemap
-  - Páginas públicas: `/`, `/login`, `/privacy`, `/terms`, `/support`
-  - Usar `lastmod: 2026-04-08`
-- [x] **Passo 4 — Google Search Console** (Manual)
-  - Adicionar propriedade `homerenovai.com`
-  - Verificar via DNS (Vercel) ou meta tag
-  - Submeter `sitemap.xml`
-  - Solicitar indexação das páginas principais
-- [x] **Passo 5 — Otimizar Imagens**
-  - Implementado o `<Image>` do Next.js nativamente para otimização automática para WebP in-browser e scale-down.
-  - Implementado o atributo `fill` e `priority` em LCP.
-  - Adicionado `loading="lazy"` nas demais imagens below-the-fold (ex: grids e styles).
-  - Componente Next Image adotado em `app/page.tsx` e `app/workspace/page.tsx`.
-  - ⚠️ NÃO tocar nas imagens do Supabase Storage (geradas pelo usuário) - [Mantido]
-### 🔵 Fase 2: Consolidação
-- [x] **Passo 6 — Imagem OG** (Verificado e Validado: Padrões perfeitos e em conformidade)
-- [x] **Passo 7 — Schema.org Markup** (JSON-LD: WebApplication, SoftwareApplication, VideoObject)
-- [x] **Passo 8 — Bing Webmaster Tools** (Manual)
-- [x] **Passo 9 — Lighthouse Score 90+** (Atingido escore impressionante: 88 Performance Mobile / 100 Best Practices / 100 SEO / 95 Accessibility. A otimização milimétrica cirúrgica dos formats .webp/.webm, o preload() agressivo em react-dom e o lazyOnload no Analytics salvaram nosso LCP e TBT com louvor).
----
+
 ## 4. Decisões Técnicas
-### 4.1 Arquitetura
+
 | Decisão | Escolha | Razão |
 |---------|---------|-------|
-| Router | App Router (Next.js 16) | Padrão moderno, suporta Server/Client Components |
-| Middleware | `proxy.ts` na raiz | Autenticação via Supabase SSR, protege rotas privadas |
-| SEO em Client Components | `layout.tsx` por rota | Next.js exige Server Components para `export const metadata` |
-| Tema | ThemeProvider (Context API) | Estado persistido em `localStorage` com key `homeai_theme` |
-| Responsividade | `md:` breakpoint (Tailwind) | Mobile-first, breakpoint a 768px |
-| Dev server | `next dev --webpack` | Flag `--webpack` explícita no script |
-### 4.2 Portas e URLs
-| Serviço | URL |
-|---------|-----|
-| Dev server (local) | `http://localhost:3000` |
-| Produção | `https://homerenovai.com` |
-| Google Analytics | `G-9VPVJCNYHH` |
-| Supabase | Definido em `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`) |
-| Stripe | Definido em `.env.local` (chaves em `STRIPE_SECRET_KEY`) |
-| fal.ai | Definido em `.env.local` (`FAL_KEY`) |
-| Resend | Definido em `.env.local` (`RESEND_API_KEY`) |
-| Suporte | `hello@homerenovai.com` |
-### 4.3 Design System
+| Router | App Router (Next.js 16) | Padrão moderno, Server/Client Components |
+| Middleware | `proxy.ts` | Autenticação Supabase SSR, protege rotas privadas |
+| SEO | `layout.tsx` por rota | Next.js exige Server Components para metadata |
+| Tema | ThemeProvider (Context API) | `localStorage` key `homeai_theme` |
+| Responsividade | `md:` breakpoint 768px | Mobile-first |
+| Dev server | `next dev --webpack` | Flag `--webpack` explícita |
+| Motor IA | fal.ai Flux Kontext | Image-to-image com prompts inteligentes por estilo |
+| Créditos | Cascata paid→bonus→free | Refund automático em caso de erro |
+
+---
+
+## 5. Design System
+
 | Elemento | Valor |
 |----------|-------|
-| Cor Dark | `#0A0A0A` |
-| Cor Light BG | `#F4F4F5` |
+| Dark BG | `#0A0A0A` |
+| Light BG | `#F4F4F5` |
 | Dourado (accent) | `#D4AF37` |
 | Azul (brand) | `#3B82F6` |
 | Fonte títulos | Playfair Display (serif, `--font-playfair`) |
 | Fonte corpo | Inter (sans, `--font-inter`) |
-| Border radius (cards) | `rounded-[2.5rem]` desktop, `rounded-3xl` mobile |
+| Cards desktop | `rounded-[2.5rem]` |
+| Cards mobile | `rounded-3xl` |
 | Logo | "Home" (dourado) + "RenovAi" (azul) + SparklesIcon |
-### 4.4 Padrões de Código
-- **Todas as páginas com interatividade**: `"use client"` no topo
-- **Metadata SEO**: `export const metadata: Metadata` em Server Components (layout.tsx)
-- **Temas**: `clsx()` para alternar classes `isDark ? X : Y`
-- **Imagens estáticas**: Servidas de `/public/` com `<img>` tags
-- **Imagens de usuário**: Supabase Storage bucket `homeai`
-- **Navegação mobile**: `BottomTabs` (condicional) + hierarquia de z-index
-- **Navegação desktop**: `FloatingDock` componente reutilizável
+
 ---
-## 5. Pendências e Observações
-### ⚠️ Bugs Conhecidos
-- **Nenhum bug crítico reportado.** O app está estável em produção.
-### 📌 Observações Importantes
-1. **REGRA INVIOLÁVEL**: Nenhuma funcionalidade, componente visual, ou lógica de negócio pode ser alterada durante as implementações SEO. Toda mudança deve ser **cirúrgica e não-invasiva**.
-2. **Imagens do Supabase**: As imagens geradas pelo usuário são armazenadas no Supabase Storage (bucket `homeai`) e **não devem ser otimizadas/convertidas** — são dinâmicas.
-3. **Root layout.tsx**: Contém Google Analytics, PWA scripts, fontes, e ThemeProvider. É extremamente sensível — modificações devem ser **apenas no objeto metadata**.
-4. **Middleware (`proxy.ts`)**: Protege `/workspace`, `/gallery`, `/profile` e `/upgrade`. Ignora `/`, `/login`, `/auth`, `/api`, `/privacy`, `/terms`, `/support` e arquivos estáticos. **Não modificar** sem necessidade extrema.
-5. **Vídeo na Landing**: O vídeo carrega em arquitetura de "Progressive Enhancement" (tenta ler `16X9_HomeRenovAi_720P.webm` [6.2MB] com prioridade total, possuindo fallback pro antigo `.mp4`). O poster fallback inicial para o LCP visual é o `OG_1200x630_.webp`. O `setTimeout` dinâmico libera o render aos 400ms exatos garantindo hidratação limpa do React.
-6. **Emails**: O sistema de email de boas-vindas usa Resend com template React (`emails/WelcomeEmail.tsx`). O trigger está no `WelcomeTrigger.tsx` (dispara 1x por sessão).
-7. **Stripe**: Três planos — Free (3 créditos), Pro ($9.99/mês, 100 créditos), Pro+ ($19.99/mês, 300 créditos). Webhook processa eventos de pagamento automaticamente.
-8. **PWA**: O app é instalável como PWA. O manifest está em `/public/manifest.json`, ícones em `/public/icon-*.png`.
-9. **Suporte a e-mail**: A página `/support` exibe agora o endereço atualizado `hello@homerenovai.com`. (✅ Concluído)
+
+## 6. Regras Invioláveis
+
+1. **NENHUMA funcionalidade pode ser alterada** durante ajustes de marketing/SEO
+2. **Imagens do Supabase Storage** (geradas pelo usuário) NÃO devem ser otimizadas
+3. **Root layout.tsx** — alterações apenas no objeto metadata
+4. **proxy.ts** — NÃO modificar sem necessidade extrema
+5. **NÃO desfazer**: vídeo `.webm`, `preload()` na home, GA com `lazyOnload`, setTimeout 400ms
+6. **Responsividade**: sempre usar `md:` para proteger experiência desktop
+
 ---
-> **Atenção Próximo Agente IA (Hand-off):** 
-> * Leia todas as anotações. A Fase 1 de impacto estrutural está 100% concluída (melhorias invisíveis impressionantes de LCP/SEO, Next Image puro Webp e Preload React).
-> * As rotinas do front-end são altamente sofisticadas e não devem ser alteradas na essência.
-> * As etapas Otimização e Lighthouse foram finalizadas (Desempenho Estável cravado em: 88 Performance Mobile | 100 Best Practices | 100 SEO | 95 Accessibility). Seu objetivo agora é aguardar as coordenadas do usuário sobre a PRÓXIMA bateria criativa de desenvolvimento (Fase 3).
-> * DE MODO ALGUM desfaça as abordagens cirúrgicas: vídeo ".webm", preload nativo na home page e Google Analytics com 'lazyOnload'. Estes são os componentes secretos que sustentam o nosso High-Score.
-> * Não quebre as vitrines e os delays de vídeos implementados (Eles mantêm o nosso teto de performance da Main Thread livre).
-> * Rode localmente `npm run dev` marcando no final o checkbox como concluído à medida que completa as vitórias! Bom trabalho.
+
+## 7. URLs e Serviços
+
+| Serviço | URL/ID |
+|---------|--------|
+| Produção | https://homerenovai.com |
+| Dev local | http://localhost:3000 |
+| Google Analytics | G-9VPVJCNYHH |
+| Suporte | hello@homerenovai.com |
+| Supabase/Stripe/fal.ai/Resend | Definidos em `.env.local` |
+
+---
+
+## 8. Observações para Próximo Agente IA
+
+> ⚠️ **ATENÇÃO**:
+> - A Fase 1 e Fase 2 de SEO estão 100% concluídas
+> - Lighthouse Score estável: 88 Performance | 100 Best Practices | 100 SEO | 95 Accessibility
+> - As otimizações de vídeo (.webm, preload react-dom, lazyOnload) são os componentes que sustentam o score
+> - O app está em fase de MONETIZAÇÃO ATIVA — foco em aquisição de usuários
+> - Rode `npm run dev` para testar localmente na porta 3000
+> - Consulte `docs/PLANO_MONETIZACAO.md` para a estratégia de marketing
+> - Consulte `docs/PARECER_PROFISSIONAL.md` para assessment técnico atualizado
