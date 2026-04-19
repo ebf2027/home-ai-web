@@ -28,15 +28,42 @@ async function postForRedirectUrl(endpoint: string, body?: any) {
   return data.url;
 }
 
-export default function UpgradePage() {
+function UpgradeContent() {
   const { isDark, toggleTheme } = useTheme();
+  const searchParams = useSearchParams();
+  const isSuccess = searchParams.get("success") === "1";
+  const planParam = searchParams.get("plan");
+  const sessionId = searchParams.get("session_id");
 
-  // 🌟 MOCK STATE ADICIONADO AQUI 🌟
-  // Altere manualmente a palavra "pro" abaixo para "free" ou "pro_plus" e salve para testar o visual!
   // 🌟 ESTADO DO PLANO (Começa como 'free' até o banco responder) 🌟
   const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "pro_plus">("free");
+  const [showSuccessMsg, setShowSuccessMsg] = useState(false);
 
-  // 🌟 BUSCA O PLANO REAL NO SUPABASE (Reaproveitando a inteligência do Perfil) 🌟
+  // 🎯 RASTREAMENTO PINTEREST CHECKOUT 🎯
+  useEffect(() => {
+    if (isSuccess) {
+      setShowSuccessMsg(true);
+      
+      // Dispara o evento de conversão para o Pinterest
+      if (typeof window !== "undefined" && (window as any).pintrk) {
+        const value = planParam === "pro_plus" ? 19.99 : 9.99;
+        (window as any).pintrk('track', 'checkout', {
+          event_id: sessionId || `order_${Date.now()}`,
+          value: value,
+          order_quantity: 1,
+          currency: 'USD'
+        });
+      }
+
+      // Limpa a URL após 5 segundos para evitar re-disparar no refresh
+      const timer = setTimeout(() => {
+        window.history.replaceState({}, '', '/upgrade');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, planParam, sessionId]);
+
+  // 🌟 BUSCA O PLANO REAL NO SUPABASE 🌟
   useEffect(() => {
     async function getUserPlan() {
       try {
@@ -122,6 +149,12 @@ export default function UpgradePage() {
         {error && (
           <div className={clsx("mb-8 max-w-md mx-auto rounded-xl p-4 text-sm text-center border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
             {error}
+          </div>
+        )}
+
+        {showSuccessMsg && (
+          <div className={clsx("mb-8 max-w-md mx-auto rounded-xl p-4 text-sm text-center border font-bold animate-bounce", isDark ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-green-50 border-green-200 text-green-700")}>
+            ✨ Upgrade successful! Welcome to {planParam === "pro_plus" ? "Pro+" : "Pro"}.
           </div>
         )}
 
@@ -261,3 +294,11 @@ export default function UpgradePage() {
     </main>
   );
 }
+
+export default function UpgradePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
+      <UpgradeContent />
+    </Suspense>
+  );
+}
