@@ -44,7 +44,7 @@ function UpgradeContent() {
   useEffect(() => {
     if (isSuccess) {
       setShowSuccessMsg(true);
-      
+
       // Dispara o evento de conversão para o Pinterest
       if (typeof window !== "undefined" && (window as any).pintrk) {
         const value = planParam === "pro_plus" ? 19.99 : 9.99;
@@ -302,4 +302,4 @@ export default function UpgradePage() {
       <UpgradeContent />
     </Suspense>
   );
-}
+}
