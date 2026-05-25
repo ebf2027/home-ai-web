@@ -62,7 +62,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
       </div>
       {/* Selo Before */}
       <div className="absolute left-3 top-3 md:left-3 md:top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[8px] font-black uppercase text-white border border-white/10 backdrop-blur-sm">Before</div>
-      
+
       {/* Selo After */}
       <div className="absolute right-3 top-3 md:right-3 md:top-3 z-10 rounded-full bg-[#D4AF37] px-3 py-1 text-[8px] font-black uppercase text-black shadow-lg">After</div>
       <div className="absolute top-0 h-full" style={{ left: `calc(${pos}% - 1px)` }}>
@@ -74,7 +74,7 @@ function BeforeAfterSlider({ beforeSrc, afterSrc }: { beforeSrc: string; afterSr
 }
 function ExampleCarousel() {
   const [index, setIndex] = useState(0);
-  const images = ["/examples/ex1.jpg", "/examples/ex2.jpg", "/examples/ex3.jpg", "/examples/ex4.jpg", "/examples/ex5.jpg", "/examples/ex6.jpg","/examples/ex7.jpg"];
+  const images = ["/examples/ex1.jpg", "/examples/ex2.jpg", "/examples/ex3.jpg", "/examples/ex4.jpg", "/examples/ex5.jpg", "/examples/ex6.jpg", "/examples/ex7.jpg"];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -95,10 +95,10 @@ function ExampleCarousel() {
           className={clsx(
             "object-cover transition-opacity duration-1000",
             i === index ? "opacity-100" : "opacity-0"
- )}
+          )}
         />
       ))}
-    
+
     </div>
   );
 }
@@ -155,19 +155,19 @@ export default function Home() {
       // 1. Baixa os dados da imagem em segundo plano
       const response = await fetch(resultUrl);
       const blob = await response.blob();
-      
+
       // 2. Cria um link temporário "escondido" no seu navegador
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      
+
       // 3. Define o nome do arquivo que será salvo
       link.download = 'homerenovai-design.jpg';
-      
+
       // 4. Simula o clique para disparar o download na pasta do PC
       document.body.appendChild(link);
       link.click();
-      
+
       // 5. Limpa a bagunça da memória
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
@@ -276,8 +276,8 @@ export default function Home() {
                       <SparklesIcon className="h-7 w-7 text-[#D4AF37]" />
                     </div>
                     <p className="text-[11px] text-center uppercase font-black tracking-widest leading-relaxed text-white [text-shadow:_0_2px_10px_rgb(0_0_0_/_80%)]">
-  Select a high-quality photo<br />of your room
-</p>
+                      Select a high-quality photo<br />of your room
+                    </p>
                   </div>
                 </>
               ) : resultUrl ? (

@@ -14,11 +14,13 @@ export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Preload da imagem LCP (poster do vídeo) crucial para o Lighthouse Mobile
   preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
 
   useEffect(() => {
+    setMounted(true);
     const checkLoginStatus = async () => {
       const supabase = createClient();
       
@@ -41,7 +43,7 @@ export default function LandingPage() {
   return (
     <main className={clsx(
       "min-h-screen transition-colors duration-500 font-sans overflow-x-hidden", 
-      isDark ? "bg-[#0A0A0A] text-white" : "bg-[#F4F4F5] text-zinc-900"
+      mounted && isDark ? "bg-[#0A0A0A] text-white" : "bg-[#F4F4F5] text-zinc-900"
     )}>
       {/* Schema.org VideoObject Markup */}
       <script
@@ -63,7 +65,7 @@ export default function LandingPage() {
       <header className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-white/5 bg-black/10">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-black tracking-tighter font-serif">
-            <span className={isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
+            <span className={mounted && isDark ? "text-[#D4AF37]" : "text-zinc-900"}>Home</span>
             <span className="text-blue-500">RenovAi</span>
           </h1>
         </div>
@@ -73,12 +75,12 @@ export default function LandingPage() {
             onClick={toggleTheme} 
             className={clsx(
               "p-2 rounded-full transition-all duration-300 border",
-              isDark 
+              mounted && isDark 
                 ? "bg-zinc-900 border-white/10 text-yellow-400 hover:bg-white/5" 
                 : "bg-white border-zinc-200 text-zinc-900 shadow-sm hover:bg-zinc-50"
             )}
           >
-            {isDark ? "☀️" : "🌙"}
+            {mounted && isDark ? "☀️" : "🌙"}
           </button>
         </div>
       </header>

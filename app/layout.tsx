@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Script from "next/script";
+import { GoogleAnalytics } from '@next/third-parties/google';
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import ConditionalBottomBar from "./components/ConditionalBottomBar";
@@ -99,22 +100,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans">
-        {/* Google Tag (gtag.js) - Movido para body para obedecer o padrão Next */}
-        <Script 
-          src="https://www.googletagmanager.com/gtag/js?id=G-9VPVJCNYHH" 
-          strategy="lazyOnload" 
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-9VPVJCNYHH');
-          `}
-        </Script>
+        {/* Google Analytics - Otimizado pelo Next.js */}
+        <GoogleAnalytics gaId="G-9VPVJCNYHH" />
 
-        {/* Pinterest Tag - Otimizada */}
-        <Script id="pinterest-tag" strategy="lazyOnload">
+        {/* Pinterest Tag - Otimizada (afterInteractive previne bloqueio e executa via worker/defer) */}
+        <Script id="pinterest-tag" strategy="afterInteractive">
           {`
             !function(e){if(!window.pintrk){window.pintrk = function () {
             window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
