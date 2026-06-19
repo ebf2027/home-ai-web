@@ -225,9 +225,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- FOOTER SIMPLES --- */}
-      <footer className="py-12 px-6 border-t border-white/5 text-center text-zinc-600 text-xs tracking-widest uppercase">
-        © 2026 HomeRenovAi. The pinnacle of AI design.
+           {/* --- FOOTER SIMPLES --- */}
+      <footer className="py-12 px-6 border-t border-white/5 text-center text-zinc-600 text-xs tracking-widest uppercase flex flex-col gap-2 items-center">
+        <div>
+          © 2026 HomeRenovAi. The pinnacle of AI design.
+        </div>
+        <div className="lowercase tracking-normal normal-case text-zinc-500 mt-1">
+          Questions? Contact us at{' '}
+                    <a 
+            href="mailto:hello@homerenovai.com" 
+            className="text-amber-600 hover:text-amber-500 underline transition-colors font-medium"
+          >
+            hello@homerenovai.com
+          </a>
+
+        </div>
       </footer>
 
     </main>

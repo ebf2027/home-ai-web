@@ -100,7 +100,7 @@ export default function TermsPage() {
           <ul className="list-disc pl-6 space-y-2 mt-4 text-zinc-600 dark:text-zinc-300">
             <li><strong>Free Credits:</strong> New users may receive a limited number of complimentary credits upon registration. These credits are non-transferable and may be subject to expiration.</li>
             <li><strong>Bonus Credits:</strong> Promotional credits may be granted at our discretion. These credits cannot be exchanged for monetary value.</li>
-            <li><strong>Premium Subscriptions:</strong> Paid plans provide recurring credit allocations and access to enhanced features. Subscriptions are billed periodically through <strong>Stripe</strong>, our secure payment processor.</li>
+            <li><strong>Premium Subscriptions:</strong> Paid plans provide recurring credit allocations and access to enhanced features. Subscriptions are billed periodically through <strong>Paddle</strong>, our secure payment processor.</li>
             <li><strong>Cancellation:</strong> You may cancel your subscription at any time through the customer portal. Upon cancellation, your subscription remains active until the end of the current billing cycle. No prorated refunds are issued for partial billing periods.</li>
             <li><strong>Refund Policy:</strong> Due to the nature of AI processing costs, credits that have already been consumed are non-refundable. Refund requests for unused credits or billing issues will be evaluated on a case-by-case basis by contacting our support team.</li>
           </ul>
