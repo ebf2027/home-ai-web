@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export default function InstallButton() {
-    const [installPrompt, setInstallPrompt] = useState<any>(null);
+    const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isIOS, setIsIOS] = useState(false);
     const [showIOSModal, setShowIOSModal] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
@@ -10,9 +10,11 @@ export default function InstallButton() {
     useEffect(() => {
         // 1. Verifica se já está rodando como app instalado (standalone)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        const isIOSStandalone = (window.navigator as any).standalone === true;
+        const isIOSStandalone = window.navigator.standalone === true;
         if (isStandalone || isIOSStandalone) {
-            setIsInstalled(true);
+            setTimeout(() => {
+                setIsInstalled(true);
+            }, 0);
             return;
         }
 
@@ -21,15 +23,16 @@ export default function InstallButton() {
         setIsIOS(/iphone|ipad|ipod/.test(userAgent));
 
         // 3. ✅ Lê o evento que já foi capturado globalmente pelo script do layout
-        if ((window as any).__deferredInstallPrompt) {
-            setInstallPrompt((window as any).__deferredInstallPrompt);
+        if (window.__deferredInstallPrompt) {
+            setInstallPrompt(window.__deferredInstallPrompt);
         }
 
         // 4. Também escuta caso o evento ainda não tenha disparado
-        const handleBeforeInstallPrompt = (e: any) => {
-            e.preventDefault();
-            (window as any).__deferredInstallPrompt = e;
-            setInstallPrompt(e);
+        const handleBeforeInstallPrompt = (e: Event) => {
+            const installEvent = e as BeforeInstallPromptEvent;
+            installEvent.preventDefault();
+            window.__deferredInstallPrompt = installEvent;
+            setInstallPrompt(installEvent);
         };
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
@@ -52,7 +55,7 @@ export default function InstallButton() {
             if (outcome === 'accepted') {
                 setInstallPrompt(null);
                 setIsInstalled(true);
-                (window as any).__deferredInstallPrompt = null;
+                window.__deferredInstallPrompt = null;
             }
         } else {
             alert('Abra o site no Chrome e aguarde alguns segundos para o botão de instalação ficar disponível.');

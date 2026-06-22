@@ -20,20 +20,25 @@ export default function LandingPage() {
   preload("/OG_1200x630_.webp", { as: "image", fetchPriority: "high" });
 
   useEffect(() => {
-    setMounted(true);
     const checkLoginStatus = async () => {
       const supabase = createClient();
       
       const { data: { user }, error } = await supabase.auth.getUser();
       
-      if (user && !error) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
+      setTimeout(() => {
+        if (user && !error) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      }, 0);
     };
 
     checkLoginStatus();
+    
+    setTimeout(() => {
+      setMounted(true);
+    }, 0);
     
     // Libera a renderização do vídeo levemente após a pintura inicial para melhorar o Lighthouse Mobile
     const timer = setTimeout(() => setVideoReady(true), 400);
@@ -214,7 +219,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-serif mb-8">Ready to Create Your Masterpiece?</h2>
           <p className="text-lg md:text-xl font-light opacity-80 mb-12">
-            Experience the next generation of interior design and visualize the home you've always dreamed of.
+            Experience the next generation of interior design and visualize the home you&apos;ve always dreamed of.
           </p>
           <Link 
             href="/workspace" 

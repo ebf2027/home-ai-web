@@ -16,7 +16,7 @@ type Busy = null | "checkout_pro" | "checkout_pro_plus" | "portal";
 
 
 // --- Função Auxiliar do Stripe (Lógica Intacta) ---
-async function postForRedirectUrl(endpoint: string, body?: any) {
+async function postForRedirectUrl(endpoint: string, body?: Record<string, unknown>) {
   const res = await fetch(endpoint, {
     method: "POST",
     headers: body ? { "Content-Type": "application/json" } : undefined,
@@ -38,17 +38,15 @@ function UpgradeContent() {
 
   // 🌟 ESTADO DO PLANO (Começa como 'free' até o banco responder) 🌟
   const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "pro_plus">("free");
-  const [showSuccessMsg, setShowSuccessMsg] = useState(false);
+  const [showSuccessMsg] = useState(isSuccess);
 
   // 🎯 RASTREAMENTO PINTEREST CHECKOUT 🎯
   useEffect(() => {
     if (isSuccess) {
-      setShowSuccessMsg(true);
-
       // Dispara o evento de conversão para o Pinterest
-      if (typeof window !== "undefined" && (window as any).pintrk) {
+      if (typeof window !== "undefined" && window.pintrk) {
         const value = planParam === "pro_plus" ? 19.99 : 9.99;
-        (window as any).pintrk('track', 'checkout', {
+        window.pintrk('track', 'checkout', {
           event_id: sessionId || `order_${Date.now()}`,
           value: value,
           order_quantity: 1,
@@ -98,8 +96,9 @@ function UpgradeContent() {
       setBusy(plan === "pro" ? "checkout_pro" : "checkout_pro_plus");
       const url = await postForRedirectUrl("/api/stripe/checkout", { plan });
       window.location.href = url;
-    } catch (e: any) {
-      setError(e?.message || "Could not start checkout.");
+    } catch (e: unknown) {
+      const err = e as Error;
+      setError(err?.message || "Could not start checkout.");
       setBusy(null);
     }
   }
@@ -110,8 +109,9 @@ function UpgradeContent() {
       setBusy("portal");
       const url = await postForRedirectUrl("/api/stripe/portal");
       window.location.href = url;
-    } catch (e: any) {
-      setError(e?.message || "Could not open billing portal.");
+    } catch (e: unknown) {
+      const err = e as Error;
+      setError(err?.message || "Could not open billing portal.");
       setBusy(null);
     }
   }

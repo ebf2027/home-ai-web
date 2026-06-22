@@ -19,14 +19,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         try {
             const saved = localStorage.getItem("homeai_theme") as Theme | null;
+            let activeTheme: Theme = "light";
             if (saved === "dark" || saved === "light") {
-                setThemeState(saved);
+                activeTheme = saved;
             } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-                setThemeState("dark");
+                activeTheme = "dark";
             }
-            setMounted(true);
+            setTimeout(() => {
+                setThemeState(activeTheme);
+                setMounted(true);
+            }, 0);
         } catch {
-            setMounted(true);
+            setTimeout(() => {
+                setMounted(true);
+            }, 0);
         }
     }, []);
 
